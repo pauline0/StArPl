@@ -1,0 +1,25 @@
+﻿/* Optik div-Container-Header */
+div.box-header
+{
+	border:0px solid #888;
+	box-shadow:0px 2px 5px #ccc;
+	max-width:1113px;
+	padding:20px;
+	text-align:center;
+}
+
+/* Optik div-Container-Content*/
+div.box-content
+{
+	border:1px solid #888;
+	box-shadow:0px 2px 5px #ccc;
+	max-width:1113px;
+	padding:20px;
+	background-color:#F8F8FF
+}
+
+/* Tabelle zentrieren, auch möglich mit class="center", aber zusätzliche Implementierung, um nicht jedesmal class="center" schreiben zu müssen */
+th, tr
+{
+	text-align: center;
+}

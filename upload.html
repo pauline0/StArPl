@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>StArPl - Neu erstellen</title>
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://raw.githubusercontent.com/blueimp/jQuery-File-Upload/master/js/jquery.fileupload.js"></script>
+		<script src="js/fileinput.min.js"></script>
+		<script src="js/own.js"></script>
+		<link rel="icon" href="img/icon.ico">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="css/fileinput.css">
+		<link rel="stylesheet" href="css/own.css">
+	</head>
+	<body>
+		<div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
+			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
+			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
+		</div>
+		<div class="center-block box-content">
+			<form method="post" action="./index.html" name="formUpload" id="formUpload" onsubmit="return upload();">
+				<h3>Hochladen von Arbeiten</h3>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+						<input class="form-control" id="titel" name="titel" placeholder="Titel" required autofocus />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+						<select class="form-control" id="studiengang" name="studiengang" required>
+							<option value="">Studiengang...</option>
+							<option value="ban">Bank</option>
+							<option value="bau">Bauwesen</option>
+							<option value="die">Dienstleistungsmanagement</option>
+							<option value="elo">Elektrotechnik</option>
+							<option value="fac">Facility Management</option>
+							<option value="han">Handel</option>
+							<option value="iba">IBA</option>
+							<option value="imo">Immobilienwirtschaft</option>
+							<option value="ind">Industrie</option>
+							<option value="inf">Informatik</option>
+							<option value="mas">Maschinenbau</option>
+							<option value="ppm">PPM</option>
+							<option value="spe">Spedition/Logistik</option>
+							<option value="ste">Steuern/Prüfungswesen</option>
+							<option value="tou">Tourismusbetriebswirtschaft</option>
+							<option value="ver">Versicherung</option>
+							<option value="wir">Wirtschaftsinformatik</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-bullhorn"></i></span>
+						<select class="form-control" id="language" name="language" required>
+							<option value="">Sprache...</option>
+							<option value="deu">deutsch</option>
+							<option value="en">englisch</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-file"></i></span>
+						<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>
+							<option value="">Art der Arbeit...</option>
+							<option value="ptb">Praxistransferbericht</option>
+							<option value="sa">Studienarbeit</option>
+							<option value="ba">Bachelorarbeit</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+						<input class="form-control" id="jahrgang" name="jahrgang" placeholder="Jahrgang" pattern="[0-9]{4}" required />
+					</div>
+				</div>
+				<!-- <div class="form-group"> -->
+					<!-- <input id="fileupload" type="file" name="files[]" required > -->
+				<!-- </div> -->
+				<div class="form-group">
+					<div class="fileupload fileupload-new" data-provides="fileupload">
+						<span class="btn btn-default btn-file">
+							<span class="fileupload-new">Datei auswählen...</span>
+							<span class="fileupload-exists">Datei ändern...</span>
+							<input type="file" />
+						</span>
+						<span class="fileupload-preview"></span>
+						<a href="#" class="close fileupload-exists" data-dismiss="fileupload" style="float: none">×</a>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+						<input class="form-control" id="schlagwoerter" name="schlagwoerter" placeholder="Schlagwörter" required />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="glyphicon glyphicon-text-size"></i></span>
+						<textarea class="form-control" id="kurzfassung" name="kurzfassung" placeholder="Kurzfassung" rows="5"></textarea>
+					</div>
+				</div>
+				<!-- <div id='formUpload-divError' class="alert alert-danger hide"> -->
+				<!-- </div> -->
+				<div class="form-group">
+					<button type="submit" class="btn btn-success">
+						<span class="glyphicon glyphicon-upload"></span> Hochladen
+					</button>
+				</div>
+			</form>
+		</div>
+	</body>
+</html>
