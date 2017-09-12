@@ -50,7 +50,22 @@ function changeFachbereich()
 // wird beim hochladen aufgerufen
 function upload()
 {
-	return true;
+	var returnValue = false;
+	var data = $('#formUpload').serialize();
+	data += '&action=formUpload';
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		// console.log(data);
+		if (data[0] != 0)
+		{
+			returnValue = true;
+			$('#idOfFile')[0].value = data[0];
+		}
+	});
+	$.ajaxSetup({async: true});
+	return returnValue;
 }
 
 // wird beim Login aufgerufen

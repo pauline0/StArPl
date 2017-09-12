@@ -1,9 +1,13 @@
 <?php
+session_start(); // starten der PHP-Session
+$_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
 $dirUpload = '../upload';
-$Id = 1; // noch anzupassen (aus DB abfragen, welche ID)
+$Id = $_post['idOfFile'];
 $pathNewPics = "$dirUpload/$Id";
 mkdir("$pathNewPics", 0644);
+// print_r($_REQUEST);
+// print_r($_FILES);
 if(isset($_FILES["FileInputUploadArbeit"]))
 {
 	foreach ($_FILES["FileInputUploadArbeit"]["error"] as $key => $error)

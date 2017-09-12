@@ -19,7 +19,7 @@
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
 		</div>
 		<div class="center-block box-content">
-			<form method="post" action="./php/upload.php" name="formUpload" id="formUpload" onsubmit="return upload();" enctype="multipart/form-data">
+			<form method="post" action="./php/uploadPDF.php" name="formUpload" id="formUpload" onsubmit="return upload();" enctype="multipart/form-data">
 				<h3>Hochladen von Arbeiten</h3>
 				<div class="form-group">
 					<div class="input-group">
@@ -31,24 +31,25 @@
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
 						<select class="form-control" id="studiengang" name="studiengang" required>
+							<!-- value-Werte zu empfehlen aufgrund eventueller Sprachvielfalt (gleiche value für gleichen Studiengang) -->
 							<option value="">Studiengang...</option>
-							<option value="ban">Bank</option>
-							<option value="bau">Bauwesen</option>
-							<option value="die">Dienstleistungsmanagement</option>
-							<option value="elo">Elektrotechnik</option>
-							<option value="fac">Facility Management</option>
-							<option value="han">Handel</option>
-							<option value="iba">IBA</option>
-							<option value="imo">Immobilienwirtschaft</option>
-							<option value="ind">Industrie</option>
-							<option value="inf">Informatik</option>
-							<option value="mas">Maschinenbau</option>
-							<option value="ppm">PPM</option>
-							<option value="spe">Spedition/Logistik</option>
-							<option value="ste">Steuern/Prüfungswesen</option>
-							<option value="tou">Tourismusbetriebswirtschaft</option>
-							<option value="ver">Versicherung</option>
-							<option value="wir">Wirtschaftsinformatik</option>
+							<option value="Bank">Bank</option>
+							<option value="Bauwesen">Bauwesen</option>
+							<option value="Dienstleistungsmanagement">Dienstleistungsmanagement</option>
+							<option value="Elektrotechnik">Elektrotechnik</option>
+							<option value="Facility Management">Facility Management</option>
+							<option value="Handel">Handel</option>
+							<option value="IBA">IBA</option>
+							<option value="Immobilienwirtschaft">Immobilienwirtschaft</option>
+							<option value="Industrie">Industrie</option>
+							<option value="Informatik">Informatik</option>
+							<option value="Maschinenbau">Maschinenbau</option>
+							<option value="PPM">PPM</option>
+							<option value="Spedition/Logistik">Spedition/Logistik</option>
+							<option value="Steuern/Prüfungswesen">Steuern/Prüfungswesen</option>
+							<option value="Tourismusbetriebswirtschaft">Tourismusbetriebswirtschaft</option>
+							<option value="Versicherung">Versicherung</option>
+							<option value="Wirtschaftsinformatik">Wirtschaftsinformatik</option>
 						</select>
 					</div>
 				</div>
@@ -57,8 +58,8 @@
 						<span class="input-group-addon"><i class="glyphicon glyphicon-bullhorn"></i></span>
 						<select class="form-control" id="language" name="language" required>
 							<option value="">Sprache...</option>
-							<option value="deu">deutsch</option>
-							<option value="en">englisch</option>
+							<option value="deutsch">deutsch</option>
+							<option value="englisch">englisch</option>
 						</select>
 					</div>
 				</div>
@@ -67,9 +68,9 @@
 						<span class="input-group-addon"><i class="glyphicon glyphicon-file"></i></span>
 						<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>
 							<option value="">Art der Arbeit...</option>
-							<option value="ptb">Praxistransferbericht</option>
-							<option value="sa">Studienarbeit</option>
-							<option value="ba">Bachelorarbeit</option>
+							<option value="Praxistransferbericht">Praxistransferbericht</option>
+							<option value="Studienarbeit">Studienarbeit</option>
+							<option value="Bachelorarbeit">Bachelorarbeit</option>
 						</select>
 					</div>
 				</div>
@@ -106,6 +107,7 @@
 						<textarea class="form-control" id="kurzfassung" name="kurzfassung" placeholder="Kurzfassung" rows="5"></textarea>
 					</div>
 				</div>
+				<input type="hidden" id="idOfFile" name="idOfFile">
 				<!-- <div id='formUpload-divError' class="alert alert-danger hide"> -->
 				<!-- </div> -->
 				<div class="form-group">
