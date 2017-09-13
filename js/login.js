@@ -14,7 +14,7 @@ function login()
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{
-		console.log(data);
+		// console.log(data);
 		if (data[0] >= 1) // data[0] entspricht UserId
 		{
 			// Login erfolgreich
