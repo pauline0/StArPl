@@ -71,23 +71,40 @@ function upload()
 // wird beim Login aufgerufen
 function login()
 {
-	if (false)
+	var returnValue = false;
+	var UserName = $('#UserName')[0].value;
+	var Password = $('#Password')[0].value;
+	$.ajaxSetup({async: false});
+	var data =
 	{
-		// Login erfolgreich
-		$('#formLogin-divError').addClass('hide');
+		action: "login",
+		UserName: UserName,
+		Password: Password
 	}
-	else
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
 	{
-		// Login fehlgeschlagen
-		$('#formLogin-divError').removeClass('hide');
-		if (false)
+		console.log(data);
+		if (data[0] >= 1) // data[0] entspricht UserId
 		{
-			$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> Falscher Username oder Passwort.';
+			// Login erfolgreich
+			$('#formLogin-divError').addClass('hide');
+			returnValue = true;
 		}
 		else
 		{
-		$('#formLogin-divError')[0].innerHTML = '<b>Fehler!</b> Datenbank ist nicht erreichbar.';
+			// Login fehlgeschlagen
+			$('#formLogin-divError').removeClass('hide');
+			if (data[0] == 0) // login Fehlgeschlagen
+			{
+				$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> Falscher Username oder Passwort.';
+			}
+			else
+			{
+				$('#formLogin-divError')[0].innerHTML = '<b>Fehler!</b> Datenbank ist nicht erreichbar.';
+			}
 		}
-	}
-	return false;
+	});
+	$.ajaxSetup({async: true});
+	return returnValue;
 }

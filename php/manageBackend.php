@@ -9,6 +9,24 @@ if (!$conn->connect_error)
 {
 	switch ($action)
 	{
+		case 'login':
+		{
+			$userName = $_post['UserName'];
+			$password = md5($_post['Password']);
+			$id = checkLogin($conn, $userName, $password);
+			$userAnswer = array();
+			$userAnswer[0] = $id;
+			if ($id)
+			{
+				$userAnswer[1] = 'Login erfolgreich';
+			}
+			else
+			{
+				$userAnswer[1] = 'Login fehlgeschlagen';
+			}
+			echo json_encode($userAnswer);
+			break;
+		}
 		case 'formUpload':
 		{
 			$titel = $_post['titel'];
@@ -38,5 +56,24 @@ if (!$conn->connect_error)
 			break;
 		}
 	}
+}
+else
+{
+	$userAnswer = array();
+	$userAnswer[0] = -1;
+	$userAnswer[1] = 'Datenbankverbindung fehlgeschlagen';
+	echo json_encode($userAnswer);
+}
+
+// login checken (existiert UserName mit PW in DB?)
+function checkLogin($conn, $userName, $password)
+{
+	$result = $conn->query("SELECT `Id` FROM `login` WHERE `UserName`='$userName' AND `Password`='$password';");
+	$returnId = 0;
+	while ($zeile = $result->fetch_assoc())
+	{
+		$returnId = $_SESSION['Id'] = $zeile['Id'];
+	}
+	return $returnId;
 }
 ?>
