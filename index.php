@@ -14,6 +14,6 @@ if (isset($_REQUEST['upload']))
 }
 else
 {
-    include_once('html/index.html');
+    include_once('html/viewArbeiten.html');
 }
 ?>

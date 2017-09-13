@@ -1,7 +1,4 @@
 ﻿$(document).ready(function() {
-	// Navigation zwischen den Fachbereichen
-	$('button.btn.btn-default.btn-sm.btn-block').click(changeFachbereich);
-	
 	// FileUploadArbeit
 	$("#FileInputUploadArbeit").fileinput({
         showUpload: false, // Zeile 698 in "fileinput.js" bearbeitet, showUpload auf false gesetzt; Zeile 3.930 in "fileinput.js" bearbeitet, um "Remove"-Button rot einzufärben
@@ -39,14 +36,6 @@
 	});
 });
 
-// wird beim Wechsel des Fachbereichs Aufgerufen
-function changeFachbereich()
-{
-	strHtml = '';
-	strHtml += $(this).text();
-	$('#contentOverview')[0].innerHTML = strHtml;
-}
-
 // wird beim hochladen aufgerufen
 function upload()
 {
@@ -62,47 +51,6 @@ function upload()
 		{
 			returnValue = true;
 			$('#idOfFile')[0].value = data[0];
-		}
-	});
-	$.ajaxSetup({async: true});
-	return returnValue;
-}
-
-// wird beim Login aufgerufen
-function login()
-{
-	var returnValue = false;
-	var UserName = $('#UserName')[0].value;
-	var Password = $('#Password')[0].value;
-	$.ajaxSetup({async: false});
-	var data =
-	{
-		action: "login",
-		UserName: UserName,
-		Password: Password
-	}
-	$.post("php/manageBackend.php", data)
-	.always(function(data)
-	{
-		console.log(data);
-		if (data[0] >= 1) // data[0] entspricht UserId
-		{
-			// Login erfolgreich
-			$('#formLogin-divError').addClass('hide');
-			returnValue = true;
-		}
-		else
-		{
-			// Login fehlgeschlagen
-			$('#formLogin-divError').removeClass('hide');
-			if (data[0] == 0) // login Fehlgeschlagen
-			{
-				$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> Falscher Username oder Passwort.';
-			}
-			else
-			{
-				$('#formLogin-divError')[0].innerHTML = '<b>Fehler!</b> Datenbank ist nicht erreichbar.';
-			}
 		}
 	});
 	$.ajaxSetup({async: true});
