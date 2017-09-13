@@ -1,15 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.7.4
+-- version 4.6.6deb4
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Erstellungszeit: 12. Sep 2017 um 12:16
--- Server-Version: 10.2.8-MariaDB
--- PHP-Version: 7.1.9
+-- Host: localhost:3306
+-- Erstellungszeit: 13. Sep 2017 um 14:28
+-- Server-Version: 10.1.25-MariaDB-
+-- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -38,6 +36,26 @@ CREATE TABLE `files` (
   `kurzfassung` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `login`
+--
+
+CREATE TABLE `login` (
+  `Id` int(11) NOT NULL,
+  `UserName` text NOT NULL,
+  `Password` text NOT NULL,
+  `UserRole` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `login`
+--
+
+INSERT INTO `login` (`Id`, `UserName`, `Password`, `UserRole`) VALUES
+(1, 'leo7044', '3684c2c69316c14e9564c303439e564e', 1);
+
 --
 -- Indizes der exportierten Tabellen
 --
@@ -49,6 +67,13 @@ ALTER TABLE `files`
   ADD PRIMARY KEY (`Id`);
 
 --
+-- Indizes für die Tabelle `login`
+--
+ALTER TABLE `login`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `UserName` (`UserName`(20));
+
+--
 -- AUTO_INCREMENT für exportierte Tabellen
 --
 
@@ -57,8 +82,11 @@ ALTER TABLE `files`
 --
 ALTER TABLE `files`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
-COMMIT;
-
+--
+-- AUTO_INCREMENT für Tabelle `login`
+--
+ALTER TABLE `login`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
