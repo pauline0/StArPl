@@ -7,7 +7,7 @@ if (isset($_SESSION['Id']))
 	$dirUpload = '../upload';
 	$Id = $_post['idOfFile'];
 	$pathNewPics = "$dirUpload/$Id";
-	mkdir("$pathNewPics", 0644);
+	mkdir("$pathNewPics", 0755, true);
 	if(isset($_FILES["FileInputUploadArbeit"]))
 	{
 		foreach ($_FILES["FileInputUploadArbeit"]["error"] as $key => $error)
