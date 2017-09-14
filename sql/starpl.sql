@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 14. Sep 2017 um 08:34
+-- Erstellungszeit: 14. Sep 2017 um 08:45
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -57,6 +57,17 @@ CREATE TABLE `login` (
 INSERT INTO `login` (`Id`, `UserName`, `Password`, `UserRole`) VALUES
 (1, 'leo7044', '3684c2c69316c14e9564c303439e564e', 1);
 
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `SearchWords`
+--
+
+CREATE TABLE `SearchWords` (
+  `FileId` int(11) NOT NULL,
+  `Word` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- Indizes der exportierten Tabellen
 --
@@ -73,6 +84,12 @@ ALTER TABLE `files`
 ALTER TABLE `login`
   ADD PRIMARY KEY (`Id`),
   ADD UNIQUE KEY `UserName` (`UserName`(20));
+
+--
+-- Indizes für die Tabelle `SearchWords`
+--
+ALTER TABLE `SearchWords`
+  ADD UNIQUE KEY `FileId` (`FileId`,`Word`(20));
 
 --
 -- AUTO_INCREMENT für exportierte Tabellen

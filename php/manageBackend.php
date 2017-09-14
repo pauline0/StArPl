@@ -51,6 +51,16 @@ if (!$conn->connect_error)
 					$userAnswer[1] = 'Speichern fehlgeschlagen';
 				}
 				echo json_encode($userAnswer);
+				$schlagwoerter = $_post['schlagwort'];
+				$fileId = $userAnswer[0];
+				foreach ($schlagwoerter as $key => $value)
+				{
+					if ($value)
+					{
+						$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$fileId', '$value')");
+					}
+				}
+				count($schlagwoerter);
 			}
 			break;
 		}
