@@ -86,7 +86,7 @@
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-						<input class="form-control" id="schlagwort" name="schlagwort[]" placeholder="Schlagwort 1" required />
+						<input class="form-control" id="schlagwort" name="schlagwort[]" placeholder="Schlagwort 1" list="schlagwoerter" required />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-success addButton"><i class="glyphicon glyphicon-plus"></i></button>
 						</span>
@@ -95,12 +95,13 @@
 				<div class="form-group hide" id="missingTemplate">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-						<input class="form-control" id="schlagwort" name="schlagwort[]" placeholder="ein weiteres Schlagwort" />
+						<input class="form-control" id="schlagwort" name="schlagwort[]" placeholder="ein weiteres Schlagwort" list="schlagwoerter" />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-danger removeButton"><i class="glyphicon glyphicon-minus"></i></button>
 						</span>
 					</div>
 				</div>
+				<datalist id="schlagwoerter"></datalist>
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-text-size"></i></span>

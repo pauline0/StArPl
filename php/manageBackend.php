@@ -57,11 +57,21 @@ if (!$conn->connect_error)
 				{
 					if ($value)
 					{
-						$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$fileId', '$value')");
+						$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$fileId', '$value');");
 					}
 				}
-				count($schlagwoerter);
 			}
+			break;
+		}
+		case 'getAllSearchWords':
+		{
+			$result = $conn->query("SELECT DISTINCT `Word` FROM `SearchWords`;");
+			$searchWordsArray = array();
+			while ($zeile = $result->fetch_assoc())
+			{
+				array_push($searchWordsArray, $zeile['Word']);
+			}
+			echo json_encode($searchWordsArray);
 			break;
 		}
 		default:

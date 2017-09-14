@@ -34,6 +34,9 @@
 			$('#formUpload').find('.addButton').removeAttr('disabled');
 		}
 	});
+
+	// Schlagwörter-datalist füllen
+	fillDataListSchlagwoerter();
 });
 
 // wird beim hochladen aufgerufen
@@ -55,4 +58,26 @@ function upload()
 	});
 	$.ajaxSetup({async: true});
 	return returnValue;
+}
+
+// befüllt die Schlagwörter-datalist 
+function fillDataListSchlagwoerter()
+{
+	var strHtml = '';
+	var data =
+	{
+		action: "getAllSearchWords"
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		// console.log(data);
+		for (var key in data)
+		{
+			strHtml += '<option value="' + data[key] + '">';
+		}
+		$('#schlagwoerter')[0].innerHTML = strHtml;
+	});
+	$.ajaxSetup({async: true});
 }
