@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 13. Sep 2017 um 14:28
+-- Erstellungszeit: 14. Sep 2017 um 08:34
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -28,6 +28,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `files` (
   `Id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
   `titel` text NOT NULL,
   `studiengang` text NOT NULL,
   `language` text NOT NULL,

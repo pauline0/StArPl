@@ -31,13 +31,14 @@ if (!$conn->connect_error)
 		{
 			if (isset($_SESSION['Id']))
 			{
+				$id = $_SESSION['Id'];
 				$titel = $_post['titel'];
 				$studiengang = $_post['studiengang'];
 				$language = $_post['language'];
 				$artOfArbeit = $_post['artOfArbeit'];
 				$jahrgang = $_post['jahrgang'];
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("INSERT INTO `files`(`titel`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `kurzfassung`) VALUES ('$titel', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$kurzfassung');");
+				$conn->query("INSERT INTO `files`(`userId`, `titel`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `kurzfassung`) VALUES ('$id', '$titel', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$kurzfassung');");
 				$userAnswer = array();
 				if ($conn->affected_rows > 0)
 				{
