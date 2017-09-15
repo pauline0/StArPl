@@ -5,7 +5,14 @@ $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllArbeiten();
 	changeFachbereich();
-	$('button.btn.btn-default.btn-sm.btn-block').click(changeFachbereich);
+	$('button.btn.btn-default.btn-sm.btn-block')
+	.click
+	(
+		function()
+		{
+			changeFachbereich($(this)[0].value);
+		}
+	);
 });
 
 // lädt alle Arbeiten aus der Datenbank
@@ -25,14 +32,10 @@ function getAllArbeiten()
 }
 
 // wird beim Wechsel des Fachbereichs Aufgerufen
-function changeFachbereich()
+function changeFachbereich(selectedStudiengang)
 {
 	var strHtml = '';
-	var selectedStudiengang = '';
-	if ($(this)[0].value)
-	{
-		selectedStudiengang = $(this)[0].value;
-	}
+	selectedStudiengang = selectedStudiengang || '';
 	for (var key in arrayAllArbeiten)
 	{
 		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang)
@@ -49,4 +52,5 @@ function changeFachbereich()
 		}
 	}
 	$('#tableContent')[0].innerHTML = strHtml;
+	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
 }
