@@ -19,25 +19,41 @@
 		<div class="center-block box-content">
 			<div class="row">
 				<div class="col-md-3">
-					<button class="btn btn-default btn-sm btn-block">Bank</button>
-					<button class="btn btn-default btn-sm btn-block">Bauwesen</button>
-					<button class="btn btn-default btn-sm btn-block">Dienstleistungsmanagement</button>
-					<button class="btn btn-default btn-sm btn-block">Elektrotechnik</button>
-					<button class="btn btn-default btn-sm btn-block">Facility Management</button>
-					<button class="btn btn-default btn-sm btn-block">Handel</button>
-					<button class="btn btn-default btn-sm btn-block">IBA</button>
-					<button class="btn btn-default btn-sm btn-block">Immobilienwirtschaft</button>
-					<button class="btn btn-default btn-sm btn-block">Industrie</button>
-					<button class="btn btn-default btn-sm btn-block">Informatik</button>
-					<button class="btn btn-default btn-sm btn-block">Maschinenbau</button>
-					<button class="btn btn-default btn-sm btn-block">PPM</button>
-					<button class="btn btn-default btn-sm btn-block">Spedition/Logistik</button>
-					<button class="btn btn-default btn-sm btn-block">Steuern/Prüfungswesen</button>
-					<button class="btn btn-default btn-sm btn-block">Tourismusbetriebswirtschaft</button>
-					<button class="btn btn-default btn-sm btn-block">Versicherung</button>
-					<button class="btn btn-default btn-sm btn-block">Wirtschaftsinformatik</button>
+					<button class="btn btn-default btn-sm btn-block" value="">Alle</button>
+					<button class="btn btn-default btn-sm btn-block" value="Bank">Bank</button>
+					<button class="btn btn-default btn-sm btn-block" value="Bauwesen">Bauwesen</button>
+					<button class="btn btn-default btn-sm btn-block" value="Dienstleistungsmanagement">Dienstleistungsmanagement</button>
+					<button class="btn btn-default btn-sm btn-block" value="Elektrotechnik">Elektrotechnik</button>
+					<button class="btn btn-default btn-sm btn-block" value="Facility Management">Facility Management</button>
+					<button class="btn btn-default btn-sm btn-block" value="Handel">Handel</button>
+					<button class="btn btn-default btn-sm btn-block" value="IBA">IBA</button value="">
+					<button class="btn btn-default btn-sm btn-block" value="Immobilienwirtschaft">Immobilienwirtschaft</button>
+					<button class="btn btn-default btn-sm btn-block" value="Industrie">Industrie</button>
+					<button class="btn btn-default btn-sm btn-block" value="Informatik">Informatik</button>
+					<button class="btn btn-default btn-sm btn-block" value="Maschinenbau">Maschinenbau</button>
+					<button class="btn btn-default btn-sm btn-block" value="PPM">PPM</button>
+					<button class="btn btn-default btn-sm btn-block" value="Spedition/Logistik">Spedition/Logistik</button>
+					<button class="btn btn-default btn-sm btn-block" value="Steuern/Prüfungswesen">Steuern/Prüfungswesen</button>
+					<button class="btn btn-default btn-sm btn-block" value="Tourismusbetriebswirtschaft">Tourismusbetriebswirtschaft</button>
+					<button class="btn btn-default btn-sm btn-block" value="Versicherung">Versicherung</button>
+					<button class="btn btn-default btn-sm btn-block" value="Wirtschaftsinformatik">Wirtschaftsinformatik</button>
 				</div>
-				<div class="col-md-9" id="contentOverview">
+				<div class="col-md-9">
+					<table class="table table-stripped table-hover table-bordered table-condensed">
+						<thead>
+							<tr>
+								<th>Titel</th>
+								<th>Student</th>
+								<th>Studiengang</th>
+								<th>Sprache</th>
+								<th>Art der Arbeit</th>
+								<th>Jahrgang</th>
+								<th>Dozent</th>
+								<th>Firma</th>
+							</tr>
+						</thead>
+						<tbody id="tableContent"></tbody>
+					</table>
 				</div>
 			</div>
 		</div>

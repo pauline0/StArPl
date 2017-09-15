@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 15. Sep 2017 um 09:42
+-- Erstellungszeit: 15. Sep 2017 um 11:14
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -30,6 +30,7 @@ CREATE TABLE `files` (
   `Id` int(11) NOT NULL,
   `userId` int(11) NOT NULL,
   `titel` text NOT NULL,
+  `student` text NOT NULL,
   `studiengang` text NOT NULL,
   `language` text NOT NULL,
   `artOfArbeit` text NOT NULL,

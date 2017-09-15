@@ -33,6 +33,7 @@ if (!$conn->connect_error)
 			{
 				$id = $_SESSION['Id'];
 				$titel = $_post['titel'];
+				$student = $_post['student'];
 				$studiengang = $_post['studiengang'];
 				$language = $_post['language'];
 				$artOfArbeit = $_post['artOfArbeit'];
@@ -40,7 +41,7 @@ if (!$conn->connect_error)
 				$dozent = $_post['dozent'];
 				$firma = $_post['firma'];
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("INSERT INTO `files`(`userId`, `titel`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `dozent`, `firma`, `kurzfassung`) VALUES ('$id', '$titel', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$dozent', '$firma', '$kurzfassung');");
+				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `dozent`, `firma`, `kurzfassung`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$dozent', '$firma', '$kurzfassung');");
 				$userAnswer = array();
 				if ($conn->affected_rows > 0)
 				{
@@ -74,6 +75,17 @@ if (!$conn->connect_error)
 				array_push($searchWordsArray, $zeile['Word']);
 			}
 			echo json_encode($searchWordsArray);
+			break;
+		}
+		case 'getAllArbeiten':
+		{
+			$result = $conn->query("SELECT * FROM `files`;");
+			$allArbeiten = array();
+			while ($zeile = $result->fetch_assoc())
+			{
+				array_push($allArbeiten, $zeile);
+			}
+			echo json_encode($allArbeiten);
 			break;
 		}
 		default:
