@@ -5,6 +5,7 @@
 		<title>StArPl</title>
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="js/general.js"></script>
 		<script src="js/viewArbeiten.js"></script>
 		<link rel="icon" href="img/icon.ico">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -12,7 +13,7 @@
 		<link rel="stylesheet" href="css/own.css">
 	</head>
 	<body>
-		<div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
+		<div class="jumbotron center-block box-header" onclick="window.history.replaceState('', '', '?studiengang=');location.reload('.');" style="cursor: pointer;">
 			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
 		</div>

@@ -4,7 +4,8 @@ var arrayAllArbeiten = null;
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllArbeiten();
-	changeFachbereich();
+	getGetParas();
+	changeFachbereich($_GET().studiengang);
 	$('button.btn.btn-default.btn-sm.btn-block')
 	.click
 	(
@@ -38,7 +39,7 @@ function changeFachbereich(selectedStudiengang)
 	selectedStudiengang = selectedStudiengang || '';
 	for (var key in arrayAllArbeiten)
 	{
-		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang)
+		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang || undefined == selectedStudiengang)
 		{
 			strHtml +=
 				'<td>' + arrayAllArbeiten[key].titel + '</td>' +
@@ -53,4 +54,5 @@ function changeFachbereich(selectedStudiengang)
 	}
 	$('#tableContent')[0].innerHTML = strHtml;
 	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
+	window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 }
