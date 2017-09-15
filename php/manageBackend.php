@@ -37,8 +37,10 @@ if (!$conn->connect_error)
 				$language = $_post['language'];
 				$artOfArbeit = $_post['artOfArbeit'];
 				$jahrgang = $_post['jahrgang'];
+				$dozent = $_post['dozent'];
+				$firma = $_post['firma'];
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("INSERT INTO `files`(`userId`, `titel`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `kurzfassung`) VALUES ('$id', '$titel', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$kurzfassung');");
+				$conn->query("INSERT INTO `files`(`userId`, `titel`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `dozent`, `firma`, `kurzfassung`) VALUES ('$id', '$titel', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$dozent', '$firma', '$kurzfassung');");
 				$userAnswer = array();
 				if ($conn->affected_rows > 0)
 				{
