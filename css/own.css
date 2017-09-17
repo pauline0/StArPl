@@ -23,3 +23,8 @@ th, tr
 {
 	text-align: center;
 }
+
+a
+{
+	cursor: pointer;
+}
