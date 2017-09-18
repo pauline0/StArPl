@@ -76,7 +76,14 @@ function showArbeitDetailled(Id)
 {
 	var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
-	$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
-	$('#tableOverview').hide();
-	window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
+	try
+	{
+		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
+		$('#tableOverview').hide();
+		window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
+	}
+	catch(e)
+	{
+		changeFachbereich();
+	}
 }
