@@ -69,6 +69,7 @@ function changeFachbereich(selectedStudiengang)
 	$('#tableContent')[0].innerHTML = strHtml;
 	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
 	$('#tableOverview').show();
+	$('#tableDetailledArbeit').hide();
 	window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 }
 
@@ -76,14 +77,38 @@ function showArbeitDetailled(Id)
 {
 	var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
-	try
-	{
+	/*try
+	{*/
+		var tableSortArray =
+		[
+			['titel', 'Titel'],
+			['student', 'Student'],
+			['studiengang', 'Studiengang'],
+			['language', 'Sprache'],
+			['artOfArbeit', 'Art der Arbeit'],
+			['jahrgang', 'Jahrgang'],
+			['dozent', 'Dozent'],
+			['firma', 'Firma'],
+			['kurzfassung', 'Kurzfassung']
+		];
+		var strHtml = '';
+		strHml = '';
+		for (var subArray in tableSortArray)
+		{
+			strHtml +=
+				'<tr>' +
+					'<th>' + tableSortArray[subArray][1] + '</th>' +
+					'<td>' + arrayAllArbeiten[idArray][tableSortArray[subArray][0]] + '</td>' +
+				'</tr>';
+		}
+		$('#tableBodyDetailledArbeit')[0].innerHTML = strHtml;
 		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
 		$('#tableOverview').hide();
+		$('#tableDetailledArbeit').show();
 		window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
-	}
+	/*}
 	catch(e)
 	{
 		changeFachbereich();
-	}
+	}*/
 }
