@@ -2,10 +2,9 @@
 	// FileUploadArbeit
 	$("#FileInputUploadArbeit").fileinput({
         showUpload: false, // Zeile 698 in "fileinput.js" bearbeitet, showUpload auf false gesetzt; Zeile 3.930 in "fileinput.js" bearbeitet, um "Remove"-Button rot einzufärben
-		uploadUrl: 'upload',
 		allowedFileTypes: ['pdf'],
         overwriteInitial: true,
-		defaultPreviewContent: '<i class="glyphicon glyphicon-file" style="font-size:100px;"></i><h6 class="text-muted">Laden Sie Ihre Arbeit hier hoch (.pdf-Format), unterstützt Drag & Drop</h6>'
+		defaultPreviewContent: '<center><i class="glyphicon glyphicon-file" style="font-size:100px;"></i><h6 class="text-muted">Laden Sie Ihre Arbeit hier hoch (.pdf-Format)</h6></center>'
     });
 	
 	// Schlagwörter

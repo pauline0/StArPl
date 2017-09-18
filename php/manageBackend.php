@@ -3,7 +3,7 @@ header("Content-Type: application/json; charset=utf-8"); // JSON-Antwort
 include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
-$action = $_REQUEST['action'];
+$action = $_post['action'];
 // print_r($_post);
 if (!$conn->connect_error)
 {
