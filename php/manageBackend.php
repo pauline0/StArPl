@@ -3,7 +3,7 @@ header("Content-Type: application/json; charset=utf-8"); // JSON-Antwort
 include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
-$action = $_post['action'];
+$action = $_REQUEST['action'];
 // print_r($_post);
 if (!$conn->connect_error)
 {
@@ -81,11 +81,17 @@ if (!$conn->connect_error)
 		{
 			$result = $conn->query("SELECT * FROM `files`;");
 			$allArbeiten = array();
+			// $fileArray = array('test2.pdf');
+			$i = 0;
 			while ($zeile = $result->fetch_assoc())
 			{
 				array_push($allArbeiten, $zeile);
+				$fileArray = getFileNamesArray($zeile['Id']);
+				$allArbeiten[$i]['dateien'] = $fileArray;
+				$i++;
 			}
 			echo json_encode($allArbeiten);
+			// print_r($allArbeiten);
 			break;
 		}
 		default:
@@ -113,5 +119,29 @@ function checkLogin($conn, $userName, $password)
 		$returnId = $_SESSION['Id'] = $zeile['Id'];
 	}
 	return $returnId;
+}
+
+// liest die Dateinamen aus dem entsprechenden Verzeichnis aus
+function getFileNamesArray($Id)
+{
+	$allFiles = array();
+	$directory = '../upload/' . $Id . '/';
+	if (is_dir ($directory))
+	{
+		// öffnen des Verzeichnisses
+		if ($handle = opendir($directory))
+		{
+			// einlesen der Verzeichnisses
+			while (($file = readdir($handle)) !== false)
+			{
+				if (filetype($file) != 'dir')
+				{
+					$allFiles[] = $file;
+				}
+			}
+			closedir($handle);
+		}
+	}
+	return $allFiles;
 }
 ?>

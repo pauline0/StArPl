@@ -77,8 +77,8 @@ function showArbeitDetailled(Id)
 {
 	var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
-	/*try
-	{*/
+	if (selectedArbeit != undefined)
+	{
 		var tableSortArray =
 		[
 			['titel', 'Titel'],
@@ -106,9 +106,9 @@ function showArbeitDetailled(Id)
 		$('#tableOverview').hide();
 		$('#tableDetailledArbeit').show();
 		window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
-	/*}
-	catch(e)
+	}
+	else
 	{
 		changeFachbereich();
-	}*/
+	}
 }
