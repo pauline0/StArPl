@@ -1,6 +1,8 @@
 // globale Variablen
 var arrayAllArbeiten = null;
-var arrayIdsArbeiten = new Array();
+var arrayIdsArbeiten = null;
+var arraySelectedArbeiten = null;
+var arrayTableSelectedArbeiten = null;
 
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
@@ -22,11 +24,35 @@ $(document).ready(function() {
 			changeFachbereich($(this)[0].value);
 		}
 	);
+	$('#tableOverview').DataTable();
 });
+
+// update der DataTable
+function reloadDataTable()
+{
+	arrayTableSelectedArbeiten = new Array();
+	for (var key in arraySelectedArbeiten)
+	{
+		var arrayOneRow = new Array();
+		arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');">' + arraySelectedArbeiten[key].titel + '</a>');
+		arrayOneRow.push(arraySelectedArbeiten[key].student);
+		arrayOneRow.push(arraySelectedArbeiten[key].studiengang);
+		arrayOneRow.push(arraySelectedArbeiten[key].language);
+		arrayOneRow.push(arraySelectedArbeiten[key].artOfArbeit);
+		arrayOneRow.push(arraySelectedArbeiten[key].jahrgang);
+		arrayOneRow.push(arraySelectedArbeiten[key].dozent);
+		arrayOneRow.push(arraySelectedArbeiten[key].firma);
+		arrayTableSelectedArbeiten.push(arrayOneRow);
+	}
+	$('#tableOverview').DataTable().clear();
+	$('#tableOverview').DataTable().rows.add(arrayTableSelectedArbeiten);
+	$('#tableOverview').DataTable().draw();
+}
 
 // lädt alle Arbeiten aus der Datenbank
 function getAllArbeiten()
 {
+	arrayIdsArbeiten = new Array();
 	var data =
 	{
 		action: "getAllArbeiten"
@@ -47,12 +73,14 @@ function getAllArbeiten()
 // wird beim Wechsel des Fachbereichs Aufgerufen
 function changeFachbereich(selectedStudiengang)
 {
+	arraySelectedArbeiten = new Array();
 	var strHtml = '';
 	selectedStudiengang = selectedStudiengang || '';
 	for (var key in arrayAllArbeiten)
 	{
 		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang || undefined == selectedStudiengang)
 		{
+			arraySelectedArbeiten.push(arrayAllArbeiten[key]);
 			strHtml +=
 				'<tr>' +
 					'<td><a onclick="showArbeitDetailled(' + arrayAllArbeiten[key].Id + ');">' + arrayAllArbeiten[key].titel + '</a></td>' +
@@ -68,8 +96,9 @@ function changeFachbereich(selectedStudiengang)
 	}
 	$('#tableContent')[0].innerHTML = strHtml;
 	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
-	$('#tableOverview').show();
+	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
+	reloadDataTable();
 	window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 }
 
@@ -120,7 +149,7 @@ function showArbeitDetailled(Id)
 				'</tr>';
 		$('#tableBodyDetailledArbeit')[0].innerHTML = strHtml;
 		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
-		$('#tableOverview').hide();
+		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
 		window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
 	}

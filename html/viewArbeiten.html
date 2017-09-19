@@ -5,11 +5,14 @@
 		<title>StArPl</title>
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
 		<script src="js/viewArbeiten.js"></script>
 		<link rel="icon" href="img/icon.ico">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css">
 		<link rel="stylesheet" href="css/own.css">
 	</head>
 	<body>
@@ -40,21 +43,23 @@
 				</div>
 				<div class="col-md-9">
 					<h2 id="headLineStudiengang"></h2>
-					<table class="table table-stripped table-hover table-bordered table-condensed" id="tableOverview">
-						<thead>
-							<tr>
-								<th>Titel</th>
-								<th>Student</th>
-								<th>Studiengang</th>
-								<th>Sprache</th>
-								<th>Art der Arbeit</th>
-								<th>Jahrgang</th>
-								<th>Dozent</th>
-								<th>Firma</th>
-							</tr>
-						</thead>
-						<tbody id="tableContent"></tbody>
-					</table>
+					<div id="divTableOverview">
+						<table class="table table-stripped table-hover table-bordered table-condensed" id="tableOverview">
+							<thead>
+								<tr>
+									<th>Titel</th>
+									<th>Student</th>
+									<th>Studiengang</th>
+									<th>Sprache</th>
+									<th>Art der Arbeit</th>
+									<th>Jahrgang</th>
+									<th>Dozent</th>
+									<th>Firma</th>
+								</tr>
+							</thead>
+							<tbody id="tableContent"></tbody>
+						</table>
+					</div>
 					<table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
 						<thead></thead>
 						<tbody id="tableBodyDetailledArbeit"></tbody>

@@ -4,7 +4,6 @@ include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $action = $_post['action'];
-// print_r($_post);
 if (!$conn->connect_error)
 {
 	switch ($action)
@@ -79,9 +78,8 @@ if (!$conn->connect_error)
 		}
 		case 'getAllArbeiten':
 		{
-			$result = $conn->query("SELECT * FROM `files`;");
+			$result = $conn->query("SELECT * FROM `files` ORDER BY `titel` ASC;");
 			$allArbeiten = array();
-			// $fileArray = array('test2.pdf');
 			$i = 0;
 			while ($zeile = $result->fetch_assoc())
 			{
@@ -91,7 +89,6 @@ if (!$conn->connect_error)
 				$i++;
 			}
 			echo json_encode($allArbeiten);
-			// print_r($allArbeiten);
 			break;
 		}
 		default:
