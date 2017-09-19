@@ -8,6 +8,15 @@ $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllArbeiten();
 	getGetParas();
+	$('#tableOverview').DataTable
+	(
+		{
+			"language":
+			{
+				"url": "js/dataTableGerman.json"
+			}
+		}
+	);
 	if ($_GET().id)
 	{
 		showArbeitDetailled($_GET().id);
@@ -24,7 +33,6 @@ $(document).ready(function() {
 			changeFachbereich($(this)[0].value);
 		}
 	);
-	$('#tableOverview').DataTable();
 });
 
 // update der DataTable

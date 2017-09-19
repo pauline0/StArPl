@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>StArPl - Neu erstellen</title>
+		<title>StArPl - Hochladen</title>
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="js/fileinput.min.js"></script> <!-- 4.4.3-10 -->
@@ -16,7 +16,14 @@
 	<body>
 		<div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
 			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
-			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
+			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Hochladen</h2>
+			<div class="text-right">
+				<form method="post" action="">
+					<button type="submit" name="logout" class="btn btn-danger">
+						<span class="glyphicon glyphicon-log-out"></span> Abmelden
+					</button>
+				</form>
+			</div>
 		</div>
 		<div class="center-block box-content">
 			<form method="post" action="./php/uploadPDF.php" name="formUpload" id="formUpload" onsubmit="return upload();" enctype="multipart/form-data">
