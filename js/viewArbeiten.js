@@ -98,9 +98,26 @@ function showArbeitDetailled(Id)
 			strHtml +=
 				'<tr>' +
 					'<th>' + tableSortArray[subArray][1] + '</th>' +
-					'<td>' + arrayAllArbeiten[idArray][tableSortArray[subArray][0]] + '</td>' +
+					'<td>' + selectedArbeit[tableSortArray[subArray][0]] + '</td>' +
 				'</tr>';
 		}
+		strHtml +=
+				'<tr>' +
+					'<th>Datei(en)</th>' +
+					'<td>';
+						for (var file in selectedArbeit.dateien)
+						{
+							var selectedFile = selectedArbeit.dateien[file];
+							strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
+							if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
+							{
+								strHtml += '<img src="img/pdf.png">';
+							}
+							strHtml += selectedFile + '</a><br/>';
+						}
+		strHtml +=
+					'</td>' +
+				'</tr>';
 		$('#tableBodyDetailledArbeit')[0].innerHTML = strHtml;
 		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
 		$('#tableOverview').hide();
