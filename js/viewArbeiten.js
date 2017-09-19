@@ -3,6 +3,7 @@ var arrayAllArbeiten = null;
 var arrayIdsArbeiten = null;
 var arraySelectedArbeiten = null;
 var arrayTableSelectedArbeiten = null;
+var arrayAllSearchWordsWithId = null;
 
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
@@ -49,7 +50,17 @@ function reloadDataTable()
 		arrayOneRow.push(arraySelectedArbeiten[key].artOfArbeit);
 		arrayOneRow.push(arraySelectedArbeiten[key].jahrgang);
 		arrayOneRow.push(arraySelectedArbeiten[key].dozent);
-		arrayOneRow.push(arraySelectedArbeiten[key].firma);
+		// für die Suche - nicht elegant, aber effektiv ;)
+		var strHtml = '';
+		strHtml +=
+			arraySelectedArbeiten[key].firma +
+			'<span class="hidden">';
+			for(var schlagwort in arraySelectedArbeiten[key].searchWords)
+			{
+				strHtml += arraySelectedArbeiten[key].searchWords[schlagwort];
+			}
+		strHtml += '</span>';
+		arrayOneRow.push(strHtml);
 		arrayTableSelectedArbeiten.push(arrayOneRow);
 	}
 	$('#tableOverview').DataTable().clear();
@@ -76,6 +87,37 @@ function getAllArbeiten()
 		}
 	});
 	$.ajaxSetup({async: true});
+	getAllSearchWordsWithId();
+}
+
+// gibt alle Schlagwörter aus
+function getAllSearchWordsWithId()
+{
+	arrayAllSearchWordsWithId = new Array();
+	var data =
+	{
+		action: "getAllSearchWordsWithId"
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		arrayAllSearchWordsWithId = data;
+		for (var keyArbeiten in arrayAllArbeiten)
+		{
+			var idArray = $.inArray(keyArbeiten.toString(), arrayIdsArbeiten);
+			var arraySearchWords = new Array();
+			for (var keySearch in arrayAllSearchWordsWithId)
+			{
+				if (arrayAllSearchWordsWithId[keySearch].FileId == arrayAllArbeiten[keyArbeiten].Id.toString())
+				{
+					arraySearchWords.push(arrayAllSearchWordsWithId[keySearch].Word);
+				}
+			}
+			arrayAllArbeiten[keyArbeiten]['searchWords'] = arraySearchWords;
+		}
+	});
+	$.ajaxSetup({async: true});
 }
 
 // wird beim Wechsel des Fachbereichs Aufgerufen
@@ -99,7 +141,7 @@ function changeFachbereich(selectedStudiengang)
 					'<td>' + arrayAllArbeiten[key].jahrgang + '</td>' +
 					'<td>' + arrayAllArbeiten[key].dozent + '</td>' +
 					'<td>' + arrayAllArbeiten[key].firma + '</td>' +
-				'</tr>'
+				'</tr>';
 		}
 	}
 	$('#tableContent')[0].innerHTML = strHtml;

@@ -76,6 +76,17 @@ if (!$conn->connect_error)
 			echo json_encode($searchWordsArray);
 			break;
 		}
+		case 'getAllSearchWordsWithId':
+		{
+			$result = $conn->query("SELECT * FROM `SearchWords`;");
+			$searchWordsArray = array();
+			while ($zeile = $result->fetch_assoc())
+			{
+				array_push($searchWordsArray, $zeile);
+			}
+			echo json_encode($searchWordsArray);
+			break;
+		}
 		case 'getAllArbeiten':
 		{
 			$result = $conn->query("SELECT * FROM `files` ORDER BY `titel` ASC;");
@@ -84,8 +95,7 @@ if (!$conn->connect_error)
 			while ($zeile = $result->fetch_assoc())
 			{
 				array_push($allArbeiten, $zeile);
-				$fileArray = getFileNamesArray($zeile['Id']);
-				$allArbeiten[$i]['dateien'] = $fileArray;
+				$allArbeiten[$i]['dateien'] = getFileNamesArray($zeile['Id']);
 				$i++;
 			}
 			echo json_encode($allArbeiten);
