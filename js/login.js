@@ -2,15 +2,9 @@
 function login()
 {
 	var returnValue = false;
-	var UserName = $('#UserName')[0].value;
-	var Password = $('#Password')[0].value;
+	var data = $('#formLogin').serialize();
+	data += '&action=formLogin';
 	$.ajaxSetup({async: false});
-	var data =
-	{
-		action: "login",
-		UserName: UserName,
-		Password: Password
-	}
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{

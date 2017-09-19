@@ -3,12 +3,13 @@ header("Content-Type: application/json; charset=utf-8"); // JSON-Antwort
 include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
+$_post = replaceChars($_post);
 $action = $_post['action'];
 if (!$conn->connect_error)
 {
 	switch ($action)
 	{
-		case 'login':
+		case 'formLogin':
 		{
 			$userName = $_post['UserName'];
 			$password = md5($_post['Password']);
@@ -150,5 +151,14 @@ function getFileNamesArray($Id)
 		}
 	}
 	return $allFiles;
+}
+
+// ersetzt Spezialzeichen
+function replaceChars($str)
+{
+	$str = str_replace("\\", "&#92;", $str); // Backslash
+	$str = str_replace("'", "&#39;", $str); // einfaches Anführungszeichen
+	$str = str_replace("`", "&#96;", $str); // schräges einfaches Anführungszeichen links (gravis)
+	return $str;
 }
 ?>
