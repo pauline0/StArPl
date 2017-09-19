@@ -1,10 +1,13 @@
 ﻿$(document).ready(function() {
 	// FileUploadArbeit
 	$("#FileInputUploadArbeit").fileinput({
-        showUpload: false, // Zeile 698 in "fileinput.js" bearbeitet, showUpload auf false gesetzt; Zeile 3.930 in "fileinput.js" bearbeitet, um "Remove"-Button rot einzufärben
+        showUpload: false, // Zeile 701 in "fileinput.js" bearbeitet, showUpload auf false gesetzt; Zeile 3.939 in "fileinput.js" bearbeitet, um "Remove"-Button rot einzufärben
 		allowedFileTypes: ['pdf'],
         overwriteInitial: true,
-		defaultPreviewContent: '<center><i class="glyphicon glyphicon-file" style="font-size:100px;"></i><h6 class="text-muted">Laden Sie Ihre Arbeit hier hoch (.pdf-Format)</h6></center>'
+		browseClass: "btn btn-primary",
+        browseLabel: "&nbsp;Datei(en) auswählen [*.pdf]",
+		browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
+        removeLabel: "&nbsp;Löschen"
     });
 	
 	// Schlagwörter
