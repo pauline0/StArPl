@@ -49,7 +49,7 @@ function reloadDataTable()
 		arrayOneRow.push(arraySelectedArbeiten[key].language);
 		arrayOneRow.push(arraySelectedArbeiten[key].artOfArbeit);
 		arrayOneRow.push(arraySelectedArbeiten[key].jahrgang);
-		arrayOneRow.push(arraySelectedArbeiten[key].dozent);
+		arrayOneRow.push(arraySelectedArbeiten[key].betreuer);
 		// für die Suche - nicht elegant, aber effektiv ;)
 		var strHtml = '';
 		strHtml +=
@@ -139,7 +139,7 @@ function changeFachbereich(selectedStudiengang)
 					'<td>' + arrayAllArbeiten[key].language + '</td>' +
 					'<td>' + arrayAllArbeiten[key].artOfArbeit + '</td>' +
 					'<td>' + arrayAllArbeiten[key].jahrgang + '</td>' +
-					'<td>' + arrayAllArbeiten[key].dozent + '</td>' +
+					'<td>' + arrayAllArbeiten[key].betreuer + '</td>' +
 					'<td>' + arrayAllArbeiten[key].firma + '</td>' +
 				'</tr>';
 		}
@@ -166,7 +166,7 @@ function showArbeitDetailled(Id)
 			['language', 'Sprache'],
 			['artOfArbeit', 'Art der Arbeit'],
 			['jahrgang', 'Jahrgang'],
-			['dozent', 'Dozent'],
+			['betreuer', 'Betreuer'],
 			['firma', 'Firma'],
 			['kurzfassung', 'Kurzfassung']
 		];

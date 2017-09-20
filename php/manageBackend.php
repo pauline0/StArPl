@@ -38,11 +38,11 @@ if (!$conn->connect_error)
 				$language = $_post['language'];
 				$artOfArbeit = $_post['artOfArbeit'];
 				$jahrgang = $_post['jahrgang'];
-				$dozent = $_post['dozent'];
+				$betreuer = $_post['betreuer'];
 				$firma = $_post['firma'];
 				$sperrvermerk = $_post['sperrvermerk'];
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `dozent`, `firma`, `sperrvermerk`, `kurzfassung`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$dozent', '$firma', '$sperrvermerk', '$kurzfassung');");
+				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung');");
 				$userAnswer = array();
 				if ($conn->affected_rows > 0)
 				{
