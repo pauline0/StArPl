@@ -105,9 +105,10 @@ if (!$conn->connect_error)
 		}
 		case 'getOwnUser':
 		{
-			if ($id = isset($_SESSION['Id']))
+			if (isset($_SESSION['Id']))
 			{
-				$result = $conn->query("SELECT `Id`, `UserName`, `UserRole` FROM `login` WHERE `Id`=$id ");
+				$id = $_SESSION['Id'];
+				$result = $conn->query("SELECT `Id`, `UserName`, `UserRole` FROM `login` WHERE `Id`='$id';");
 				$answer = array();
 				while ($zeile = $result->fetch_assoc())
 				{

@@ -1,10 +1,10 @@
 <?php
 session_start();
-if (isset($_REQUEST['upload']))
+if (isset($_REQUEST['edit']))
 {
     if (isset($_SESSION['Id']) && !isset($_REQUEST['logout']))
     {
-        include_once('html/upload.html');
+        include_once('html/viewArbeiten.html');
     }
     else
     {
@@ -12,11 +12,11 @@ if (isset($_REQUEST['upload']))
         include_once('html/login.html');
     }
 }
-else if (isset($_REQUEST['edit']))
+else if (isset($_REQUEST['upload']))
 {
     if (isset($_SESSION['Id']) && !isset($_REQUEST['logout']))
     {
-        include_once('html/viewArbeiten.html');
+        include_once('html/upload.html');
     }
     else
     {
