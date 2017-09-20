@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 19. Sep 2017 um 15:27
+-- Erstellungszeit: 20. Sep 2017 um 13:17
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -58,7 +58,8 @@ CREATE TABLE `login` (
 --
 
 INSERT INTO `login` (`Id`, `UserName`, `Password`, `UserRole`) VALUES
-(1, 'leo7044', '3684c2c69316c14e9564c303439e564e', 1);
+(1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 1),
+(2, 'leo7044', '3684c2c69316c14e9564c303439e564e', 1);
 
 -- --------------------------------------------------------
 
@@ -107,7 +108,7 @@ ALTER TABLE `files`
 -- AUTO_INCREMENT für Tabelle `login`
 --
 ALTER TABLE `login`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

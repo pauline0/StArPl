@@ -1,3 +1,17 @@
+$(document).ready(function() {
+	getGetParas();
+	initializeForm();
+});
+
+// initialisiert das Formular (richtige ZielPage)
+function initializeForm()
+{
+	if ($_GET().upload)
+	{
+		document.formLogin.action = './?upload';
+	}
+}
+
 // wird beim Login aufgerufen
 function login()
 {
