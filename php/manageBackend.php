@@ -103,6 +103,20 @@ if (!$conn->connect_error)
 			echo json_encode($allArbeiten);
 			break;
 		}
+		case 'getOwnUser':
+		{
+			if ($id = isset($_SESSION['Id']))
+			{
+				$result = $conn->query("SELECT `Id`, `UserName`, `UserRole` FROM `login` WHERE `Id`=$id ");
+				$answer = array();
+				while ($zeile = $result->fetch_assoc())
+				{
+					array_push($answer, $zeile);
+				}
+				echo json_encode($answer);
+			}
+			break;
+		}
 		default:
 		{
 			echo 'no Action';

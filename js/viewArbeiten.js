@@ -4,11 +4,17 @@ var arrayIdsArbeiten = null;
 var arraySelectedArbeiten = null;
 var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
+var ownUser = null;
 
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllArbeiten();
 	getGetParas();
+	prepareTableHeader();
+	if ($_GET().edit)
+	{
+		getOwnUser();
+	}
 	$('#tableOverview').DataTable
 	(
 		{
@@ -36,6 +42,27 @@ $(document).ready(function() {
 	);
 });
 
+// erstellt den tableHeader
+function prepareTableHeader()
+{
+	var strHtml =
+		'<tr>' +
+			'<th>Titel</th>' +
+			'<th>Student</th>' +
+			'<th>Studiengang</th>' +
+			'<th>Sprache</th>' +
+			'<th>Art der Arbeit</th>' +
+			'<th>Jahrgang</th>' +
+			'<th>Betreuer</th>' +
+			'<th>Firma</th>';
+	if ($_GET().edit)
+	{
+		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
+	}
+	strHtml += '</tr>';
+	$('#tableHeader')[0].innerHTML = strHtml;
+}
+
 // update der DataTable
 function reloadDataTable()
 {
@@ -51,16 +78,26 @@ function reloadDataTable()
 		arrayOneRow.push(arraySelectedArbeiten[key].jahrgang);
 		arrayOneRow.push(arraySelectedArbeiten[key].betreuer);
 		// für die Suche - nicht elegant, aber effektiv ;)
-		var strHtml = '';
-		strHtml +=
+		var strHtml =
 			arraySelectedArbeiten[key].firma +
 			'<span class="hidden">';
-			for(var schlagwort in arraySelectedArbeiten[key].searchWords)
-			{
-				strHtml += arraySelectedArbeiten[key].searchWords[schlagwort];
-			}
+		for (var schlagwort in arraySelectedArbeiten[key].searchWords)
+		{
+			strHtml += arraySelectedArbeiten[key].searchWords[schlagwort];
+		}
 		strHtml += '</span>';
 		arrayOneRow.push(strHtml);
+		if ($_GET().edit)
+		{
+			if (ownUser[0].Id == arraySelectedArbeiten[key].userId) // handelt es sich um einen eigenen Bericht
+			{
+				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');"><span class="glyphicon glyphicon-pencil"></span></a>');
+			}
+			else
+			{
+				arrayOneRow.push('');
+			}
+		}
 		arrayTableSelectedArbeiten.push(arrayOneRow);
 	}
 	$('#tableOverview').DataTable().clear();
@@ -124,14 +161,14 @@ function getAllSearchWordsWithId()
 function changeFachbereich(selectedStudiengang)
 {
 	arraySelectedArbeiten = new Array();
-	var strHtml = '';
+	//var strHtml = '';
 	selectedStudiengang = selectedStudiengang || '';
 	for (var key in arrayAllArbeiten)
 	{
 		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang || undefined == selectedStudiengang)
 		{
 			arraySelectedArbeiten.push(arrayAllArbeiten[key]);
-			strHtml +=
+			/*strHtml +=
 				'<tr>' +
 					'<td><a onclick="showArbeitDetailled(' + arrayAllArbeiten[key].Id + ');">' + arrayAllArbeiten[key].titel + '</a></td>' +
 					'<td>' + arrayAllArbeiten[key].student + '</td>' +
@@ -141,10 +178,10 @@ function changeFachbereich(selectedStudiengang)
 					'<td>' + arrayAllArbeiten[key].jahrgang + '</td>' +
 					'<td>' + arrayAllArbeiten[key].betreuer + '</td>' +
 					'<td>' + arrayAllArbeiten[key].firma + '</td>' +
-				'</tr>';
+				'</tr>';*/
 		}
 	}
-	$('#tableContent')[0].innerHTML = strHtml;
+	// $('#tableContent')[0].innerHTML = strHtml;
 	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
@@ -159,6 +196,7 @@ function changeFachbereich(selectedStudiengang)
 	}
 }
 
+// detaillierte Übersicht über eine Arbeit
 function showArbeitDetailled(Id)
 {
 	var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
@@ -178,7 +216,6 @@ function showArbeitDetailled(Id)
 			['kurzfassung', 'Kurzfassung']
 		];
 		var strHtml = '';
-		strHml = '';
 		for (var subArray in tableSortArray)
 		{
 			strHtml +=
@@ -221,4 +258,24 @@ function showArbeitDetailled(Id)
 	{
 		changeFachbereich();
 	}
+}
+
+// ==================================================
+// ausschließlich für den edit-Bereich erforderlich
+// ==================================================
+
+// eigener User
+function getOwnUser()
+{
+	var data =
+	{
+		action: "getOwnUser"
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		ownUser = data;
+	});
+	$.ajaxSetup({async: true});
 }
