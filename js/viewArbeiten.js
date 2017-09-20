@@ -94,7 +94,7 @@ function reloadDataTable()
 		arrayOneRow.push(strHtml);
 		if ($_GET().edit)
 		{
-			if (ownUser[0].Id == arraySelectedArbeiten[key].userId) // handelt es sich um einen eigenen Bericht
+			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '1') // handelt es sich um einen eigenen Bericht
 			{
 				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');"><span class="glyphicon glyphicon-pencil"></span></a>');
 			}
