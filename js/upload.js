@@ -90,13 +90,13 @@ function changeSperrvermerk()
 	if(document.formUpload.sperrvermerk.checked)
 	{
 		$('#FileInputUploadArbeit').attr('required', false);
-		document.formUpload.sperrvermerk.value = 'true';
+		document.formUpload.sperrvermerk.value = "1";
 		$('#divFileInputUploadArbeit').hide();
 	}
 	else
 	{
 		$('#FileInputUploadArbeit').attr('required', true);
-		document.formUpload.sperrvermerk.value = 'false';
+		document.formUpload.sperrvermerk.value = "0";
 		$('#divFileInputUploadArbeit').show();
 	}
 }

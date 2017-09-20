@@ -8,7 +8,7 @@ if (isset($_SESSION['Id']))
 	$Id = $_post['idOfFile'];
 	$pathNewPics = "$dirUpload/$Id";
 	mkdir("$pathNewPics", 0755, true);
-	if(isset($_FILES["FileInputUploadArbeit"]))
+	if(isset($_FILES["FileInputUploadArbeit"]) && !$_post['sperrvermerk'])
 	{
 		foreach ($_FILES["FileInputUploadArbeit"]["error"] as $key => $error)
 		{
