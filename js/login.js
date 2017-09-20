@@ -29,13 +29,13 @@ function login()
 		if (data[0] >= 1) // data[0] entspricht UserId
 		{
 			// Login erfolgreich
-			$('#formLogin-divError').addClass('hide');
+			$('#formLogin-divError').hide();
 			returnValue = true;
 		}
 		else
 		{
 			// Login fehlgeschlagen
-			$('#formLogin-divError').removeClass('hide');
+			$('#formLogin-divError').show();
 			if (data[0] == 0) // login Fehlgeschlagen
 			{
 				$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> Falscher Username oder Passwort.';

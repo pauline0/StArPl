@@ -14,6 +14,11 @@ $(document).ready(function() {
 	if ($_GET().edit)
 	{
 		getOwnUser();
+		$('#divLogoutButton').show();
+	}
+	else
+	{
+		$('#divLogoutButton').hide();
 	}
 	$('#tableOverview').DataTable
 	(
