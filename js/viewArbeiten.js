@@ -149,7 +149,14 @@ function changeFachbereich(selectedStudiengang)
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
 	reloadDataTable();
-	window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
+	if ($_GET().edit)
+	{
+		window.history.replaceState('', '', '?edit&studiengang=' + selectedStudiengang);
+	}
+	else
+	{
+		window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
+	}
 }
 
 function showArbeitDetailled(Id)
@@ -201,7 +208,14 @@ function showArbeitDetailled(Id)
 		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
 		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
-		window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
+		if ($_GET().edit)
+		{
+			window.history.replaceState('', '', '?edit&studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
+		}
+		else
+		{
+			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
+		}
 	}
 	else
 	{

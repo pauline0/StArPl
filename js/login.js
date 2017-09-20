@@ -10,6 +10,10 @@ function initializeForm()
 	{
 		document.formLogin.action = './?upload';
 	}
+	else if ($_GET().edit)
+	{
+		document.formLogin.action = './?edit';
+	}
 }
 
 // wird beim Login aufgerufen
