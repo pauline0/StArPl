@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 20. Sep 2017 um 13:17
+-- Erstellungszeit: 20. Sep 2017 um 13:52
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -37,6 +37,7 @@ CREATE TABLE `files` (
   `jahrgang` int(4) NOT NULL,
   `dozent` text NOT NULL,
   `firma` text NOT NULL,
+  `sperrvermerk` tinyint(1) NOT NULL,
   `kurzfassung` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

@@ -83,3 +83,20 @@ function fillDataListSchlagwoerter()
 	});
 	$.ajaxSetup({async: true});
 }
+
+// wird beim Klick auf Sperrvermerk ausgeführt
+function changeSperrvermerk()
+{
+	if(document.formUpload.sperrvermerk.checked)
+	{
+		$('#FileInputUploadArbeit').attr('required', false);
+		document.formUpload.sperrvermerk.value = 'true';
+		$('#divFileInputUploadArbeit').hide();
+	}
+	else
+	{
+		$('#FileInputUploadArbeit').attr('required', true);
+		document.formUpload.sperrvermerk.value = 'false';
+		$('#divFileInputUploadArbeit').show();
+	}
+}

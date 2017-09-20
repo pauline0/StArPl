@@ -105,7 +105,10 @@
 						<input class="form-control" id="firma" name="firma" placeholder="Firma" required />
 					</div>
 				</div>
-				<div class="form-group">
+				<div class="checkbox">
+					<label><input type="checkbox" id="sperrvermerk" name="sperrvermerk" onChange="changeSperrvermerk();" value="false">Sperrvermerk</label>
+				</div>
+				<div class="form-group" id="divFileInputUploadArbeit">
 					<input id="FileInputUploadArbeit" name="FileInputUploadArbeit[]" type="file" class="file-loading" required multiple />
 				</div>
 				<div class="form-group">
