@@ -51,7 +51,6 @@ function upload()
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{
-		// console.log(data);
 		if (data[0] != 0)
 		{
 			returnValue = true;
@@ -74,7 +73,6 @@ function fillDataListSchlagwoerter()
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{
-		// console.log(data);
 		for (var key in data)
 		{
 			strHtml += '<option value="' + data[key] + '">';
@@ -90,6 +88,7 @@ function changeSperrvermerk()
 	if(document.formUpload.sperrvermerk.checked)
 	{
 		$('#FileInputUploadArbeit').attr('required', false);
+		$($.find('button.btn.btn-default.btn-danger.fileinput-remove.fileinput-remove-button')[0]).click();
 		document.formUpload.sperrvermerk.value = "1";
 		$('#divFileInputUploadArbeit').hide();
 	}
