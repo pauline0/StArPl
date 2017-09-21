@@ -40,7 +40,14 @@ if (!$conn->connect_error)
 				$jahrgang = $_post['jahrgang'];
 				$betreuer = $_post['betreuer'];
 				$firma = $_post['firma'];
-				$sperrvermerk = $_post['sperrvermerk'];
+				if (isset($_post['sperrvermerk']))
+				{
+					$sperrvermerk = $_post['sperrvermerk'];
+				}
+				else
+				{
+					$sperrvermerk = 0;
+				}
 				$kurzfassung = $_post['kurzfassung'];
 				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung');");
 				$userAnswer = array();

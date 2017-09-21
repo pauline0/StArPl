@@ -166,27 +166,14 @@ function getAllSearchWordsWithId()
 function changeFachbereich(selectedStudiengang)
 {
 	arraySelectedArbeiten = new Array();
-	//var strHtml = '';
 	selectedStudiengang = selectedStudiengang || '';
 	for (var key in arrayAllArbeiten)
 	{
 		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang || undefined == selectedStudiengang)
 		{
 			arraySelectedArbeiten.push(arrayAllArbeiten[key]);
-			/*strHtml +=
-				'<tr>' +
-					'<td><a onclick="showArbeitDetailled(' + arrayAllArbeiten[key].Id + ');">' + arrayAllArbeiten[key].titel + '</a></td>' +
-					'<td>' + arrayAllArbeiten[key].student + '</td>' +
-					'<td>' + arrayAllArbeiten[key].studiengang + '</td>' +
-					'<td>' + arrayAllArbeiten[key].language + '</td>' +
-					'<td>' + arrayAllArbeiten[key].artOfArbeit + '</td>' +
-					'<td>' + arrayAllArbeiten[key].jahrgang + '</td>' +
-					'<td>' + arrayAllArbeiten[key].betreuer + '</td>' +
-					'<td>' + arrayAllArbeiten[key].firma + '</td>' +
-				'</tr>';*/
 		}
 	}
-	// $('#tableContent')[0].innerHTML = strHtml;
 	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
