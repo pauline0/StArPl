@@ -26,6 +26,7 @@ $(document).ready(function() {
 	if ($_GET().edit)
 	{
 		getOwnUser();
+		$('#tableBodyDetailledArbeitEdit').hide();
 		$('#divLogoutButton').show();
 	}
 	else
@@ -199,6 +200,7 @@ function changeFachbereich(selectedStudiengang)
 		window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 	}
 	$('#editButtons').hide();
+	$('#leaveButtons').hide();
 }
 
 // detaillierte Übersicht über eine Arbeit
@@ -241,13 +243,6 @@ function showArbeitDetailled(Id)
 		if ($_GET().edit)
 		{
 			window.history.replaceState('', '', '?edit&studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
-		}
-		else
-		{
-			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
-		}
-		if ($_GET().edit)
-		{
 			if (ownUser[0].Id == selectedArbeit.userId || ownUser[0].UserRole == '1')
 			{
 				$('#editButtons').show();
@@ -256,6 +251,11 @@ function showArbeitDetailled(Id)
 			{
 				$('#editButtons').hide();
 			}
+			$('#leaveButtons').hide();
+		}
+		else
+		{
+			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
 		}
 	}
 	else
@@ -287,7 +287,59 @@ function getOwnUser()
 // wechselt in den Bearbeitungsmodus
 function editArbeit()
 {
-	console.log();
+	getGetParas();
+	var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
+	var selectedArbeit = arrayAllArbeiten[idArray];
+	strHtml = '';
+	for (var subArray in arrayTableDetailledView)
+	{
+		strHtml +=
+			'<tr>' +
+				'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
+				'<td><input class="form-control" id ="' + arrayTableDetailledView[subArray][0] + '" name="' + arrayTableDetailledView[subArray][0] +'" value="' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '" /></td>' +
+			'</tr>';
+	}
+	strHtml +=
+		'<tr>' +
+			'<th>Datei(en)</th>' +
+			'<td>';
+				for (var file in selectedArbeit.dateien)
+				{
+					var selectedFile = selectedArbeit.dateien[file];
+					strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
+					if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
+					{
+						strHtml += '<img src="img/pdf.png">';
+					}
+					strHtml += selectedFile + '</a><br/>';
+				}
+	strHtml +=
+			'</td>' +
+		'</tr>';
+	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
+	$('#tableBodyDetailledArbeit').hide();
+	$('#tableBodyDetailledArbeitEdit').show();
+	$('#editButtons').hide();
+	$('#leaveButtons').show();
+}
+
+// verlässt den Bearbeitungsmodus
+function resetArbeit()
+{
+	$('#tableBodyDetailledArbeit').show();
+	$('#tableBodyDetailledArbeitEdit').hide();
+	$('#editButtons').show();
+	$('#leaveButtons').hide();
+}
+
+// speichert die Arbeit
+function saveArbeit()
+{
+	resetArbeit();
+	getAllArbeiten();
+	getOwnUser();
+	getGetParas();
+	showArbeitDetailled($_GET().id);
 }
 
 // löscht eine Arbeit vollständig
