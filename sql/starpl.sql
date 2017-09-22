@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 20. Sep 2017 um 15:51
+-- Erstellungszeit: 22. Sep 2017 um 11:22
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -60,7 +60,7 @@ CREATE TABLE `login` (
 
 INSERT INTO `login` (`Id`, `UserName`, `Password`, `UserRole`) VALUES
 (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 1),
-(2, 'leo7044', '3684c2c69316c14e9564c303439e564e', 1);
+(2, 'leo7044', '3684c2c69316c14e9564c303439e564e', 0);
 
 -- --------------------------------------------------------
 

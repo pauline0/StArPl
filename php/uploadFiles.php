@@ -5,7 +5,7 @@ if (isset($_SESSION['Id']))
 	$_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 	$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
 	$dirUpload = '../upload';
-	$Id = $_post['idOfFile'];
+	$Id = $_post['idOfArbeit'];
 	$pathNewPics = "$dirUpload/$Id";
 	mkdir("$pathNewPics", 0755, true);
 	if(isset($_FILES["FileInputUploadArbeit"]) && !$_post['sperrvermerk'])
@@ -24,6 +24,7 @@ if (isset($_SESSION['Id']))
 			}
 		}
 	}
+	echo 'Die Arbeit wurde erfolgreich hochgeladen. In 3 Sekunden werden Sie zur <a href="..">Übersicht</a> weitergeleitet.';
 }
-// header('Location: ' . '..');
+header('Refresh:3; url=..');
 ?>

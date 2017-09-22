@@ -5,6 +5,18 @@ var arraySelectedArbeiten = null;
 var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
 var ownUser = null;
+var arrayTableDetailledView =
+[
+	['titel', 'Titel'],
+	['student', 'Student'],
+	['studiengang', 'Studiengang'],
+	['language', 'Sprache'],
+	['artOfArbeit', 'Art der Arbeit'],
+	['jahrgang', 'Jahrgang'],
+	['betreuer', 'Betreuer'],
+	['firma', 'Firma'],
+	['kurzfassung', 'Kurzfassung']
+];
 
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
@@ -94,7 +106,7 @@ function reloadDataTable()
 		arrayOneRow.push(strHtml);
 		if ($_GET().edit)
 		{
-			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '1') // handelt es sich um einen eigenen Bericht
+			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '1') // verfügt der User über Bearbeitungsrecht?
 			{
 				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');"><span class="glyphicon glyphicon-pencil"></span></a>');
 			}
@@ -186,6 +198,7 @@ function changeFachbereich(selectedStudiengang)
 	{
 		window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 	}
+	$('#editButtons').hide();
 }
 
 // detaillierte Übersicht über eine Arbeit
@@ -195,25 +208,13 @@ function showArbeitDetailled(Id)
 	var selectedArbeit = arrayAllArbeiten[idArray];
 	if (selectedArbeit != undefined)
 	{
-		var tableSortArray =
-		[
-			['titel', 'Titel'],
-			['student', 'Student'],
-			['studiengang', 'Studiengang'],
-			['language', 'Sprache'],
-			['artOfArbeit', 'Art der Arbeit'],
-			['jahrgang', 'Jahrgang'],
-			['betreuer', 'Betreuer'],
-			['firma', 'Firma'],
-			['kurzfassung', 'Kurzfassung']
-		];
 		var strHtml = '';
-		for (var subArray in tableSortArray)
+		for (var subArray in arrayTableDetailledView)
 		{
 			strHtml +=
 				'<tr>' +
-					'<th>' + tableSortArray[subArray][1] + '</th>' +
-					'<td>' + selectedArbeit[tableSortArray[subArray][0]] + '</td>' +
+					'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
+					'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
 				'</tr>';
 		}
 		strHtml +=
@@ -245,6 +246,17 @@ function showArbeitDetailled(Id)
 		{
 			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
 		}
+		if ($_GET().edit)
+		{
+			if (ownUser[0].Id == selectedArbeit.userId || ownUser[0].UserRole == '1')
+			{
+				$('#editButtons').show();
+			}
+			else
+			{
+				$('#editButtons').hide();
+			}
+		}
 	}
 	else
 	{
@@ -252,9 +264,9 @@ function showArbeitDetailled(Id)
 	}
 }
 
-// ==================================================
-// ausschließlich für den edit-Bereich erforderlich
-// ==================================================
+// ============================================================
+// ausschließlich für den edit-Bereich erforderlich / sinnvoll
+// ============================================================
 
 // eigener User
 function getOwnUser()
@@ -270,4 +282,45 @@ function getOwnUser()
 		ownUser = data;
 	});
 	$.ajaxSetup({async: true});
+}
+
+// wechselt in den Bearbeitungsmodus
+function editArbeit()
+{
+	console.log();
+}
+
+// löscht eine Arbeit vollständig
+function deleteArbeit()
+{
+	if (confirm('Möchten Sie diese Arbeit wirklich löschen?'))
+	{
+		getGetParas();
+		var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
+		var id = arrayAllArbeiten[idArray].Id;
+		var data =
+		{
+			action: "deleteArbeit",
+			id: id
+		}
+		$.ajaxSetup({async: false});
+		$.post("php/manageBackend.php", data)
+		.always(function(data)
+		{
+			console.log(data);
+			// Achtung, Fake-Meldung
+			/*if(true)
+			{*/
+				alert('Der Bericht wurde erfolgreich gelöscht.');
+			/*}
+			else // NICHT erfolgreich gelöscht
+			{
+				alert('Der Bericht konnte nicht gelöscht werden.');
+			}*/
+			getAllArbeiten();
+			getOwnUser();
+			changeFachbereich();
+		});
+		$.ajaxSetup({async: true});
+	}
 }

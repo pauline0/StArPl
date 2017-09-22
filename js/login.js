@@ -1,6 +1,7 @@
 $(document).ready(function() {
 	getGetParas();
 	initializeForm();
+	$('#formLogin-divError').hide();
 });
 
 // initialisiert das Formular (richtige ZielPage)

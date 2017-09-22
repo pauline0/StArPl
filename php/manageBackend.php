@@ -120,8 +120,45 @@ if (!$conn->connect_error)
 				while ($zeile = $result->fetch_assoc())
 				{
 					array_push($answer, $zeile);
+					$_SESSION['UserRole'] = $zeile['UserRole'];
 				}
 				echo json_encode($answer);
+			}
+			break;
+		}
+		case 'deleteArbeit': // gibt keine Rückmeldung aus
+		{
+			if (isset($_SESSION['Id']))
+			{
+				$userIdOfArbeit = 0;
+				$id = $_post['id'];
+				$result = $conn->query("SELECT `userId` FROM `files` WHERE `Id`='$id';");
+				while ($zeile = $result->fetch_assoc())
+				{
+					$userIdOfArbeit = $zeile['userId'];
+				}
+				if ($_SESSION['UserRole'] >= 1 || $userIdOfArbeit)
+				{
+					$conn->query("DELETE FROM `files` WHERE `Id`='$id';");
+					$conn->query("DELETE FROM `SearchWords` WHERE `FileId`='$id';");
+					$directory = "../upload/$id/";
+					if (is_dir($directory))
+					{
+						// öffnen des Verzeichnisses
+						if ($handle = opendir($directory))
+						{
+							// einlesen der Verzeichnisses
+							while (($file = readdir($handle)) !== false)
+							{
+								if (filetype($file) != 'dir')
+								{
+									unlink($directory.$file);
+								}
+							}
+							closedir($handle);
+						}
+					}
+				}
 			}
 			break;
 		}
@@ -156,7 +193,7 @@ function checkLogin($conn, $userName, $password)
 function getFileNamesArray($Id)
 {
 	$allFiles = array();
-	$directory = '../upload/' . $Id . '/';
+	$directory = "../upload/$Id/";
 	if (is_dir ($directory))
 	{
 		// öffnen des Verzeichnisses

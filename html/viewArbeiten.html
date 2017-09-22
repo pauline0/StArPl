@@ -16,7 +16,7 @@
 		<link rel="stylesheet" href="css/own.css">
 	</head>
 	<body>
-		<div class="jumbotron center-block box-header" onclick="getAllArbeiten();changeFachbereich();" style="cursor: pointer;">
+		<div class="jumbotron center-block box-header" onclick="getAllArbeiten();getOwnUser();changeFachbereich();" style="cursor: pointer;">
 			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
 			<div class="text-right" id="divLogoutButton">
@@ -59,7 +59,16 @@
 					<table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
 						<thead></thead>
 						<tbody id="tableBodyDetailledArbeit"></tbody>
+						<tbody id="tableBodyDetailledArbeitEdit"></tbody>
 					</table>
+					<div class="form-group text-right" id="editButtons">
+						<button onclick="deleteArbeit();" class="btn btn-danger">
+							<span class="glyphicon glyphicon-remove"></span> Löschen
+						</button>
+						<button onclick="editArbeit();" class="btn btn-primary">
+							<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

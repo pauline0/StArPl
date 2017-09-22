@@ -54,7 +54,7 @@ function upload()
 		if (data[0] != 0)
 		{
 			returnValue = true;
-			$('#idOfFile')[0].value = data[0];
+			$('#idOfArbeit')[0].value = data[0];
 		}
 	});
 	$.ajaxSetup({async: true});
