@@ -290,16 +290,22 @@ function editArbeit()
 	getGetParas();
 	var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
-	strHtml = '';
-	for (var subArray in arrayTableDetailledView)
+	var cuttedArrayTableDetailledView = arrayTableDetailledView.slice(0, -1);
+	var strHtml = '';
+	for (var subArray in cuttedArrayTableDetailledView)
 	{
 		strHtml +=
 			'<tr>' +
-				'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
-				'<td><input class="form-control" id ="' + arrayTableDetailledView[subArray][0] + '" name="' + arrayTableDetailledView[subArray][0] +'" value="' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '" /></td>' +
+				'<th>' + cuttedArrayTableDetailledView[subArray][1] + '</th>' +
+				'<td><input class="form-control" id ="' + cuttedArrayTableDetailledView[subArray][0] + '" name="' + cuttedArrayTableDetailledView[subArray][0] +'" value="' + selectedArbeit[cuttedArrayTableDetailledView[subArray][0]] + '" required /></td>' +
 			'</tr>';
 	}
 	strHtml +=
+		'<tr>' +
+			'<th>' + arrayTableDetailledView[arrayTableDetailledView.length - 1][1] + '</th>' +
+			'<td><textarea class="form-control" rows="5" id ="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] + '" name="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] +'" required>' + selectedArbeit[arrayTableDetailledView[arrayTableDetailledView.length - 1][0]] + '</textarea></td>' +
+		'</tr>';
+	/*strHtml +=
 		'<tr>' +
 			'<th>Datei(en)</th>' +
 			'<td>';
@@ -315,8 +321,9 @@ function editArbeit()
 				}
 	strHtml +=
 			'</td>' +
-		'</tr>';
+		'</tr>';*/
 	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
+	$('#jahrgang')[0].pattern = '[0-9]{4}';
 	$('#tableBodyDetailledArbeit').hide();
 	$('#tableBodyDetailledArbeitEdit').show();
 	$('#editButtons').hide();
@@ -330,16 +337,27 @@ function resetArbeit()
 	$('#tableBodyDetailledArbeitEdit').hide();
 	$('#editButtons').show();
 	$('#leaveButtons').hide();
+	return false;
 }
 
 // speichert die Arbeit
 function saveArbeit()
 {
+	var data = $('#formSaveArbeit').serialize();
+	data += '&action=formSaveArbeit';
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		console.log(data);
+	});
+	$.ajaxSetup({async: true});
 	resetArbeit();
 	getAllArbeiten();
 	getOwnUser();
 	getGetParas();
 	showArbeitDetailled($_GET().id);
+	return false;
 }
 
 // löscht eine Arbeit vollständig

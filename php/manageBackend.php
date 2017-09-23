@@ -74,6 +74,23 @@ if (!$conn->connect_error)
 			}
 			break;
 		}
+		case 'formSaveArbeit':
+		{
+			if (isset($_SESSION['Id']))
+			{
+				$titel = $_post['titel'];
+				$student = $_post['student'];
+				$studiengang = $_post['studiengang'];
+				$language = $_post['language'];
+				$artOfArbeit = $_post['artOfArbeit'];
+				$jahrgang = $_post['jahrgang'];
+				$betreuer = $_post['betreuer'];
+				$firma = $_post['firma'];
+				$kurzfassung = $_post['kurzfassung'];
+				$conn->query("UPDATE `files` SET `titel`='$titel', `student`='$student', `studiengang`='$studiengang', `language`='$language', `artOfArbeit`='$artOfArbeit', `jahrgang`='$jahrgang', `betreuer`='$betreuer', `firma`='$firma', `kurzfassung`='$kurzfassung';");
+			}
+			break;
+		}
 		case 'getAllSearchWords':
 		{
 			$result = $conn->query("SELECT DISTINCT `Word` FROM `SearchWords`;");
