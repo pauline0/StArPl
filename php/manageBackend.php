@@ -74,6 +74,24 @@ if (!$conn->connect_error)
 			}
 			break;
 		}
+		case 'fileAjaxUpload':
+		{
+			if (isset($_SESSION['Id']))
+			{
+				$Id = $_post['id'];
+				$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
+				$dirUpload = '../upload';
+				$pathNewPics = "$dirUpload/$Id/";
+				mkdir("$pathNewPics", 0755, true);
+				foreach($_FILES as $key => $value)
+				{
+					$tmpName = $value['tmp_name'];
+					$name = $value['name'];
+					move_uploaded_file($tmpName, $pathNewPics . $name);
+				}
+			}
+			break;
+		}
 		case 'formSaveArbeit':
 		{
 			if (isset($_SESSION['Id']))

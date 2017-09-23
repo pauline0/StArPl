@@ -346,11 +346,7 @@ function saveArbeit()
 	var data = $('#formSaveArbeit').serialize();
 	data += '&action=formSaveArbeit';
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
-	.always(function(data)
-	{
-		console.log(data);
-	});
+	$.post("php/manageBackend.php", data);
 	$.ajaxSetup({async: true});
 	resetArbeit();
 	getAllArbeiten();
@@ -377,7 +373,7 @@ function deleteArbeit()
 		$.post("php/manageBackend.php", data)
 		.always(function(data)
 		{
-			console.log(data);
+			// console.log(data);
 			// Achtung, Fake-Meldung
 			/*if(true)
 			{*/

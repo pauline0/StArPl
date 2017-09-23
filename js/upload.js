@@ -4,11 +4,12 @@
         showUpload: false, // Zeile 701 in "fileinput.js" bearbeitet, showUpload auf false gesetzt; Zeile 3.939 in "fileinput.js" bearbeitet, um "Remove"-Button rot einzufärben
 		allowedFileTypes: ['pdf'],
         overwriteInitial: true,
+		maxFileCount: 20,
 		browseClass: "btn btn-primary",
         browseLabel: "&nbsp;Datei(en) auswählen [*.pdf]",
 		browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
         removeLabel: "&nbsp;Löschen"
-    });
+	});
 	
 	// Schlagwörter
     var maxSchlagwoerter = 10; // wie viele Inputs?
@@ -45,16 +46,49 @@
 function upload()
 {
 	var returnValue = false;
+	var tmpId = 0;
 	var data = $('#formUpload').serialize();
 	data += '&action=formUpload';
 	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{
-		if (data[0] != 0)
+		tmpId = data[0];
+	});
+	$.ajaxSetup({async: true});
+	if (tmpId > 0)
+	{
+		returnValue = uploadFiles(tmpId);
+	}
+	return returnValue;
+}
+
+// Dateien hochladen
+function uploadFiles(id)
+{
+	var returnValue = false;
+	var form_data = new FormData();
+	for (var i = 0; i < $('#FileInputUploadArbeit').prop('files').length; i++)
+	{
+		var file_data = $('#FileInputUploadArbeit').prop('files')[i];
+		form_data.append('file' + i, file_data);
+	}
+	form_data.append('id', id);
+	form_data.append('action', 'fileAjaxUpload');
+	form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
+	$.ajaxSetup({async: false});
+	$.ajax({
+		url: './php/manageBackend.php', // point to server-side PHP script
+		dataType: 'text',  // what to expect back from the PHP script, if anything
+		cache: false,
+		contentType: false,
+		processData: false,
+		data: form_data,
+		type: 'post',
+		success: function(data)
 		{
+			// console.log(data); // display response from the PHP script, if any
 			returnValue = true;
-			$('#idOfArbeit')[0].value = data[0];
 		}
 	});
 	$.ajaxSetup({async: true});
