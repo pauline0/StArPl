@@ -87,7 +87,6 @@ function uploadFiles(id)
 		type: 'post',
 		success: function(data)
 		{
-			// console.log(data); // display response from the PHP script, if any
 			returnValue = true;
 		}
 	});
