@@ -96,6 +96,7 @@ if (!$conn->connect_error)
 		{
 			if (isset($_SESSION['Id']))
 			{
+				$id = $_post['id'];
 				$titel = $_post['titel'];
 				$student = $_post['student'];
 				$studiengang = $_post['studiengang'];
@@ -105,7 +106,7 @@ if (!$conn->connect_error)
 				$betreuer = $_post['betreuer'];
 				$firma = $_post['firma'];
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("UPDATE `files` SET `titel`='$titel', `student`='$student', `studiengang`='$studiengang', `language`='$language', `artOfArbeit`='$artOfArbeit', `jahrgang`='$jahrgang', `betreuer`='$betreuer', `firma`='$firma', `kurzfassung`='$kurzfassung';");
+				$conn->query("UPDATE `files` SET `titel`='$titel', `student`='$student', `studiengang`='$studiengang', `language`='$language', `artOfArbeit`='$artOfArbeit', `jahrgang`='$jahrgang', `betreuer`='$betreuer', `firma`='$firma', `kurzfassung`='$kurzfassung' WHERE `Id`='$id';");
 			}
 			break;
 		}

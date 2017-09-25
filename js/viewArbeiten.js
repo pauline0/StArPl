@@ -291,13 +291,50 @@ function editArbeit()
 	var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
 	var cuttedArrayTableDetailledView = arrayTableDetailledView.slice(0, -1);
+	var arrayTableEdit =
+	[
+		'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" value="' + selectedArbeit[arrayTableDetailledView[0][0]] + '" required />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" value="' + selectedArbeit[arrayTableDetailledView[1][0]] + '" required />',
+		'<select class="form-control" id="studiengang" name="studiengang" required>' +
+			'<option value="Bank">Bank</option>' +
+			'<option value="Bauwesen">Bauwesen</option>' +
+			'<option value="Dienstleistungsmanagement">Dienstleistungsmanagement</option>' +
+			'<option value="Elektrotechnik">Elektrotechnik</option>' +
+			'<option value="Facility Management">Facility Management</option>' +
+			'<option value="Handel">Handel</option>' +
+			'<option value="IBA">IBA</option>' +
+			'<option value="Immobilienwirtschaft">Immobilienwirtschaft</option>' +
+			'<option value="Industrie">Industrie</option>' +
+			'<option value="Informatik">Informatik</option>' +
+			'<option value="Maschinenbau">Maschinenbau</option>' +
+			'<option value="PPM">PPM</option>' +
+			'<option value="Spedition/Logistik">Spedition/Logistik</option>' +
+			'<option value="Steuern/Prüfungswesen">Steuern/Prüfungswesen</option>' +
+			'<option value="Tourismusbetriebswirtschaft">Tourismusbetriebswirtschaft</option>' +
+			'<option value="Versicherung">Versicherung</option>' +
+			'<option value="Wirtschaftsinformatik">Wirtschaftsinformatik</option>' +
+		'</select>',
+		'<select class="form-control" id="language" name="language" required>' +
+			'<option value="deutsch">deutsch</option>' +
+			'<option value="englisch">englisch</option>' +
+		'</select>',
+		
+		'<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>' +
+			'<option value="Praxistransferbericht">Praxistransferbericht</option>' +
+			'<option value="Studienarbeit">Studienarbeit</option>' +
+			'<option value="Bachelorarbeit">Bachelorarbeit</option>' +
+		'</select>',
+		'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" value="' + selectedArbeit[arrayTableDetailledView[5][0]] + '" required pattern="[0-9]{4}" />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" value="' + selectedArbeit[arrayTableDetailledView[6][0]] + '" required />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" value="' + selectedArbeit[arrayTableDetailledView[7][0]] + '" required />'
+	]
 	var strHtml = '';
 	for (var subArray in cuttedArrayTableDetailledView)
 	{
 		strHtml +=
 			'<tr>' +
 				'<th>' + cuttedArrayTableDetailledView[subArray][1] + '</th>' +
-				'<td><input class="form-control" id ="' + cuttedArrayTableDetailledView[subArray][0] + '" name="' + cuttedArrayTableDetailledView[subArray][0] +'" value="' + selectedArbeit[cuttedArrayTableDetailledView[subArray][0]] + '" required /></td>' +
+				'<td>' + arrayTableEdit[subArray] + '</td>' +
 			'</tr>';
 	}
 	strHtml +=
@@ -323,7 +360,9 @@ function editArbeit()
 			'</td>' +
 		'</tr>';*/
 	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
-	$('#jahrgang')[0].pattern = '[0-9]{4}';
+	$('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
+	$('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
+	$('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
 	$('#tableBodyDetailledArbeit').hide();
 	$('#tableBodyDetailledArbeitEdit').show();
 	$('#editButtons').hide();
@@ -343,15 +382,15 @@ function resetArbeit()
 // speichert die Arbeit
 function saveArbeit()
 {
+	getGetParas();
 	var data = $('#formSaveArbeit').serialize();
-	data += '&action=formSaveArbeit';
+	data += '&action=formSaveArbeit&id=' + $_GET().id;
 	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data);
 	$.ajaxSetup({async: true});
 	resetArbeit();
 	getAllArbeiten();
 	getOwnUser();
-	getGetParas();
 	showArbeitDetailled($_GET().id);
 	return false;
 }
