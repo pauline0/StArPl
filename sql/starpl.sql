@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 22. Sep 2017 um 11:22
+-- Erstellungszeit: 26. Sep 2017 um 13:29
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -73,6 +73,18 @@ CREATE TABLE `SearchWords` (
   `Word` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `userLogin`
+--
+
+CREATE TABLE `userLogin` (
+  `Id` int(11) NOT NULL,
+  `UserName` text NOT NULL,
+  `UserRole` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- Indizes der exportierten Tabellen
 --
@@ -97,6 +109,13 @@ ALTER TABLE `SearchWords`
   ADD UNIQUE KEY `FileId` (`FileId`,`Word`(20));
 
 --
+-- Indizes für die Tabelle `userLogin`
+--
+ALTER TABLE `userLogin`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `UserName` (`UserName`(20));
+
+--
 -- AUTO_INCREMENT für exportierte Tabellen
 --
 
@@ -110,6 +129,11 @@ ALTER TABLE `files`
 --
 ALTER TABLE `login`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+--
+-- AUTO_INCREMENT für Tabelle `userLogin`
+--
+ALTER TABLE `userLogin`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

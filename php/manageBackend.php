@@ -4,7 +4,7 @@ include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
-$action = $_post['action'];
+$action = $_REQUEST['action'];
 if (!$conn->connect_error)
 {
 	switch ($action)
@@ -24,6 +24,48 @@ if (!$conn->connect_error)
 			{
 				$userAnswer[1] = 'Login fehlgeschlagen';
 			}
+			echo json_encode($userAnswer);
+			break;
+		}
+		case 'loginHwr':
+		{
+			// toDo: es ist zu überprüfen, ob UserName mit s_* beginnt. Falls ja, Hinweis / Fehler zurückgeben
+			$userName = $_REQUEST['UserName'];
+			$password = $_REQUEST['Password'];
+			$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
+			$post = "name=$userName&password=$password";
+			//$returnValueLogin = json_decode(fireCURL($url, $post));
+			$userAnswer = array();
+			// if ($returnValueLogin->session != '')
+			if (true)
+			{
+				$session = '';
+				$uid = '';
+				$url = 'https://webmail.stud.hwr-berlin.de/ajax/contacts?action=getuser';
+				$post = "name=$session&password=$uid";
+				//$returnUserName = json_decode(fireCURL($url, $post));
+				if (true)
+				{
+					$_SESSION['UserName'] = 'test';
+					$userRole = 0; // noch anzupassen
+					$userId = checkIfUserExist($conn, $userName);
+					if (!$userId)
+					{
+						$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
+					}
+					else
+					{
+						$userAnswer[0] = $userId;
+					}
+					$userAnswer[1] = 'Login erfolgreich';
+				}
+			}
+			else
+			{
+				$userAnswer[0] = 0;
+				$userAnswer[1] = 'Login fehlgeschlagen';
+			}
+			// echo $returnValueLogin->session;
 			echo json_encode($userAnswer);
 			break;
 		}
@@ -225,6 +267,25 @@ function checkLogin($conn, $userName, $password)
 	return $returnId;
 }
 
+// überprüft, ob ein User bereits in der Datenbank existiert
+function checkIfUserExist($conn, $userName)
+{
+	$userId = 0;
+	$result = $conn->query("SELECT `Id` FROM `userLogin` WHERE `UserName`='$userName';");
+	while ($zeile = $result->fetch_assoc())
+	{
+		$userId = $_SESSION['Id'] = $zeile['Id'];
+	}
+	return $userId;
+}
+
+// legt einen User in der Datenbank an
+function createUserInDb($conn, $userName, $userRole)
+{
+	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
+	return $_SESSION['Id'] = mysqli_insert_id($conn);
+}
+
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus
 function getFileNamesArray($Id)
 {
@@ -256,5 +317,18 @@ function replaceChars($str)
 	$str = str_replace("'", "&#39;", $str); // einfaches Anführungszeichen
 	$str = str_replace("`", "&#96;", $str); // schräges einfaches Anführungszeichen links (gravis)
 	return $str;
+}
+
+// benötigt, um header-Problem mit jQuery.post() zu umgehen
+function fireCURL($url, $post)
+{
+	$curl = curl_init();
+	curl_setopt($curl, CURLOPT_URL, $url);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+	$response = curl_exec($curl);
+	curl_close($curl);
+	return $response;
 }
 ?>

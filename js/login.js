@@ -22,10 +22,11 @@ function login()
 {
 	var returnValue = false;
 	var data = $('#formLogin').serialize();
-	data += '&action=formLogin';
+	// data += '&action=formLogin';
+	data += '&action=loginHwr';
 	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data)
-	.always(function(data)
+	/*.always(function(data)
 	{
 		if (data[0] >= 1) // data[0] entspricht UserId
 		{
@@ -45,6 +46,23 @@ function login()
 			{
 				$('#formLogin-divError')[0].innerHTML = '<b>Fehler!</b> Datenbank ist nicht erreichbar.';
 			}
+		}
+	});*/
+	.always(function(data)
+	{
+		// console.log(data);
+		// if (data.session)
+		if (data[0] >= 1)
+		{
+			$('#formLogin-divError').hide();
+			// Backend-Arbeit (user in tabelle erstellen mit dummy-PW (wegen admin-acc wird PW-Spalte benötigt), falls nicht vorhanden)
+			// in $_SESSION anzeigenamen speichern
+			returnValue = true;
+		}
+		else
+		{
+			$('#formLogin-divError').show();
+			$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> Falscher Username oder Passwort.';
 		}
 	});
 	$.ajaxSetup({async: true});
