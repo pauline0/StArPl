@@ -4,7 +4,7 @@ include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
-$action = $_REQUEST['action'];
+$action = $_post['action'];
 if (!$conn->connect_error)
 {
 	switch ($action)
@@ -30,8 +30,8 @@ if (!$conn->connect_error)
 		case 'loginHwr':
 		{
 			// toDo: es ist zu überprüfen, ob UserName mit s_* beginnt. Falls ja, Hinweis / Fehler zurückgeben
-			$userName = $_REQUEST['UserName'];
-			$password = $_REQUEST['Password'];
+			$userName = $_post['UserName'];
+			$password = $_post['Password'];
 			$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 			$post = "name=$userName&password=$password";
 			//$returnValueLogin = json_decode(fireCURL($url, $post));
@@ -39,15 +39,19 @@ if (!$conn->connect_error)
 			// if ($returnValueLogin->session != '')
 			if (true)
 			{
-				$session = '';
+				// $session = $_SESSION['session'] = $returnValueLogin->session;
+				$session =  $_SESSION['session'] = '';
+				// $uid = $returnValueLogin->user_id;
 				$uid = '';
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/contacts?action=getuser';
 				$post = "name=$session&password=$uid";
 				//$returnUserName = json_decode(fireCURL($url, $post));
+				// if ($returnValueLogin->display_name)
 				if (true)
 				{
+					// $_SESSION['UserNAme'] = $returnValueLogin->display_name;
 					$_SESSION['UserName'] = 'test';
-					$userRole = 0; // noch anzupassen
+					$userRole = 0; // muss in DB manuell angepasst werden (einmal Höhne einloggen lassen)
 					$userId = checkIfUserExist($conn, $userName);
 					if (!$userId)
 					{
@@ -320,6 +324,7 @@ function replaceChars($str)
 }
 
 // benötigt, um header-Problem mit jQuery.post() zu umgehen
+// ebenfalls in index.php vorhanden
 function fireCURL($url, $post)
 {
 	$curl = curl_init();
