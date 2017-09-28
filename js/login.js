@@ -55,8 +55,6 @@ function login()
 		if (data[0] >= 1)
 		{
 			$('#formLogin-divError').hide();
-			// Backend-Arbeit (user in tabelle erstellen mit dummy-PW (wegen admin-acc wird PW-Spalte benötigt), falls nicht vorhanden)
-			// in $_SESSION anzeigenamen speichern
 			returnValue = true;
 		}
 		else

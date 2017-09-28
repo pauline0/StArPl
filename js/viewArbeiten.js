@@ -219,6 +219,17 @@ function showArbeitDetailled(Id)
 					'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
 				'</tr>';
 		}
+		if ($_GET().edit)
+		{
+			if (ownUser[0].UserRole == 1 || ownUser[0].Id == selectedArbeit.userId)
+			{
+				strHtml +=
+					'<tr>' +
+						'<th>Downloads</th>' +
+						'<td id="downloadsValue">' + selectedArbeit.downloads + '</td>' +
+					'</tr>';
+			}
+		}
 		strHtml +=
 				'<tr>' +
 					'<th>Datei(en)</th>' +
@@ -226,7 +237,7 @@ function showArbeitDetailled(Id)
 						for (var file in selectedArbeit.dateien)
 						{
 							var selectedFile = selectedArbeit.dateien[file];
-							strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
+							strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id + '/' + selectedFile + '" onclick="downloadFile(' + Id + ');">';
 							if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
 							{
 								strHtml += '<img src="img/pdf.png">';
@@ -262,6 +273,26 @@ function showArbeitDetailled(Id)
 	{
 		changeFachbereich();
 	}
+}
+
+// zählt den Counter für Downloads hoch
+function downloadFile(Id)
+{
+	var data =
+	{
+		action: 'incrementDownloads',
+		id: Id
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
+		arrayAllArbeiten[idArray].downloads = parseInt(arrayAllArbeiten[idArray].downloads)
+		arrayAllArbeiten[idArray].downloads += 1;
+		$('#downloadsValue')[0].innerHTML = arrayAllArbeiten[idArray].downloads;
+	});
+	$.ajaxSetup({async: true});
 }
 
 // ============================================================

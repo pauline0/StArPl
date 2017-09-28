@@ -32,36 +32,45 @@ if (!$conn->connect_error)
 			// toDo: es ist zu überprüfen, ob UserName mit s_* beginnt. Falls ja, Hinweis / Fehler zurückgeben
 			$userName = $_post['UserName'];
 			$password = $_post['Password'];
-			$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
-			$post = "name=$userName&password=$password";
-			//$returnValueLogin = json_decode(fireCURL($url, $post));
-			$userAnswer = array();
-			// if ($returnValueLogin->session != '')
-			if (true)
+			if (substr($userName, 0, 2) != 's_' || $userName == 's_brandenburg' || $userName == 's_kleinvik')
+			// if (true)
 			{
-				// $session = $_SESSION['session'] = $returnValueLogin->session;
-				$session =  $_SESSION['session'] = '';
-				// $uid = $returnValueLogin->user_id;
-				$uid = '';
-				$url = 'https://webmail.stud.hwr-berlin.de/ajax/contacts?action=getuser';
-				$post = "name=$session&password=$uid";
-				//$returnUserName = json_decode(fireCURL($url, $post));
-				// if ($returnValueLogin->display_name)
+				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
+				$post = "name=$userName&password=$password";
+				//$returnValueLogin = json_decode(fireCURL($url, $post));
+				$userAnswer = array();
+				// if ($returnValueLogin->session != '')
 				if (true)
 				{
-					// $_SESSION['UserNAme'] = $returnValueLogin->display_name;
-					$_SESSION['UserName'] = 'test';
-					$userRole = 0; // muss in DB manuell angepasst werden (einmal Höhne einloggen lassen)
-					$userId = checkIfUserExist($conn, $userName);
-					if (!$userId)
+					// $session = $_SESSION['session'] = $returnValueLogin->session;
+					$session =  $_SESSION['session'] = '';
+					// $uid = $returnValueLogin->user_id;
+					$uid = '';
+					$url = 'https://webmail.stud.hwr-berlin.de/ajax/contacts?action=getuser';
+					$post = "name=$session&password=$uid";
+					//$returnUserName = json_decode(fireCURL($url, $post));
+					// if ($returnValueLogin->display_name)
+					if (true)
 					{
-						$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
+						// $_SESSION['UserNAme'] = $returnValueLogin->display_name;
+						$_SESSION['UserName'] = 'test';
+						$userRole = 0; // muss in DB manuell angepasst werden (einmal Höhne einloggen lassen)
+						$userId = checkIfUserExist($conn, $userName);
+						if (!$userId)
+						{
+							$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
+						}
+						else
+						{
+							$userAnswer[0] = $userId;
+						}
+						$userAnswer[1] = 'Login erfolgreich';
 					}
-					else
-					{
-						$userAnswer[0] = $userId;
-					}
-					$userAnswer[1] = 'Login erfolgreich';
+				}
+				else
+				{
+					$userAnswer[0] = 0;
+					$userAnswer[1] = 'Login fehlgeschlagen';
 				}
 			}
 			else
@@ -95,7 +104,7 @@ if (!$conn->connect_error)
 					$sperrvermerk = 0;
 				}
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung');");
+				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`, `downloads`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung', '0');");
 				$userAnswer = array();
 				if ($conn->affected_rows > 0)
 				{
@@ -197,7 +206,7 @@ if (!$conn->connect_error)
 			if (isset($_SESSION['Id']))
 			{
 				$id = $_SESSION['Id'];
-				$result = $conn->query("SELECT `Id`, `UserName`, `UserRole` FROM `login` WHERE `Id`='$id';");
+				$result = $conn->query("SELECT * FROM `userLogin` WHERE `Id`='$id';");
 				$answer = array();
 				while ($zeile = $result->fetch_assoc())
 				{
@@ -242,6 +251,12 @@ if (!$conn->connect_error)
 					}
 				}
 			}
+			break;
+		}
+		case 'incrementDownloads':
+		{
+			$id = $_post['id'];
+			$conn->query("UPDATE `files` SET `downloads`=`downloads`+1 WHERE `id`='$id';");
 			break;
 		}
 		default:
