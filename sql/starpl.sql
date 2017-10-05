@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Erstellungszeit: 28. Sep 2017 um 10:16
+-- Erstellungszeit: 05. Okt 2017 um 19:27
 -- Server-Version: 10.1.25-MariaDB-
 -- PHP-Version: 7.0.22-0ubuntu0.17.04.1
 
@@ -45,27 +45,6 @@ CREATE TABLE `files` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `login`
---
-
-CREATE TABLE `login` (
-  `Id` int(11) NOT NULL,
-  `UserName` text NOT NULL,
-  `Password` text NOT NULL,
-  `UserRole` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Daten für Tabelle `login`
---
-
-INSERT INTO `login` (`Id`, `UserName`, `Password`, `UserRole`) VALUES
-(1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 1),
-(2, 'leo7044', '3684c2c69316c14e9564c303439e564e', 0);
-
--- --------------------------------------------------------
-
---
 -- Tabellenstruktur für Tabelle `SearchWords`
 --
 
@@ -87,6 +66,13 @@ CREATE TABLE `userLogin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- Daten für Tabelle `userLogin`
+--
+
+INSERT INTO `userLogin` (`Id`, `UserName`, `UserRole`) VALUES
+(1, 's_brandenburg', 1);
+
+--
 -- Indizes der exportierten Tabellen
 --
 
@@ -95,13 +81,6 @@ CREATE TABLE `userLogin` (
 --
 ALTER TABLE `files`
   ADD PRIMARY KEY (`Id`);
-
---
--- Indizes für die Tabelle `login`
---
-ALTER TABLE `login`
-  ADD PRIMARY KEY (`Id`),
-  ADD UNIQUE KEY `UserName` (`UserName`(20));
 
 --
 -- Indizes für die Tabelle `SearchWords`
@@ -126,15 +105,10 @@ ALTER TABLE `userLogin`
 ALTER TABLE `files`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT für Tabelle `login`
---
-ALTER TABLE `login`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
---
 -- AUTO_INCREMENT für Tabelle `userLogin`
 --
 ALTER TABLE `userLogin`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

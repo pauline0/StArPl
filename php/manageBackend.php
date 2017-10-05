@@ -9,63 +9,31 @@ if (!$conn->connect_error)
 {
 	switch ($action)
 	{
-		case 'formLogin':
-		{
-			$userName = $_post['UserName'];
-			$password = md5($_post['Password']);
-			$id = checkLogin($conn, $userName, $password);
-			$userAnswer = array();
-			$userAnswer[0] = $id;
-			if ($id)
-			{
-				$userAnswer[1] = 'Login erfolgreich';
-			}
-			else
-			{
-				$userAnswer[1] = 'Login fehlgeschlagen';
-			}
-			echo json_encode($userAnswer);
-			break;
-		}
 		case 'loginHwr':
 		{
-			// toDo: es ist zu überprüfen, ob UserName mit s_* beginnt. Falls ja, Hinweis / Fehler zurückgeben
 			$userName = $_post['UserName'];
 			$password = $_post['Password'];
 			if (substr($userName, 0, 2) != 's_' || $userName == 's_brandenburg' || $userName == 's_kleinvik')
-			// if (true)
 			{
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 				$post = "name=$userName&password=$password";
-				//$returnValueLogin = json_decode(fireCURL($url, $post));
+				$returnValueLogin = json_decode(fireCURL($url, $post));
 				$userAnswer = array();
-				// if ($returnValueLogin->session != '')
-				if (true)
+				if ($returnValueLogin->session != '')
 				{
-					// $session = $_SESSION['session'] = $returnValueLogin->session;
-					$session =  $_SESSION['session'] = '';
-					// $uid = $returnValueLogin->user_id;
-					$uid = '';
-					$url = 'https://webmail.stud.hwr-berlin.de/ajax/contacts?action=getuser';
-					$post = "name=$session&password=$uid";
-					//$returnUserName = json_decode(fireCURL($url, $post));
-					// if ($returnValueLogin->display_name)
-					if (true)
+					$_SESSION['session'] = $returnValueLogin->session;
+					$uid = $returnValueLogin->user_id;
+					$userRole = 0; // muss in DB manuell angepasst werden
+					$userId = checkIfUserExist($conn, $userName);
+					if (!$userId)
 					{
-						// $_SESSION['UserNAme'] = $returnValueLogin->display_name;
-						$_SESSION['UserName'] = 'test';
-						$userRole = 0; // muss in DB manuell angepasst werden (einmal Höhne einloggen lassen)
-						$userId = checkIfUserExist($conn, $userName);
-						if (!$userId)
-						{
-							$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
-						}
-						else
-						{
-							$userAnswer[0] = $userId;
-						}
-						$userAnswer[1] = 'Login erfolgreich';
+						$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
 					}
+					else
+					{
+						$userAnswer[0] = $userId;
+					}
+					$userAnswer[1] = 'Login erfolgreich';
 				}
 				else
 				{
@@ -78,7 +46,6 @@ if (!$conn->connect_error)
 				$userAnswer[0] = 0;
 				$userAnswer[1] = 'Login fehlgeschlagen';
 			}
-			// echo $returnValueLogin->session;
 			echo json_encode($userAnswer);
 			break;
 		}

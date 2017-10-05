@@ -30,10 +30,13 @@ else
 // regelt logout
 function logout()
 {
-    $session = $_SESSION['session'];
-    $url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=logout';
-    $post = "session=$session";
-    fireCURL($url, $post);
+	if (isset($_SESSION['session']))
+	{
+		$session = $_SESSION['session'];
+		$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=logout';
+		$post = "session=$session";
+		fireCURL($url, $post);
+	}
     session_destroy();
     include_once('html/login.html');
 }
