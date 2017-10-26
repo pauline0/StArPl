@@ -1,13 +1,14 @@
 ﻿$(document).ready(function() {
 	// FileUploadArbeit
 	$("#FileInputUploadArbeit").fileinput({
-        showUpload: false, // Zeile 701 in "fileinput.js" bearbeitet, showUpload auf false gesetzt; Zeile 3.939 in "fileinput.js" bearbeitet, um "Remove"-Button rot einzufärben
+        showUpload: false,
 		allowedFileTypes: ['pdf'],
         overwriteInitial: true,
 		maxFileCount: 20,
 		browseClass: "btn btn-primary",
         browseLabel: "&nbsp;Datei(en) auswählen [*.pdf]",
 		browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
+		removeClass: "btn btn-danger",
         removeLabel: "&nbsp;Löschen"
 	});
 	
