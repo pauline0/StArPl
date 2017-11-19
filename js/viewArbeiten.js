@@ -266,6 +266,8 @@ function showArbeitDetailled(Id)
 		}
 		else
 		{
+			$('#leaveButtons').hide();
+			$('#editButtons').hide();
 			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
 		}
 	}
