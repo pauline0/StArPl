@@ -21,7 +21,7 @@ if (!$conn->connect_error)
 				$userAnswer = array();
 				if ($returnValueLogin->session != '')
 				{
-					$_SESSION['session'] = $returnValueLogin->session;
+					$_SESSION['StArPl_session'] = $returnValueLogin->session;
 					$uid = $returnValueLogin->user_id;
 					$userRole = 0; // muss in DB manuell angepasst werden
 					$userId = checkIfUserExist($conn, $userName);
@@ -51,9 +51,9 @@ if (!$conn->connect_error)
 		}
 		case 'formUpload':
 		{
-			if (isset($_SESSION['Id']))
+			if (isset($_SESSION['StArPl_Id']))
 			{
-				$id = $_SESSION['Id'];
+				$id = $_SESSION['StArPl_Id'];
 				$titel = $_post['titel'];
 				$student = $_post['student'];
 				$studiengang = $_post['studiengang'];
@@ -98,7 +98,7 @@ if (!$conn->connect_error)
 		}
 		case 'fileAjaxUpload':
 		{
-			if (isset($_SESSION['Id']))
+			if (isset($_SESSION['StArPl_Id']))
 			{
 				$Id = $_post['id'];
 				$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
@@ -116,7 +116,7 @@ if (!$conn->connect_error)
 		}
 		case 'formSaveArbeit':
 		{
-			if (isset($_SESSION['Id']))
+			if (isset($_SESSION['StArPl_Id']))
 			{
 				$id = $_post['id'];
 				$titel = $_post['titel'];
@@ -170,15 +170,15 @@ if (!$conn->connect_error)
 		}
 		case 'getOwnUser':
 		{
-			if (isset($_SESSION['Id']))
+			if (isset($_SESSION['StArPl_Id']))
 			{
-				$id = $_SESSION['Id'];
+				$id = $_SESSION['StArPl_Id'];
 				$result = $conn->query("SELECT * FROM `userLogin` WHERE `Id`='$id';");
 				$answer = array();
 				while ($zeile = $result->fetch_assoc())
 				{
 					array_push($answer, $zeile);
-					$_SESSION['UserRole'] = $zeile['UserRole'];
+					$_SESSION['StArPl_UserRole'] = $zeile['UserRole'];
 				}
 				echo json_encode($answer);
 			}
@@ -186,7 +186,7 @@ if (!$conn->connect_error)
 		}
 		case 'deleteArbeit': // gibt keine Rückmeldung aus
 		{
-			if (isset($_SESSION['Id']))
+			if (isset($_SESSION['StArPl_Id']))
 			{
 				$userIdOfArbeit = 0;
 				$id = $_post['id'];
@@ -195,7 +195,7 @@ if (!$conn->connect_error)
 				{
 					$userIdOfArbeit = $zeile['userId'];
 				}
-				if ($_SESSION['UserRole'] >= 1 || $userIdOfArbeit)
+				if ($_SESSION['StArPl_UserRole'] >= 1 || $userIdOfArbeit)
 				{
 					$conn->query("DELETE FROM `files` WHERE `Id`='$id';");
 					$conn->query("DELETE FROM `SearchWords` WHERE `FileId`='$id';");
@@ -248,7 +248,7 @@ function checkLogin($conn, $userName, $password)
 	$returnId = 0;
 	while ($zeile = $result->fetch_assoc())
 	{
-		$returnId = $_SESSION['Id'] = $zeile['Id'];
+		$returnId = $_SESSION['StArPl_Id'] = $zeile['Id'];
 	}
 	return $returnId;
 }
@@ -260,7 +260,7 @@ function checkIfUserExist($conn, $userName)
 	$result = $conn->query("SELECT `Id` FROM `userLogin` WHERE `UserName`='$userName';");
 	while ($zeile = $result->fetch_assoc())
 	{
-		$userId = $_SESSION['Id'] = $zeile['Id'];
+		$userId = $_SESSION['StArPl_Id'] = $zeile['Id'];
 	}
 	return $userId;
 }
@@ -269,7 +269,7 @@ function checkIfUserExist($conn, $userName)
 function createUserInDb($conn, $userName, $userRole)
 {
 	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
-	return $_SESSION['Id'] = mysqli_insert_id($conn);
+	return $_SESSION['StArPl_Id'] = mysqli_insert_id($conn);
 }
 
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus

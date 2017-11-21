@@ -2,7 +2,7 @@
 session_start();
 if (isset($_REQUEST['edit']))
 {
-    if (isset($_SESSION['Id']) && !isset($_REQUEST['logout']))
+    if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
     {
         include_once('html/viewArbeiten.html');
     }
@@ -13,7 +13,7 @@ if (isset($_REQUEST['edit']))
 }
 else if (isset($_REQUEST['upload']))
 {
-    if (isset($_SESSION['Id']) && !isset($_REQUEST['logout']))
+    if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
     {
         include_once('html/upload.html');
     }
@@ -30,14 +30,16 @@ else
 // regelt logout
 function logout()
 {
-	if (isset($_SESSION['session']))
+	if (isset($_SESSION['StArPl_session']))
 	{
-		$session = $_SESSION['session'];
+		$session = $_SESSION['StArPl_session'];
 		$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=logout';
 		$post = "session=$session";
 		fireCURL($url, $post);
 	}
-    session_destroy();
+    unset($_SESSION['StArPl_Id']);
+    unset($_SESSION['StArPl_UserRole']);
+    unset($_SESSION['StArPl_session']);
     include_once('html/login.html');
 }
 
