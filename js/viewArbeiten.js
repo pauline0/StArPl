@@ -23,9 +23,9 @@ $(document).ready(function() {
 	getAllArbeiten();
 	getGetParas();
 	prepareTableHeader();
+	getOwnUser();
 	if ($_GET().edit)
 	{
-		getOwnUser();
 		$('#tableBodyDetailledArbeitEdit').hide();
 		$('#divLogoutButton').show();
 	}
@@ -219,16 +219,13 @@ function showArbeitDetailled(Id)
 					'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
 				'</tr>';
 		}
-		if ($_GET().edit)
+		if (ownUser[0].UserRole == 1 || ownUser[0].Id == selectedArbeit.userId)
 		{
-			if (ownUser[0].UserRole == 1 || ownUser[0].Id == selectedArbeit.userId)
-			{
-				strHtml +=
-					'<tr>' +
-						'<th>Downloads</th>' +
-						'<td id="downloadsValue">' + selectedArbeit.downloads + '</td>' +
-					'</tr>';
-			}
+			strHtml +=
+				'<tr>' +
+					'<th>Downloads</th>' +
+					'<td id="downloadsValue">' + selectedArbeit.downloads + '</td>' +
+				'</tr>';
 		}
 		strHtml +=
 				'<tr>' +

@@ -182,6 +182,16 @@ if (!$conn->connect_error)
 				}
 				echo json_encode($answer);
 			}
+			else
+			{
+				$answer = array();
+				$noUser = array();
+				array_push($noUser, 0);
+				array_push($noUser, '');
+				array_push($noUser, 0);
+				array_push($answer, $noUser);
+				echo json_encode($answer);
+			}
 			break;
 		}
 		case 'deleteArbeit': // gibt keine Rückmeldung aus
