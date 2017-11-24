@@ -251,18 +251,6 @@ else
 	echo json_encode($userAnswer);
 }
 
-// login checken (existiert UserName mit PW in DB?)
-function checkLogin($conn, $userName, $password)
-{
-	$result = $conn->query("SELECT `Id` FROM `login` WHERE `UserName`='$userName' AND `Password`='$password';");
-	$returnId = 0;
-	while ($zeile = $result->fetch_assoc())
-	{
-		$returnId = $_SESSION['StArPl_Id'] = $zeile['Id'];
-	}
-	return $returnId;
-}
-
 // überprüft, ob ein User bereits in der Datenbank existiert
 function checkIfUserExist($conn, $userName)
 {
@@ -275,7 +263,7 @@ function checkIfUserExist($conn, $userName)
 	return $userId;
 }
 
-// legt einen User in der Datenbank an
+// legt einen neuen User in der Datenbank an
 function createUserInDb($conn, $userName, $userRole)
 {
 	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
