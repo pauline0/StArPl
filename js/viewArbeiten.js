@@ -199,6 +199,7 @@ function changeFachbereich(selectedStudiengang)
 	{
 		window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 	}
+	resetArbeit();
 	$('#editButtons').hide();
 	$('#leaveButtons').hide();
 }
