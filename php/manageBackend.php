@@ -14,7 +14,31 @@ if (!$conn->connect_error)
 			$userName = $_post['UserName'];
 			$password = $_post['Password'];
 			$userAnswer = array();
-			if ($userName == 's_brandenburg' || $userName == 's_kleinvik')
+			if (md5($userName) == '21232f297a57a5a743894a0e4a801fc3' && md5($password) == 'e36c1c30ed01795422f07944ebb65607')
+			{
+				$_SESSION['StArPl_session'] = md5('angucken4all');
+				$userRole = 0; // muss in DB manuell angepasst werden
+				$userId = checkIfUserExist($conn, $userName);
+				if (!$userId)
+				{
+					$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
+				}
+				else
+				{
+					$userAnswer[0] = $userId;
+				}
+				$userAnswer[1] = 'Login erfolgreich';
+			}
+			/* else if (substr($userName, 0, 2) != 's_')
+			{
+				// Outlook Web Access (HWR-Seite im Schnellzugriff)
+				$goalUrl = 'https://exchange.hwr-berlin.de/CookieAuth.dll?Logon';
+				$post = 'curl=Z2F&flags=0&forcedownlevel=0&formdir=1&trusted=0';
+				$post .= "&username=$userName&password=$password";
+				echo json_decode(fireCURL($goalUrl, $post));
+				// Problem: es gibt keine Antwort
+			} */
+			else if ($userName == 's_brandenburg' || $userName == 's_kleinvik')
 			{
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 				$post = "name=$userName&password=$password";
@@ -40,25 +64,6 @@ if (!$conn->connect_error)
 					$userAnswer[0] = 0;
 					$userAnswer[1] = 'Login fehlgeschlagen';
 				}
-			}
-			else if (false)
-			{
-				// Outlook Web Access (HWR-Seite im Schnellzugriff)
-			}
-			else if (md5($userName) == '21232f297a57a5a743894a0e4a801fc3' && md5($password) == 'e36c1c30ed01795422f07944ebb65607')
-			{
-				$_SESSION['StArPl_session'] = md5('angucken4all');
-				$userRole = 0; // muss in DB manuell angepasst werden
-				$userId = checkIfUserExist($conn, $userName);
-				if (!$userId)
-				{
-					$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
-				}
-				else
-				{
-					$userAnswer[0] = $userId;
-				}
-				$userAnswer[1] = 'Login erfolgreich';
 			}
 			else
 			{
