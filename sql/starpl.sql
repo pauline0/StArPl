@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.6.6deb4
--- https://www.phpmyadmin.net/
+-- version 4.5.4.1deb2ubuntu2
+-- http://www.phpmyadmin.net
 --
--- Host: localhost:3306
--- Erstellungszeit: 05. Okt 2017 um 19:27
--- Server-Version: 10.1.25-MariaDB-
--- PHP-Version: 7.0.22-0ubuntu0.17.04.1
+-- Host: localhost
+-- Erstellungszeit: 06. Dez 2017 um 16:45
+-- Server-Version: 10.0.31-MariaDB-0ubuntu0.16.04.2
+-- PHP-Version: 7.0.22-0ubuntu0.16.04.1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -70,7 +70,8 @@ CREATE TABLE `userLogin` (
 --
 
 INSERT INTO `userLogin` (`Id`, `UserName`, `UserRole`) VALUES
-(1, 's_brandenburg', 1);
+(1, 's_brandenburg', 1),
+(2, 'admin', 1);
 
 --
 -- Indizes der exportierten Tabellen
@@ -108,7 +109,7 @@ ALTER TABLE `files`
 -- AUTO_INCREMENT für Tabelle `userLogin`
 --
 ALTER TABLE `userLogin`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
