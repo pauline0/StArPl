@@ -2,29 +2,44 @@
 session_start();
 if (isset($_REQUEST['edit']))
 {
+    if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))
+    {
+        logout();
+    }
     if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
     {
         include_once('html/viewArbeiten.html');
     }
     else
     {
-        logout();
+        include_once('html/login.html');
     }
 }
 else if (isset($_REQUEST['upload']))
 {
-    if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
+    if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))
+    {
+        logout();
+    }
+    else if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
     {
         include_once('html/upload.html');
     }
     else
     {
-        logout();
+        include_once('html/login.html');
     }
 }
 else
 {
-    include_once('html/viewArbeiten.html');
+    if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))
+    {
+        logout();
+    }
+    else
+    {
+        include_once('html/viewArbeiten.html');
+    }
 }
 
 // regelt logout
@@ -40,7 +55,7 @@ function logout()
     unset($_SESSION['StArPl_Id']);
     unset($_SESSION['StArPl_UserRole']);
     unset($_SESSION['StArPl_session']);
-    include_once('html/login.html');
+    header('location: .');
 }
 
 // benötigt, um header-Problem mit jQuery.post() zu umgehen

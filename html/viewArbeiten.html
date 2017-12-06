@@ -19,8 +19,16 @@
 		<div class="jumbotron center-block box-header" onclick="getAllArbeiten();getOwnUser();changeFachbereich();" style="cursor: pointer;">
 			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
+			<div class="text-right" id="divLoginButton">
+				<a href="./?upload" class="btn btn-default">
+					<span class="glyphicon glyphicon-log-in"></span> Login
+				</a>
+			</div>
 			<div class="text-right" id="divLogoutButton">
 				<form method="post" action="">
+					<a href="./?upload" class="btn btn-default">
+						<span class="glyphicon glyphicon-upload"></span> Hochladen
+					</a>
 					<button type="submit" name="logout" class="btn btn-danger">
 						<span class="glyphicon glyphicon-log-out"></span> Abmelden
 					</button>

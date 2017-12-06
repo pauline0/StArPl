@@ -27,11 +27,16 @@ $(document).ready(function() {
 	if ($_GET().edit)
 	{
 		$('#tableBodyDetailledArbeitEdit').hide();
+	}
+	if (ownUser[0].Id)
+	{
 		$('#divLogoutButton').show();
+		$('#divLoginButton').hide();
 	}
 	else
 	{
 		$('#divLogoutButton').hide();
+		$('#divLoginButton').show();
 	}
 	$('#tableOverview').DataTable
 	(

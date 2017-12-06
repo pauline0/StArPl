@@ -13,12 +13,12 @@ if (!$conn->connect_error)
 		{
 			$userName = $_post['UserName'];
 			$password = $_post['Password'];
-			if (substr($userName, 0, 2) != 's_' || $userName == 's_brandenburg' || $userName == 's_kleinvik')
+			$userAnswer = array();
+			if ($userName == 's_brandenburg' || $userName == 's_kleinvik')
 			{
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 				$post = "name=$userName&password=$password";
 				$returnValueLogin = json_decode(fireCURL($url, $post));
-				$userAnswer = array();
 				if ($returnValueLogin->session != '')
 				{
 					$_SESSION['StArPl_session'] = $returnValueLogin->session;
@@ -40,6 +40,10 @@ if (!$conn->connect_error)
 					$userAnswer[0] = 0;
 					$userAnswer[1] = 'Login fehlgeschlagen';
 				}
+			}
+			else if (false)
+			{
+				// Outlook Web Access (HWR-Seite im Schnellzugriff)
 			}
 			else
 			{
