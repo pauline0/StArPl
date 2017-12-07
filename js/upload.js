@@ -122,7 +122,7 @@ function changeSperrvermerk()
 	if(document.formUpload.sperrvermerk.checked)
 	{
 		$('#FileInputUploadArbeit').attr('required', false);
-		$($.find('button.btn.btn-default.btn-danger.fileinput-remove.fileinput-remove-button')[0]).click();
+		$($.find('button.btn.btn-danger.fileinput-remove.fileinput-remove-button')[0]).click();
 		document.formUpload.sperrvermerk.value = "1";
 		$('#divFileInputUploadArbeit').hide();
 	}
