@@ -29,16 +29,32 @@ if (!$conn->connect_error)
 				}
 				$userAnswer[1] = 'Login erfolgreich';
 			}
-			/* else if (substr($userName, 0, 2) != 's_')
+			else if (substr($userName, 0, 2) != 's_')
 			{
 				// Outlook Web Access (HWR-Seite im Schnellzugriff)
 				$goalUrl = 'https://exchange.hwr-berlin.de/CookieAuth.dll?Logon';
 				$post = 'curl=Z2F&flags=0&forcedownlevel=0&formdir=1&trusted=0';
-				$post .= "&username=$userName&password=$password";
-				echo json_decode(fireCURL($goalUrl, $post));
-				// Problem: es gibt keine Antwort
-			} */
-			else if ($userName == 's_brandenburg' || $userName == 's_kleinvik')
+				$post .= "&username=$userName&password=$password&SubmitCreds=Log+On";
+				$loginSuccessful = loginOpenExchange($goalUrl, $post);
+				if($loginSuccessful){
+					$userRole = 2;
+					$userId = checkIfUserExist($conn, $userName);
+					if (!$userId)
+					{
+						$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
+					}
+					else
+					{
+						$userAnswer[0] = $userId;
+					}
+					$userAnswer[1] = 'Login erfolgreich';
+				}
+				else{
+					$userAnswer[0] = 0;
+					$userAnswer[1] = 'Login fehlgeschlagen';
+				}
+			}
+			else if ($userName == 's_brandenburg' || $userName == 's_kleinvik' || $userName == 's_kochp')
 			{
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 				$post = "name=$userName&password=$password";
@@ -46,7 +62,6 @@ if (!$conn->connect_error)
 				if ($returnValueLogin->session != '')
 				{
 					$_SESSION['StArPl_session'] = $returnValueLogin->session;
-					$uid = $returnValueLogin->user_id;
 					$userRole = 0; // muss in DB manuell angepasst werden
 					$userId = checkIfUserExist($conn, $userName);
 					if (!$userId)
@@ -329,6 +344,7 @@ function replaceChars($str)
 
 // benötigt, um header-Problem mit jQuery.post() zu umgehen
 // ebenfalls in index.php vorhanden
+
 function fireCURL($url, $post)
 {
 	$curl = curl_init();
@@ -340,4 +356,54 @@ function fireCURL($url, $post)
 	curl_close($curl);
 	return $response;
 }
+
+
+function loginOpenExchange($url, $post)
+{
+	$curl = curl_init();
+	$headers = [];
+	$handleHeaders = function($curl, $header) use (&$headers)
+	  {
+	    $len = strlen($header);
+	    $header = explode(':', $header, 2);
+	    if (count($header) < 2) // ignore invalid headers
+	      return $len;
+
+	    $name = strtolower(trim($header[0]));
+	    if (!array_key_exists($name, $headers))
+	      $headers[$name] = [trim($header[1])];
+	    else
+	      $headers[$name][] = trim($header[1]);
+
+	    return $len;
+	  };
+	curl_setopt($curl, CURLOPT_URL, $url);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+	curl_setopt($curl, CURLOPT_HEADER, true);
+	curl_setopt($curl, CURLOPT_HEADERFUNCTION,$handleHeaders);
+	$curl_info= curl_getinfo($curl);
+	$response = curl_exec($curl);
+	$info = curl_getinfo($curl);
+	$header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+	$header = substr($response, 0, $header_size);
+	curl_close($curl);
+	$curl2 = curl_init();
+	$request_headers = array();
+	$cookie =  $headers["set-cookie"][0];
+	$request_headers[] = 'Cookie: '.$cookie;
+	$request_headers[] = 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0';
+	$headers = [];
+	curl_setopt($curl2, CURLOPT_URL, "https://exchange.hwr-berlin.de/");
+	curl_setopt($curl2,  CURLOPT_HTTPHEADER, $request_headers);
+	curl_setopt($curl2, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl2, CURLOPT_HEADER, true);
+	curl_setopt($curl2, CURLOPT_HEADERFUNCTION,$handleHeaders);
+	$response = curl_exec($curl2);
+	$redirect_url = curl_getinfo($curl2, CURLINFO_REDIRECT_URL);
+	$redirectSuccess = $redirect_url == "https://exchange.hwr-berlin.de/OWA";
+	return $redirectSuccess;
+}
+
 ?>
