@@ -1,0 +1,51 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>StArPl - Create User</title>
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="js/general.js"></script>
+		<script src="js/createUsers.js"></script>
+		<link rel="icon" href="img/icon.ico">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="css/own.css">
+	</head>
+  <body>
+    <div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
+      <h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Temporären Account erstellen</h2>
+      <div class="text-right">
+        <form method="post" action='formCreateUsers' name="formCreateUsers" onsubmit="return createUser();">
+          <button type="submit" name="logout" class="btn btn-danger">
+            <span class="glyphicon glyphicon-log-out"></span> Abmelden
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="center-block box-content">
+      <h3>Temporären Studenten-Account erstellen</h3>
+        <form method="post" action="." name="formCreateUsers" id="formCreateUsers" onsubmit="return createUser();" enctype="multipart/form-data">
+					<div class="form-group">
+            <div class="input-group">
+							<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+							<input class="form-control"  id="username" name="username" placeholder="Name"  required />
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-group">
+              <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+              <input class="form-control" type="date" id="datum_gueltig" name="datum_gueltig"  required />
+              <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+              <input class="form-control" type="time" id="time_gueltig" name="time_gueltig" value="00:00"  required />
+            </div>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success">
+              <span class="glyphicon glyphicon-ok"></span> Zugang erstellen
+            </button>
+          </div>
+        </form>
+    </div>
+  </body>
+</html>

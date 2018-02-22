@@ -65,6 +65,13 @@ CREATE TABLE `userLogin` (
   `UserRole` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `studentAccounts`(
+  `Id` int(11) NOT NULL,
+  `UserId` int(11) NOT NULL,
+  `DozentId` int(11) NOT NULL,
+  `ExpiryDate` DATETIME NOT NULL
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- Daten für Tabelle `userLogin`
 --
@@ -96,6 +103,9 @@ ALTER TABLE `userLogin`
   ADD PRIMARY KEY (`Id`),
   ADD UNIQUE KEY `UserName` (`UserName`(20));
 
+
+ALTER TABLE `studentAccounts`
+    ADD PRIMARY KEY (`Id`);
 --
 -- AUTO_INCREMENT für exportierte Tabellen
 --
@@ -110,6 +120,10 @@ ALTER TABLE `files`
 --
 ALTER TABLE `userLogin`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+ALTER TABLE `studentAccounts`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

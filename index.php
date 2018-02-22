@@ -32,6 +32,20 @@ else if (isset($_REQUEST['upload']))
         include_once('html/login.html');
     }
 }
+else if (isset($_REQUEST['create'])){
+  if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout'])){
+    logout();
+  }
+  else if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
+  {
+      include_once('html/create-new-tempuser.html');
+  }
+  else
+  {
+      include_once('html/login.html');
+  }
+
+}
 else
 {
     if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))

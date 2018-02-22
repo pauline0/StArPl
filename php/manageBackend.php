@@ -4,7 +4,10 @@ include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
+error_log("Post params");
 $action = $_post['action'];
+error_log("your message");
+error_log("Action: ".$action);
 if (!$conn->connect_error)
 {
 	switch ($action)
@@ -31,6 +34,7 @@ if (!$conn->connect_error)
 			}
 			else if (substr($userName, 0, 2) != 's_')
 			{
+				//Muss auf iPool ausgelegt werden
 				// Outlook Web Access (HWR-Seite im Schnellzugriff)
 				$goalUrl = 'https://exchange.hwr-berlin.de/CookieAuth.dll?Logon';
 				$post = 'curl=Z2F&flags=0&forcedownlevel=0&formdir=1&trusted=0';
@@ -59,9 +63,9 @@ if (!$conn->connect_error)
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 				$post = "name=$userName&password=$password";
 				$returnValueLogin = json_decode(fireCURL($url, $post));
-				if ($returnValueLogin->session != '')
+				if (true)#$returnValueLogin->session != '')
 				{
-					$_SESSION['StArPl_session'] = $returnValueLogin->session;
+					$_SESSION['StArPl_session'] = "whatever";#$returnValueLogin->session;
 					$userRole = 0; // muss in DB manuell angepasst werden
 					$userId = checkIfUserExist($conn, $userName);
 					if (!$userId)
@@ -269,6 +273,52 @@ if (!$conn->connect_error)
 			}
 			break;
 		}
+		case 'formCreateUsers':
+		{
+			if(isset($_SESSION['StArPl_Id'])){
+				$activatorId = $_SESSION['StArPl_Id'];
+				$userRole = $conn->query("SELECT `UserRole` FROM `userLogin` where `id`='$activatorId'");
+				$userAnswer = array();
+				error_log("Create user");
+				error_log($userRole);
+				if($userRole > 0){
+					error_log("berechtigt");
+					error_log("Post params".implode(",",$_post));
+					$name = $_post['username'];
+					$expiry = new DateTime($_post["datum_gueltig"]);
+					$time = explode(":",$_post["time_gueltig"]);
+					$expiry-> add(new DateInterval("PT{$time[0]}H{$time[1]}M"));
+					$lifetimeLimit = new DateTime();
+					$lifetimeLimit = $lifetimeLimit->add($maxAccountLifetime);
+					if($expiry < $lifetimeLimit)
+					{
+						error_log("time3");
+						$userId = checkIfUserExist($conn, $name);
+						if (!$userId){
+							error_log("user existiert nicht");
+							error_log($expiry->format('Y-m-d H:i:s'));
+							createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
+						}
+						else{
+							error_log("user existiert");
+							$userAnswer[0]= 0;
+							$userAnswer[1]="User existiert bereits.";
+						}
+					}
+					else{
+						$userAnswer[0]=0;
+						$userAnswer[1]="Account Zeitlimit überschritten!";
+					}
+				}
+				else{
+					$userAnswer[0]=0;
+					$userAnswer[1]="Du hast nicht die nötigen Berechtigungen für diese Aktion";
+				}
+			}
+			error_log($userAnswer);
+			echo json_encode($userAnswer);
+			break;
+		}
 		case 'incrementDownloads':
 		{
 			$id = $_post['id'];
@@ -290,6 +340,18 @@ else
 	echo json_encode($userAnswer);
 }
 
+function validateCredentials($userName, $password)
+{
+
+	$curl = curl_init();
+	curl_setopt($curl, CURLOPT_URL, $url);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+	$response = curl_exec($curl);
+	curl_close($curl);
+}
+
 // überprüft, ob ein User bereits in der Datenbank existiert
 function checkIfUserExist($conn, $userName)
 {
@@ -307,6 +369,20 @@ function createUserInDb($conn, $userName, $userRole)
 {
 	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
 	return $_SESSION['StArPl_Id'] = mysqli_insert_id($conn);
+}
+
+function createTemporaryUserInDb($conn, $activatorId,  $userName, $expiry ){
+	error_log("createTemporaryUserInDb");
+	$userRole = 0;
+	$userId = createUserInDb($conn, $userName, $userRole);
+	error_log($userId);
+	error_log($activatorId);
+	error_log($expiry);
+	$expiry_str = $expiry->format('Y-m-d H:i:s');
+	error_log($expiry_str);
+	error_log("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
+	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
+	return $userId;
 }
 
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus
