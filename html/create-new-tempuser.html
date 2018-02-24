@@ -25,7 +25,7 @@
     </div>
     <div class="center-block box-content">
       <h3>Temporären Studenten-Account erstellen</h3>
-        <form method="post" action="." name="formCreateUsers" id="formCreateUsers" onsubmit="return createUser();" enctype="multipart/form-data">
+        <form method="post" action="." name="formCreateUsers" id="formCreateUsers" onsubmit="return createUser();" enctype="multipart/form-data" >
 					<div class="form-group">
             <div class="input-group">
 							<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
@@ -46,6 +46,8 @@
             </button>
           </div>
         </form>
+				<div id="formUser-divError" class="alert alert-danger">
+				</div>
     </div>
   </body>
 </html>

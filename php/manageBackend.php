@@ -297,7 +297,7 @@ if (!$conn->connect_error)
 						if (!$userId){
 							error_log("user existiert nicht");
 							error_log($expiry->format('Y-m-d H:i:s'));
-							createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
+							$userAnswer[0] = createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
 						}
 						else{
 							error_log("user existiert");

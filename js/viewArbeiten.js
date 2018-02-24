@@ -55,12 +55,12 @@ $(document).ready(function() {
 	{
 		changeFachbereich($_GET().studiengang);
 	}
-	$('button.btn.btn-default.btn-sm.btn-block')
+	$('.nav.nav-pills.nav-stacked li')
 	.click
 	(
 		function()
 		{
-			changeFachbereich($(this)[0].value);
+			changeFachbereich($(this)[0].innerText);//value);
 		}
 	);
 });
@@ -354,7 +354,7 @@ function editArbeit()
 			'<option value="deutsch">deutsch</option>' +
 			'<option value="englisch">englisch</option>' +
 		'</select>',
-		
+
 		'<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>' +
 			'<option value="Praxistransferbericht">Praxistransferbericht</option>' +
 			'<option value="Studienarbeit">Studienarbeit</option>' +
