@@ -16,6 +16,7 @@ if (!$conn->connect_error)
 		{
 			$userName = $_post['UserName'];
 			$password = $_post['Password'];
+			error_log("Was passiert hier?");
 			$userAnswer = array();
 			if (md5($userName) == '21232f297a57a5a743894a0e4a801fc3' && md5($password) == 'e36c1c30ed01795422f07944ebb65607')
 			{
@@ -68,6 +69,8 @@ if (!$conn->connect_error)
 					$_SESSION['StArPl_session'] = "whatever";#$returnValueLogin->session;
 					$userRole = 0; // muss in DB manuell angepasst werden
 					$userId = checkIfUserExist($conn, $userName);
+					error_log("test");
+					error_log($userId);
 					if (!$userId)
 					{
 						$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
@@ -211,6 +214,22 @@ if (!$conn->connect_error)
 			echo json_encode($allArbeiten);
 			break;
 		}
+		case 'getCreatedUsers':{
+			if (isset($_SESSION['StArPl_Id'])){
+				if ($_SESSION["StArPl_UserRole"] >= 1){
+					$userId = $_SESSION['StArPl_Id'];
+					$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` where `DozentId` = '$userId';");
+					$allUsers = array();
+					while ($zeile = $result->fetch_assoc())
+					{
+						array_push($allUsers, $zeile);
+					}
+					echo json_encode($allUsers);
+				}
+				}
+			break;
+		}
+
 		case 'getOwnUser':
 		{
 			if (isset($_SESSION['StArPl_Id']))
@@ -374,8 +393,8 @@ function createUserInDb($conn, $userName, $userRole)
 function createTemporaryUserInDb($conn, $activatorId,  $userName, $expiry ){
 	error_log("createTemporaryUserInDb");
 	$userRole = 0;
-	$userId = createUserInDb($conn, $userName, $userRole);
-	error_log($userId);
+	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
+	$userId = mysqli_insert_id($conn);
 	error_log($activatorId);
 	error_log($expiry);
 	$expiry_str = $expiry->format('Y-m-d H:i:s');
