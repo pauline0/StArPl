@@ -39,7 +39,7 @@ function login()
 			$('#formLogin-divError').show();
 			if (data[0] == 0) // login Fehlgeschlagen
 			{
-				$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> Falscher Username oder Passwort.';
+				$('#formLogin-divError')[0].innerHTML = '<b>Login fehlgeschlagen!</b> ' + data[1];
 			}
 			else
 			{

@@ -83,9 +83,10 @@ function getAllCreatedUsers()
   ;
 	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data)
-	.always(function(data)
+	.always(function(r_data)
 	{
-		createdUsers = data;
+    console.log(r_data);;
+		createdUsers = r_data;
 	});
 	$.ajaxSetup({async: true});
 }

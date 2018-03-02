@@ -4,9 +4,7 @@ include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
-error_log("Post params");
 $action = $_post['action'];
-error_log("your message");
 error_log("Action: ".$action);
 if (!$conn->connect_error)
 {
@@ -16,10 +14,9 @@ if (!$conn->connect_error)
 		{
 			$userName = $_post['UserName'];
 			$password = $_post['Password'];
-			error_log("Was passiert hier?");
 			$userAnswer = array();
 			if (md5($userName) == '21232f297a57a5a743894a0e4a801fc3' && md5($password) == 'e36c1c30ed01795422f07944ebb65607')
-			{
+			{-
 				$_SESSION['StArPl_session'] = md5('angucken4all');
 				$userRole = 0; // muss in DB manuell angepasst werden
 				$userId = checkIfUserExist($conn, $userName);
@@ -64,9 +61,9 @@ if (!$conn->connect_error)
 				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
 				$post = "name=$userName&password=$password";
 				$returnValueLogin = json_decode(fireCURL($url, $post));
-				if (true)#$returnValueLogin->session != '')
+				if ($returnValueLogin->session != '')
 				{
-					$_SESSION['StArPl_session'] = "whatever";#$returnValueLogin->session;
+					$_SESSION['StArPl_session'] = $returnValueLogin->session;
 					$userRole = 0; // muss in DB manuell angepasst werden
 					$userId = checkIfUserExist($conn, $userName);
 					error_log("test");
@@ -80,6 +77,34 @@ if (!$conn->connect_error)
 						$userAnswer[0] = $userId;
 					}
 					$userAnswer[1] = 'Login erfolgreich';
+				}
+				else
+				{
+					$userAnswer[0] = 0;
+					$userAnswer[1] = 'Login fehlgeschlagen';
+				}
+			}
+			else if (substr($userName, 0, 2) == 's_'){
+				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
+				$post = "name=$userName&password=$password";
+				error_log("Trying login");
+				$returnValueLogin = json_decode(fireCURL($url, $post));
+				if ($returnValueLogin->session == '' || true)
+				{
+					error_log("Logged in");
+					$_SESSION['StArPl_session'] = "test";//$returnValueLogin->session;
+					try {
+						error_log("Find Temporary user");
+						$userId = findTemporaryUserInDB($conn, $userName);
+						$userAnswer[0] = $userId;
+						$userAnswer[1] = 'Login erfolgreich';
+					}
+					catch(UserException $e)
+					{
+						error_log("UserEcept");
+						$userAnswer[0] = 0;
+						$userAnswer[1] =  $e->getMessage();
+					}
 				}
 				else
 				{
@@ -174,10 +199,36 @@ if (!$conn->connect_error)
 				$betreuer = $_post['betreuer'];
 				$firma = $_post['firma'];
 				$kurzfassung = $_post['kurzfassung'];
+				$deleteSearchwords = implode(json_decode($_post['deleteSW']),"','");
+				error_log($deleteSearchwords);
+				$addSearchwords = json_decode($_post['addSW']);
 				$conn->query("UPDATE `files` SET `titel`='$titel', `student`='$student', `studiengang`='$studiengang', `language`='$language', `artOfArbeit`='$artOfArbeit', `jahrgang`='$jahrgang', `betreuer`='$betreuer', `firma`='$firma', `kurzfassung`='$kurzfassung' WHERE `Id`='$id';");
+				error_log("DELETE FROM `SearchWords` where `FileId` = '$id' AND `Word` IN ('$deleteSearchwords');");
+				$conn->query("DELETE FROM `SearchWords` where `FileId` = '$id' AND `Word` IN ('$deleteSearchwords');");
+				if ($addSearchwords){
+					$addSearchwords = array_unique($addSearchwords);
+					$existingSearchwords = getAllSearchWordsForDocument($conn, $id);
+					foreach ($addSearchwords as $value)
+					{
+						if (!in_array($value, $existingSearchwords)){
+							error_log("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$id', '$value');");
+							$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$id', '$value');");
+						}
+					}
+				}
 			}
 			break;
 		}
+		case 'getAllSearchWordsForDocument':
+		{
+			error_log("test");
+			$docId = $_post["id"];
+			$allSearchwords = getAllSearchWordsForDocument($conn,$docId);
+			error_log($allSearchwords);
+			echo json_encode($allSearchwords);
+			break;
+		}
+
 		case 'getAllSearchWords':
 		{
 			$result = $conn->query("SELECT DISTINCT `Word` FROM `SearchWords`;");
@@ -216,17 +267,17 @@ if (!$conn->connect_error)
 		}
 		case 'getCreatedUsers':{
 			if (isset($_SESSION['StArPl_Id'])){
-				if ($_SESSION["StArPl_UserRole"] >= 1){
-					$userId = $_SESSION['StArPl_Id'];
-					$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` where `DozentId` = '$userId';");
-					$allUsers = array();
-					while ($zeile = $result->fetch_assoc())
-					{
-						array_push($allUsers, $zeile);
-					}
-					echo json_encode($allUsers);
+				$userId = $_SESSION['StArPl_Id'];
+				$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` where `DozentId` = '$userId';");
+				$allUsers = array();
+				while ($zeile = $result->fetch_assoc())
+				{
+					array_push($allUsers, $zeile);
 				}
-				}
+				echo json_encode($allUsers);
+			}
+			$userAnswer[0] = 0;
+			$userAnswer[1] = 'Nicht eingeloggt';
 			break;
 		}
 
@@ -298,11 +349,7 @@ if (!$conn->connect_error)
 				$activatorId = $_SESSION['StArPl_Id'];
 				$userRole = $conn->query("SELECT `UserRole` FROM `userLogin` where `id`='$activatorId'");
 				$userAnswer = array();
-				error_log("Create user");
-				error_log($userRole);
 				if($userRole > 0){
-					error_log("berechtigt");
-					error_log("Post params".implode(",",$_post));
 					$name = $_post['username'];
 					$expiry = new DateTime($_post["datum_gueltig"]);
 					$time = explode(":",$_post["time_gueltig"]);
@@ -311,15 +358,11 @@ if (!$conn->connect_error)
 					$lifetimeLimit = $lifetimeLimit->add($maxAccountLifetime);
 					if($expiry < $lifetimeLimit)
 					{
-						error_log("time3");
 						$userId = checkIfUserExist($conn, $name);
 						if (!$userId){
-							error_log("user existiert nicht");
-							error_log($expiry->format('Y-m-d H:i:s'));
 							$userAnswer[0] = createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
 						}
 						else{
-							error_log("user existiert");
 							$userAnswer[0]= 0;
 							$userAnswer[1]="User existiert bereits.";
 						}
@@ -334,7 +377,6 @@ if (!$conn->connect_error)
 					$userAnswer[1]="Du hast nicht die nötigen Berechtigungen für diese Aktion";
 				}
 			}
-			error_log($userAnswer);
 			echo json_encode($userAnswer);
 			break;
 		}
@@ -401,7 +443,28 @@ function createTemporaryUserInDb($conn, $activatorId,  $userName, $expiry ){
 	error_log($expiry_str);
 	error_log("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
 	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
+
 	return $userId;
+}
+
+function findTemporaryUserInDB($conn, $userName){
+	error_log("SELECT `userLogin`.`Id`,`ExpiryDate`, (`ExpiryDate` > NOW()) AS `Valid` FROM `userLogin` LEFT JOIN `studentAccounts` ON `userLogin`.Id = `studentAccounts`.`UserId` WHERE `UserName`='$userName';");
+	$result = $conn->query("SELECT `userLogin`.`Id`,`ExpiryDate`, (`ExpiryDate` > NOW()) AS `Valid` FROM `userLogin` LEFT JOIN `studentAccounts` ON `userLogin`.Id = `studentAccounts`.`UserId` WHERE `UserName`='$userName';");
+	if(!$result){
+		throw UserException("UserName oder Passwort falsch.");
+	}
+	while ($zeile = $result->fetch_assoc()){
+		if (!$zeile["ExpiryDate"]){
+			throw new UserException("Für diesen Benutzer existieren keine gültigen Accounts");
+		}
+		if ($zeile["Valid"]){
+			error_log("is_valid");
+			$userId = $zeile["Id"];
+
+			return $_SESSION['StArPl_Id'] =  $userId;
+		}
+	}
+	throw new UserException("Alle temporären Accounts dieses Nutzers sind nicht mehr gültig.");
 }
 
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus
@@ -453,6 +516,18 @@ function fireCURL($url, $post)
 }
 
 
+function getAllSearchWordsForDocument($conn,$documentId){
+	error_log("SELECT `Word` FROM `SearchWords` where `fileId` = '$documentId';");
+	$result = $conn->query("SELECT `Word` FROM `SearchWords` where `fileId` = '$documentId';");
+	error_log($documentId);
+	$searchWordsArray = array();
+	while ($zeile = $result->fetch_assoc()){
+		error_log("SW:" + $zeile["Word"]);
+		array_push($searchWordsArray, $zeile["Word"]);
+	}
+	return $searchWordsArray;
+}
+
 function loginOpenExchange($url, $post)
 {
 	$curl = curl_init();
@@ -500,5 +575,7 @@ function loginOpenExchange($url, $post)
 	$redirectSuccess = $redirect_url == "https://exchange.hwr-berlin.de/OWA";
 	return $redirectSuccess;
 }
+
+class UserException extends Exception { }
 
 ?>

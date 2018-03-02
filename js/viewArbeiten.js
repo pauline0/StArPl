@@ -18,6 +18,7 @@ var arrayTableDetailledView =
 	['kurzfassung', 'Kurzfassung']
 ];
 
+
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllArbeiten();
@@ -378,6 +379,10 @@ function editArbeit()
 			'<th>' + arrayTableDetailledView[arrayTableDetailledView.length - 1][1] + '</th>' +
 			'<td><textarea class="form-control" rows="5" id ="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] + '" name="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] +'" required>' + selectedArbeit[arrayTableDetailledView[arrayTableDetailledView.length - 1][0]] + '</textarea></td>' +
 		'</tr>';
+	strHtml += '<tr> <th> Schlagwörter </th> <td> <div id="searchWords"> searchWords </div>';
+	strHtml += '<div id="add" class="form-inline"><span class="input-group-btn"><input class="form-control" id="schlagwort" placeholder="Neues Schlagwort" list="schlagwoerter" />' +
+		'<button type="button" class="btn btn-success addButton" onclick="addSW();"><i class="glyphicon glyphicon-plus"></i></button></span> </div> </td> </tr>'
+
 	/*strHtml +=
 		'<tr>' +
 			'<th>Datei(en)</th>' +
@@ -403,6 +408,7 @@ function editArbeit()
 	$('#tableBodyDetailledArbeitEdit').show();
 	$('#editButtons').hide();
 	$('#leaveButtons').show();
+	fillSearchwords($_GET().id);
 }
 
 // verlässt den Bearbeitungsmodus
@@ -415,12 +421,95 @@ function resetArbeit()
 	return false;
 }
 
+function fillSearchwords(docId){
+	var data =
+	{
+		action: 'getAllSearchWordsForDocument',
+		id: docId
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(r_data)
+	{
+		console.log(r_data);
+		displaySearchWords(r_data);
+	});
+	$.ajaxSetup({async: true});
+}
+
+function getSWListItem(text){
+	return "<li class='list-group-item' id='sw_"+ text +"'>" + text + '<span class="glyphicon glyphicon-trash" onclick="deleteSW($(this))"></span></li>'
+}
+
+function displaySearchWords(searchWords){
+	var searchwordStr = "<ul class='list-group'>";
+	for (var i = 0; i < searchWords.length; i++){
+		searchwordStr += getSWListItem(searchWords[i]);
+	}
+	$("#searchWords").html(searchwordStr + "</ul>");
+}
+
+function removeDeleteRequest(swElement){
+	//remove class delete
+	console.log(swElement);
+	swElement.parent().removeClass("delSW");
+	//add Button for delete Request
+	swElement.parent().html(swElement.parent().text() + '<span class="glyphicon glyphicon-trash" onclick="deleteSW($(this))"></span>');
+
+}
+
+function deleteSW(delButton){
+	//add Class to SW element to be deleted
+	swElement = delButton.parent();
+	console.log(swElement);
+	swElement.addClass("delSW");
+	//add Button to remove Deleterequest
+	//Button: Tooltip: UNDO, removes deleteClass from swElement
+	swElement.html(getSWdeleteText(swElement.text()));
+
+}
+function getSWdeleteText(text){
+	return text + '<span class="glyphicon glyphicon-trash " onclick="removeDeleteRequest($(this))"></span>';
+}
+function getSWaddString(text){
+	return "<li id='sw_"+ text +"' class='list-group-item addSW'>" + text + '<span class="glyphicon glyphicon-trash" onclick="removeNewSearchword($(this))"></span></li>';
+}
+
+function addSW(){
+	var text = $("#schlagwort")[0].value;
+	//check if searchword already exists for this document
+	if (text === ""){
+		return;
+	}
+	var swExists = ($("#searchWords li").toArray().some(elem => elem.innerText === text));//.length > 0
+	if (!swExists){
+		var newSwElem = getSWaddString(text);
+		$("#searchWords ul").append(newSwElem);
+		$("#schlagwort")[0].value = "";
+	}
+	else{
+		alert("Dieses Dokument hat schon dieses Schlagwort.")
+	}
+}
+
+function removeNewSearchword(elem){
+	elem[0].parentNode.remove();
+}
+
 // speichert die Arbeit
 function saveArbeit()
 {
 	getGetParas();
+	var addSW = [];
+	var delSW = [];
+	$("li.addSW").each(function (idx,elem){
+		addSW.push(elem.textContent);
+	});
+	$("li.delSW").each(function (idx, elem){
+		delSW.push(elem.textContent);
+	});
 	var data = $('#formSaveArbeit').serialize();
-	data += '&action=formSaveArbeit&id=' + $_GET().id;
+	data += '&action=formSaveArbeit&id=' + $_GET().id +"&deleteSW="+JSON.stringify(delSW)+"&addSW="+JSON.stringify(addSW);
 	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data);
 	$.ajaxSetup({async: true});
@@ -428,6 +517,7 @@ function saveArbeit()
 	getAllArbeiten();
 	getOwnUser();
 	showArbeitDetailled($_GET().id);
+	arraySearchwordOperations = [];
 	return false;
 }
 
