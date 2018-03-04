@@ -39,6 +39,7 @@ CREATE TABLE `files` (
   `firma` text NOT NULL,
   `sperrvermerk` tinyint(1) NOT NULL,
   `kurzfassung` text NOT NULL,
+  `privat` tinyint(1) NOT NULL,
   `downloads` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -72,6 +73,11 @@ CREATE TABLE `studentAccounts`(
   `ExpiryDate` DATETIME NOT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `releaseRequests`(
+  `Id` int(11) NOT NULL,
+  `studentAccountId` int(11) NOT NULL,
+  `FileId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 --
 -- Daten für Tabelle `userLogin`
 --
@@ -106,6 +112,9 @@ ALTER TABLE `userLogin`
 
 ALTER TABLE `studentAccounts`
     ADD PRIMARY KEY (`Id`);
+
+ALTER TABLE `releaseRequests`
+    ADD PRIMARY KEY (`Id`);
 --
 -- AUTO_INCREMENT für exportierte Tabellen
 --
@@ -122,6 +131,9 @@ ALTER TABLE `userLogin`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 ALTER TABLE `studentAccounts`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `releaseRequests`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -4,6 +4,8 @@ include_once('config.php'); // Datenbankanbindung
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
+error_log(implode(",",array_keys($_post)));
+error_log(implode($_post));
 $action = $_post['action'];
 error_log("Action: ".$action);
 if (!$conn->connect_error)
@@ -26,6 +28,7 @@ if (!$conn->connect_error)
 				}
 				else
 				{
+					$_SESSION["StArPl_Id"] = $userId;
 					$userAnswer[0] = $userId;
 				}
 				$userAnswer[1] = 'Login erfolgreich';
@@ -47,6 +50,7 @@ if (!$conn->connect_error)
 					}
 					else
 					{
+						$_SESSION["StArPl_Id"] = $userId;
 						$userAnswer[0] = $userId;
 					}
 					$userAnswer[1] = 'Login erfolgreich';
@@ -66,14 +70,13 @@ if (!$conn->connect_error)
 					$_SESSION['StArPl_session'] = $returnValueLogin->session;
 					$userRole = 0; // muss in DB manuell angepasst werden
 					$userId = checkIfUserExist($conn, $userName);
-					error_log("test");
-					error_log($userId);
 					if (!$userId)
 					{
 						$userAnswer[0] = createUserInDb($conn, $userName, $userRole);
 					}
 					else
 					{
+						$_SESSION["StArPl_Id"] = $userId;
 						$userAnswer[0] = $userId;
 					}
 					$userAnswer[1] = 'Login erfolgreich';
@@ -91,17 +94,15 @@ if (!$conn->connect_error)
 				$returnValueLogin = json_decode(fireCURL($url, $post));
 				if ($returnValueLogin->session == '' || true)
 				{
-					error_log("Logged in");
+					$_SESSION['StArPl_UserRole'] = 0;
 					$_SESSION['StArPl_session'] = "test";//$returnValueLogin->session;
 					try {
-						error_log("Find Temporary user");
 						$userId = findTemporaryUserInDB($conn, $userName);
 						$userAnswer[0] = $userId;
 						$userAnswer[1] = 'Login erfolgreich';
 					}
 					catch(UserException $e)
 					{
-						error_log("UserEcept");
 						$userAnswer[0] = 0;
 						$userAnswer[1] =  $e->getMessage();
 					}
@@ -124,6 +125,7 @@ if (!$conn->connect_error)
 		{
 			if (isset($_SESSION['StArPl_Id']))
 			{
+				error_log("StArPl_Id");
 				$id = $_SESSION['StArPl_Id'];
 				$titel = $_post['titel'];
 				$student = $_post['student'];
@@ -142,7 +144,25 @@ if (!$conn->connect_error)
 					$sperrvermerk = 0;
 				}
 				$kurzfassung = $_post['kurzfassung'];
-				$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`, `downloads`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung', '0');");
+				if (getUserRole($conn, $id) > 0 ){
+					error_log("GetUserRole");
+					$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`, `downloads`, `privat`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung', '0', '0');");
+				}
+				else {
+					$docentId = $_post["docentId"];
+					$studentAccountId = getValidStudentAccountForUser($conn, $id, $docentId);
+					if ($studentAccountId > 0){
+						$result = $conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`, `downloads`, `privat`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung', '0', '1');");
+						if (!$result) {
+						    error_log('Ungültige Anfrage: ' . $conn->error);
+						}
+						$fileId = mysqli_insert_id($conn);
+						$result = $conn->query("INSERT INTO `releaseRequests`(`studentAccountId`, `fileId`) VALUES ('$studentAccountId','$fileId');");
+						if (!$result) {
+						    error_log('Ungültige Anfrage: ' . $conn->error);
+						}
+					}
+				}
 				$userAnswer = array();
 				if ($conn->affected_rows > 0)
 				{
@@ -229,6 +249,18 @@ if (!$conn->connect_error)
 			break;
 		}
 
+		case 'getPossibleDocents':
+		{
+			$userId = $_SESSION["StArPl_Id"];
+			$result = $conn->query("SELECT `UserName`, `userLogin`.`Id` from `studentAccounts` JOIN `userLogin` ON `userLogin`.`Id` = `DozentId` where `ExpiryDate` > NOW() AND `UserId` = '$userId';");
+			$possibleDocents = array();
+			while($row = $result->fetch_assoc()){
+				$possibleDocents[$row["UserName"]] = $row["Id"];
+			}
+			echo json_encode($possibleDocents);
+			break;
+		}
+
 		case 'getAllSearchWords':
 		{
 			$result = $conn->query("SELECT DISTINCT `Word` FROM `SearchWords`;");
@@ -253,7 +285,14 @@ if (!$conn->connect_error)
 		}
 		case 'getAllArbeiten':
 		{
-			$result = $conn->query("SELECT * FROM `files` ORDER BY `titel` ASC;");
+			if (isset($_SESSION['StArPl_Id'])){
+				$userId = $_SESSION['StArPl_Id'];
+				$queryStr = "SELECT `files`.* FROM `files` WHERE NOT `privat` OR `DozentId`='$userId' OR `releaseRequests`.ORDER BY `titel` ASC;";
+			}
+			else{
+				$queryStr = "SELECT * FROM `files` WHERE NOT `privat`  ORDER BY `titel` ASC;";
+			}
+			$result = $conn->query("SELECT `files`.* FROM `files` WHERE NOT `privat`   ORDER BY `titel` ASC;");
 			$allArbeiten = array();
 			$i = 0;
 			while ($zeile = $result->fetch_assoc())
@@ -347,9 +386,11 @@ if (!$conn->connect_error)
 		{
 			if(isset($_SESSION['StArPl_Id'])){
 				$activatorId = $_SESSION['StArPl_Id'];
-				$userRole = $conn->query("SELECT `UserRole` FROM `userLogin` where `id`='$activatorId'");
+				error_log($activatorId);
+				$userRole = $conn->query("SELECT `UserRole` FROM `userLogin` where `id`='$activatorId';");
 				$userAnswer = array();
-				if($userRole > 0){
+				$row = $userRole->fetch_assoc();
+				if(implode("|",$row) > 0){
 					$name = $_post['username'];
 					$expiry = new DateTime($_post["datum_gueltig"]);
 					$time = explode(":",$_post["time_gueltig"]);
@@ -359,12 +400,21 @@ if (!$conn->connect_error)
 					if($expiry < $lifetimeLimit)
 					{
 						$userId = checkIfUserExist($conn, $name);
-						if (!$userId){
+						if ($userId == 0){
 							$userAnswer[0] = createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
+							$userAnswer[1] = "Ein neuer Benutzer-Account wurde erstellt.";
 						}
 						else{
-							$userAnswer[0]= 0;
-							$userAnswer[1]="User existiert bereits.";
+							$accountId = getStudentAccountForUser($conn, $userId, $activatorId);
+							$userAnswer[0] = $userId;
+							if ($accountId == 0){
+								createTemporaryAccountInDB($conn, $activatorId,  $userId, $expiry);
+								$userAnswer[1] = "New temporary account created";
+							}
+							else {
+								updateTemporaryAccount($conn, $accountId, $expiry);
+								$userAnswer[1] = "Updated Account";
+							}
 						}
 					}
 					else{
@@ -420,9 +470,46 @@ function checkIfUserExist($conn, $userName)
 	$result = $conn->query("SELECT `Id` FROM `userLogin` WHERE `UserName`='$userName';");
 	while ($zeile = $result->fetch_assoc())
 	{
-		$userId = $_SESSION['StArPl_Id'] = $zeile['Id'];
+		error_log(implode(",", $zeile));
+		$userId = $zeile['Id'];
 	}
 	return $userId;
+}
+
+function getUserRole($conn, $userId){
+	$result = $conn->query("Select `UserRole` FROM `userLogin` WHERE `Id`='$userId'");
+	while ($zeile = $result->fetch_assoc())
+	{
+		error_log($zeile);
+		return $zeile['UserRole'];
+	}
+}
+
+function getStudentAccountForUser($conn, $userId, $dozentId = null){
+	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE `userId`='$userId'";
+	if ($dozentId){
+		$queryStr = $queryStr . " AND `DozentId` = '$dozentId'";
+	}
+	$queryStr = $queryStr . ";";
+	$result = $conn->query($queryStr);
+	while ($row = $result->fetch_assoc()){
+		error_log(implode(",", $row));
+		return $row["Id"];
+	}
+}
+
+function getValidStudentAccountForUser($conn, $userId, $dozentId = null){
+	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE (`ExpiryDate` > NOW()) AND `userId`='$userId'";
+	if ($dozentId){
+		$queryStr = $queryStr . " AND `DozentId` = '$dozentId'";
+	}
+	$queryStr = $queryStr . ";";
+	error_log($queryStr);
+	$result = $conn->query($queryStr);
+	while ($row = $result->fetch_assoc()){
+		error_log(implode(",", array_keys($row)));
+		return $row["Id"];
+	}
 }
 
 // legt einen neuen User in der Datenbank an
@@ -432,18 +519,21 @@ function createUserInDb($conn, $userName, $userRole)
 	return $_SESSION['StArPl_Id'] = mysqli_insert_id($conn);
 }
 
+function createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry){
+	$expiry_str = $expiry->format('Y-m-d H:i:s');
+	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
+}
+
+function updateTemporaryAccount($conn, $accountId, $expiry){
+	$expiry_str = $expiry->format('Y-m-d H:i:s');
+	$conn->query("UPDATE `studentAccounts` SET `ExpiryDate`='$expiry_str' WHERE Id='$accountId'");
+}
+
 function createTemporaryUserInDb($conn, $activatorId,  $userName, $expiry ){
-	error_log("createTemporaryUserInDb");
 	$userRole = 0;
 	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
 	$userId = mysqli_insert_id($conn);
-	error_log($activatorId);
-	error_log($expiry);
-	$expiry_str = $expiry->format('Y-m-d H:i:s');
-	error_log($expiry_str);
-	error_log("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
-	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
-
+	createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry);
 	return $userId;
 }
 
@@ -458,9 +548,7 @@ function findTemporaryUserInDB($conn, $userName){
 			throw new UserException("Für diesen Benutzer existieren keine gültigen Accounts");
 		}
 		if ($zeile["Valid"]){
-			error_log("is_valid");
 			$userId = $zeile["Id"];
-
 			return $_SESSION['StArPl_Id'] =  $userId;
 		}
 	}

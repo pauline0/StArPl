@@ -11,7 +11,7 @@
 		removeClass: "btn btn-danger",
         removeLabel: "&nbsp;Löschen"
 	});
-	
+
 	// Schlagwörter
     var maxSchlagwoerter = 10; // wie viele Inputs?
     $('#formUpload')
@@ -41,6 +41,7 @@
 
 	// Schlagwörter-datalist füllen
 	fillDataListSchlagwoerter();
+	fillDocentList();
 });
 
 // wird beim hochladen aufgerufen
@@ -95,7 +96,7 @@ function uploadFiles(id)
 	return returnValue;
 }
 
-// befüllt die Schlagwörter-datalist 
+// befüllt die Schlagwörter-datalist
 function fillDataListSchlagwoerter()
 {
 	var strHtml = '';
@@ -132,4 +133,30 @@ function changeSperrvermerk()
 		document.formUpload.sperrvermerk.value = "0";
 		$('#divFileInputUploadArbeit').show();
 	}
+}
+
+
+function fillDocentList(){
+	var strHtml = '';
+	var data =
+	{
+		action: "getPossibleDocents"
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		console.log(data);
+		if ($.isEmptyObject(data)){
+			$("#selectDocents").hide();
+		}
+		else {
+			for (var key in data)
+			{
+				strHtml += '<option value="' + data[key] + '">'+key + '</option>';
+			}
+			$('#selectDocents')[0].innerHTML = strHtml;
+		}
+	});
+	$.ajaxSetup({async: true});
 }
