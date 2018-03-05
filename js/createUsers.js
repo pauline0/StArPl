@@ -15,6 +15,7 @@ function prepareTableHeader()
 	var strHtml =
 		'<tr>' +
 			'<th>Kürzel</th>' +
+      '<th>Erstellte Arbeiten </th>' +
 			'<th>Gültig bis:</th>' +
       '<th><span class="glyphicon glyphicon-pencil"></span></th>'+
       '<th><span class="glyphicon glyphicon-trash"></span></th>'+
@@ -29,6 +30,7 @@ function reloadUserTable(){
 	{
 		var arrayOneRow = new Array();
 		arrayOneRow.push(createdUsers[key].UserName);
+    arrayOneRow.push(getReleasableFilesHtml(createdUsers[key].releaseRequests));
 		arrayOneRow.push(createdUsers[key].ExpiryDate);
     var deleteButton = "<button class='btn btn-danger' onclick='deleteAccount("+createdUsers[key].Id + ")'>Löschen</button>";
     var refreshButton = "<button onclick='refreshAccount("+createdUsers[key].Id + ")'>Verlängern</button>";
@@ -42,6 +44,20 @@ function reloadUserTable(){
   userDataTable.DataTable().rows.add(arrayTableCreatedUsers);
   userDataTable.DataTable().draw();
 }
+
+function getReleasableFilesHtml(releaseRequests){
+  var strHtml = "";
+  for (var i = 0; i < releaseRequests.length; i++){
+    strHtml += "<a href='/?hidden&id=" + releaseRequests[i][0] + "'>";
+    strHtml +=  releaseRequests[i][1] + '</a> <br>';
+  }
+  return strHtml;
+}
+
+function seeHiddenDoc(id){
+  window.history.replaceState('', '', '?hidden&id=' + id);
+}
+
 
 function createUser(){
   var returnValue = false;

@@ -295,6 +295,7 @@ function showArbeitDetailled(Id)
 function showHiddenArbeit(id){
 	arrayIdsArbeiten = new Array();
 	var hiddenArbeit;
+	var role;
 	var data =
 	{
 		action: "getPrivateArbeit",
@@ -306,6 +307,7 @@ function showHiddenArbeit(id){
 	{
 		console.log(data);
 		if (data[0] > 0 ){
+			role = data[0];
 			hiddenArbeit = data[1];
 		}
 		else{
@@ -317,13 +319,16 @@ function showHiddenArbeit(id){
 		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(hiddenArbeit);
 		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
-		if (data[0] == 2){
+		if (role == 2){
+			$('#leaveButtons').hide();
+			$('#editButtons').hide();
 			$('#buttonPublishDoc').removeClass("hidden");
+			$('#buttonPublishDoc').click(function(){releaseDocument(hiddenArbeit.Id, hiddenArbeit.studiengang)});//'releaseDocument('+ hiddenArbeit.Id+','+hiddenArbeit.studiengang')';
 		}
 	}
 }
 
-function releaseDocument(id){
+function releaseDocument(id, studiengang){
 	var data =
 	{
 		action: "releasePrivateDocument",
@@ -335,6 +340,8 @@ function releaseDocument(id){
 	{
 		console.log(data);
 	});
+	window.history.replaceState('', '', '?studiengang=' + studiengang + '&id=' + id);
+	location.reload();
 }
 
 // zählt den Counter für Downloads hoch

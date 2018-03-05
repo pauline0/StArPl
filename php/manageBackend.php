@@ -297,13 +297,23 @@ if (!$conn->connect_error)
 		case 'getCreatedUsers':{
 			if (isset($_SESSION['StArPl_Id'])){
 				$userId = $_SESSION['StArPl_Id'];
-				$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` where `DozentId` = '$userId';");
+				$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate`, `fileId`, `titel` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` LEFT JOIN `releaseRequests` ON `studentAccounts`.`Id` = studentAccountId LEFT JOIN `files` ON `files`.`id` = `fileId` where `DozentId` = '3';");
 				$allUsers = array();
 				while ($zeile = $result->fetch_assoc())
 				{
-					array_push($allUsers, $zeile);
+					$UserName = $zeile["UserName"];
+					if (!array_key_exists($UserName, $allUsers)){
+						$allUsers[$UserName] = $zeile;
+						unset($allUsers[$UserName]["titel"], $allUsers[$UserName]["fileId"]);
+						$allUsers[$UserName]["releaseRequests"] = [];
+					}
+					if($zeile["fileId"]){
+						array_push($allUsers[$UserName]["releaseRequests"],[$zeile["fileId"], $zeile["titel"]]);
+					}
 				}
-				echo json_encode($allUsers);
+				$answer = array_values($allUsers);
+				error_log(json_encode($answer));
+				echo json_encode($answer);
 			}
 			$userAnswer[0] = 0;
 			$userAnswer[1] = 'Nicht eingeloggt';
