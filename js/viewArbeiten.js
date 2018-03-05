@@ -50,7 +50,12 @@ $(document).ready(function() {
 	);
 	if ($_GET().id)
 	{
-		showArbeitDetailled($_GET().id);
+		if($_GET().hidden){
+			showHiddenArbeit($_GET().id)
+		}
+		else{
+			showArbeitDetailled($_GET().id);
+		}
 	}
 	else
 	{
@@ -210,48 +215,54 @@ function changeFachbereich(selectedStudiengang)
 	$('#leaveButtons').hide();
 }
 
+function getArbeitTableHTML(selectedArbeit){
+	var strHtml = '';
+	for (var subArray in arrayTableDetailledView)
+	{
+		strHtml +=
+			'<tr>' +
+				'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
+				'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
+			'</tr>';
+	}
+	if (ownUser[0].UserRole == 1 || ownUser[0].Id == selectedArbeit.userId)
+	{
+		strHtml +=
+			'<tr>' +
+				'<th>Downloads</th>' +
+				'<td id="downloadsValue">' + selectedArbeit.downloads + '</td>' +
+			'</tr>';
+	}
+	strHtml +=
+			'<tr>' +
+				'<th>Datei(en)</th>' +
+				'<td>';
+					for (var file in selectedArbeit.dateien)
+					{
+						var selectedFile = selectedArbeit.dateien[file];
+						strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id + '/' + selectedFile + '" onclick="downloadFile(' + selectedArbeit.Id + ');">';
+						if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
+						{
+							strHtml += '<img src="img/pdf.png">';
+						}
+						strHtml += selectedFile + '</a><br/>';
+					}
+	strHtml +=
+				'</td>' +
+			'</tr>';
+	return strHtml;
+}
+
+
 // detaillierte Übersicht über eine Arbeit
 function showArbeitDetailled(Id)
 {
+	console.log(Id);
 	var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
 	if (selectedArbeit != undefined)
 	{
-		var strHtml = '';
-		for (var subArray in arrayTableDetailledView)
-		{
-			strHtml +=
-				'<tr>' +
-					'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
-					'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
-				'</tr>';
-		}
-		if (ownUser[0].UserRole == 1 || ownUser[0].Id == selectedArbeit.userId)
-		{
-			strHtml +=
-				'<tr>' +
-					'<th>Downloads</th>' +
-					'<td id="downloadsValue">' + selectedArbeit.downloads + '</td>' +
-				'</tr>';
-		}
-		strHtml +=
-				'<tr>' +
-					'<th>Datei(en)</th>' +
-					'<td>';
-						for (var file in selectedArbeit.dateien)
-						{
-							var selectedFile = selectedArbeit.dateien[file];
-							strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id + '/' + selectedFile + '" onclick="downloadFile(' + Id + ');">';
-							if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
-							{
-								strHtml += '<img src="img/pdf.png">';
-							}
-							strHtml += selectedFile + '</a><br/>';
-						}
-		strHtml +=
-					'</td>' +
-				'</tr>';
-		$('#tableBodyDetailledArbeit')[0].innerHTML = strHtml;
+		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(selectedArbeit);
 		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
 		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
@@ -279,6 +290,51 @@ function showArbeitDetailled(Id)
 	{
 		changeFachbereich();
 	}
+}
+
+function showHiddenArbeit(id){
+	arrayIdsArbeiten = new Array();
+	var hiddenArbeit;
+	var data =
+	{
+		action: "getPrivateArbeit",
+		id: id
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		console.log(data);
+		if (data[0] > 0 ){
+			hiddenArbeit = data[1];
+		}
+		else{
+			changeFachbereich();
+		}
+	});
+	$.ajaxSetup({async: true});
+	if (hiddenArbeit){
+		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(hiddenArbeit);
+		$('#divTableOverview').hide();
+		$('#tableDetailledArbeit').show();
+		if (data[0] == 2){
+			$('#buttonPublishDoc').removeClass("hidden");
+		}
+	}
+}
+
+function releaseDocument(id){
+	var data =
+	{
+		action: "releasePrivateDocument",
+		id: id
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		console.log(data);
+	});
 }
 
 // zählt den Counter für Downloads hoch
