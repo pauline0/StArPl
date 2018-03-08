@@ -18,7 +18,13 @@
     <div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
       <h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Temporären Account erstellen</h2>
       <div class="text-right">
-        <form method="post" action='formCreateUsers' name="formCreateUsers" onsubmit="return createUser();">
+        <form method="post" action=''>
+					<a href="./?edit" class="btn btn-default">
+						<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
+					</a>
+					<a href="./?upload" class="btn btn-default">
+						<span class="glyphicon glyphicon-upload"></span> Hochladen
+					</a>
           <button type="submit" name="logout" class="btn btn-danger">
             <span class="glyphicon glyphicon-log-out"></span> Abmelden
           </button>

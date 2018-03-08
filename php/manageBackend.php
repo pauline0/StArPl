@@ -441,7 +441,15 @@ EOT;
 					$expiry-> add(new DateInterval("PT{$time[0]}H{$time[1]}M"));
 					$lifetimeLimit = new DateTime();
 					$lifetimeLimit = $lifetimeLimit->add($maxAccountLifetime);
-					if($expiry < $lifetimeLimit)
+					if($expiry > $lifetimeLimit){
+						$userAnswer[0]=0;
+						$userAnswer[1]="Account Zeitlimit überschritten!";
+					}
+					else if (substr($name, 0, 2) != 's_'){
+						$userAnswer[0] = 0;
+						$userAnswer[1]="Bitte verwende eine Studentenkennung als Benutzernamen.";
+					}
+					else
 					{
 						$userId = checkIfUserExist($conn, $name);
 						if ($userId == 0){
@@ -461,10 +469,10 @@ EOT;
 							}
 						}
 					}
-					else{
-						$userAnswer[0]=0;
-						$userAnswer[1]="Account Zeitlimit überschritten!";
-					}
+					// else{
+					// 	$userAnswer[0]=0;
+					// 	$userAnswer[1]="Account Zeitlimit überschritten!";
+					// }
 				}
 				else{
 					$userAnswer[0]=0;
@@ -473,6 +481,28 @@ EOT;
 			}
 			echo json_encode($userAnswer);
 			break;
+		}
+
+		case 'deleteStudentAccount':
+		{
+				$accountId = $_post['id'];
+				$dozentId = $_SESSION["StArPl_Id"];
+				$answer = array();
+				$filesOfStudent = $conn->query("SELECT FileId FROM studentAccounts JOIN releaseRequests ON `studentAccounts`.`Id` = studentAccountId where `DozentId` = '$dozentId' AND `studentAccounts`.`Id`= '$accountId';");
+				while ($row = $filesOfStudent->fetch_assoc()){
+					$fileId = $row["FileId"];
+					$conn->query("DELETE from `files` WHERE `Id` = '$fileId'");
+					deleteFilesForArbeit($fileId);
+				}
+				$conn->query("DELETE FROM studentAccounts where `DozentId` = '$dozentId' AND `Id`= '$accountId'");
+				if ($conn->affected_rows > 0 ){
+					$answer["status"] = 0;
+				}
+				else{
+					$answer["status"] = -1;
+				}
+				echo json_encode($answer);
+				break;
 		}
 		case 'incrementDownloads':
 		{
@@ -674,6 +704,27 @@ function getAllSearchWordsForDocument($conn,$documentId){
 	}
 	return $searchWordsArray;
 }
+
+function deleteFilesForArbeit($id){
+	$directory = "../upload/$id/";
+	if (is_dir($directory))
+	{
+		// öffnen des Verzeichnisses
+		if ($handle = opendir($directory))
+		{
+			// einlesen der Verzeichnisses
+			while (($file = readdir($handle)) !== false)
+			{
+				if (filetype($file) != 'dir')
+				{
+					unlink($directory.$file);
+				}
+			}
+			closedir($handle);
+		}
+	}
+}
+
 
 function loginOpenExchange($url, $post)
 {

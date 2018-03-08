@@ -1,5 +1,6 @@
 var createdUsers = null;
 
+
 $(document).ready(function() {
   $('[data-toggle="tooltip"]').tooltip();
   prepareTableHeader();
@@ -32,7 +33,7 @@ function reloadUserTable(){
 		arrayOneRow.push(createdUsers[key].UserName);
     arrayOneRow.push(getReleasableFilesHtml(createdUsers[key].releaseRequests));
 		arrayOneRow.push(createdUsers[key].ExpiryDate);
-    var deleteButton = "<button class='btn btn-danger' onclick='deleteAccount("+createdUsers[key].Id + ")'>Löschen</button>";
+    var deleteButton = "<button class='btn btn-danger' onclick='deleteUserAccount("+createdUsers[key].Id + ")'>Löschen</button>";
     var refreshButton = "<button onclick='refreshAccount("+createdUsers[key].Id + ")'>Verlängern</button>";
 		arrayOneRow.push(refreshButton);
 		arrayOneRow.push(deleteButton);
@@ -107,6 +108,26 @@ function getAllCreatedUsers()
 	$.ajaxSetup({async: true});
 }
 
+function deleteUserAccount(id)
+{
+  if (confirm("Möchten sie wirklich diesen Account löschen? Arbeiten, die von diesem Account erstellt wurden und noch nicht freigegeben wurden, werden dabei gelöscht.")){
+  	var data =
+  	{
+  		action: "deleteStudentAccount",
+      id: id
+    }
+    ;
+  	$.ajaxSetup({async: false});
+  	$.post("php/manageBackend.php", data)
+  	.always(function(data)
+  	{
+      console.log(data);
+  	});
+  	$.ajaxSetup({async: true});
+    getAllCreatedUsers();
+    reloadUserTable();
+  }
+}
 
 function setDateDefault(){
   dateInput = $("#datum_gueltig")[0];
