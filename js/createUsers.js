@@ -1,10 +1,7 @@
 
-
-
 $(document).ready(function() {
   $('[data-toggle="tooltip"]').tooltip();
   prepareTableHeader();
-//  getAllCreatedUsers();
   $('#tableExistingUsers').DataTable();
   reloadUserTable();
   setDateDefault();
@@ -100,8 +97,11 @@ function createUser(event){
   var data = $('#formCreateUsers').serialize();
   data += '&action=formCreateUsers';
   returnValue = sendFormData(data);
-  reloadUserTable();
-  return returnValue;
+  if (returnValue){
+    reloadUserTable();
+    resetUserFormFields();
+  }
+  return false;
 }
 
 function updateUser(event, id){
@@ -112,9 +112,9 @@ function updateUser(event, id){
   returnValue = sendFormData(data);
   if (returnValue){
     reloadUserTable();
-    resetUserForm();
+    resetUserFormFields();
   }
-  return returnValue;
+  return false;
 }
 
 function getAllCreatedUsers()
@@ -190,8 +190,7 @@ function openUserRefreshForm(name,id, expiry){
   $("#cancelRefresh").show();
 }
 
-function resetUserForm(){
-  $('#formUser-divSuccess, #formUser-divError').hide();
+function resetUserFormFields(){
   $("#userFormTitle").text("Temporären Studenten-Account erstellen");
   $("#formCreateUsers").unbind( "submit" );
   $("#formCreateUsers").submit(function(event){createUser(event)});
@@ -200,4 +199,9 @@ function resetUserForm(){
   $("#formCreateUsers :submit" ).text("Zugang erstellen");
   setDateDefault();
   $("#cancelRefresh").hide();
+}
+
+function resetUserForm(){
+  $('#formUser-divSuccess, #formUser-divError').hide();
+  resetUserFormFields();
 }
