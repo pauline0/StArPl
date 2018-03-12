@@ -1,10 +1,10 @@
-var createdUsers = null;
+
 
 
 $(document).ready(function() {
   $('[data-toggle="tooltip"]').tooltip();
   prepareTableHeader();
-  getAllCreatedUsers();
+//  getAllCreatedUsers();
   $('#tableExistingUsers').DataTable();
   reloadUserTable();
   setDateDefault();
@@ -26,8 +26,9 @@ function prepareTableHeader()
 }
 
 function reloadUserTable(){
-  arrayTableCreatedUsers = new Array();
-  userDataTable = $('#tableExistingUsers');
+  var arrayTableCreatedUsers = new Array();
+  var userDataTable = $('#tableExistingUsers');
+  var createdUsers = getAllCreatedUsers();
   for (var key in createdUsers)
 	{
 		var arrayOneRow = new Array();
@@ -118,6 +119,7 @@ function updateUser(event, id){
 
 function getAllCreatedUsers()
 {
+  var createdUsers = null;
 	var data =
 	{
 		action: "getCreatedUsers"
@@ -131,6 +133,7 @@ function getAllCreatedUsers()
 		createdUsers = r_data;
 	});
 	$.ajaxSetup({async: true});
+  return createdUsers;
 }
 
 function deleteUserAccount(id)
