@@ -18,7 +18,7 @@ if (!$conn->connect_error)
 			$password = $_post['Password'];
 			$userAnswer = array();
 			if (md5($userName) == '21232f297a57a5a743894a0e4a801fc3' && md5($password) == 'e36c1c30ed01795422f07944ebb65607')
-			{-
+			{
 				$_SESSION['StArPl_session'] = md5('angucken4all');
 				$userRole = 0; // muss in DB manuell angepasst werden
 				$userId = checkIfUserExist($conn, $userName);
@@ -431,56 +431,84 @@ EOT;
 		{
 			if(isset($_SESSION['StArPl_Id'])){
 				$activatorId = $_SESSION['StArPl_Id'];
-				$userRole = $conn->query("SELECT `UserRole` FROM `userLogin` where `id`='$activatorId';");
 				$userAnswer = array();
-				$row = $userRole->fetch_assoc();
-				if(implode("|",$row) > 0){
-					$name = $_post['username'];
-					$expiry = new DateTime($_post["datum_gueltig"]);
-					$time = explode(":",$_post["time_gueltig"]);
-					$expiry-> add(new DateInterval("PT{$time[0]}H{$time[1]}M"));
-					$lifetimeLimit = new DateTime();
-					$lifetimeLimit = $lifetimeLimit->add($maxAccountLifetime);
-					if($expiry > $lifetimeLimit){
+				if(getUserRole($conn, $activatorId) > 0){
+					$name = $_post["username"];
+					$expiry = getExpiryDate($_post["datum_gueltig"],$_post["time_gueltig"], $maxAccountLifetime);
+					if(!$expiry){
 						$userAnswer[0]=0;
 						$userAnswer[1]="Account Zeitlimit überschritten!";
 					}
 					else if (substr($name, 0, 2) != 's_'){
 						$userAnswer[0] = 0;
-						$userAnswer[1]="Bitte verwende eine Studentenkennung als Benutzernamen.";
+						$userAnswer[1]="Benutzername ist keine Studentenkennung";
 					}
 					else
 					{
 						$userId = checkIfUserExist($conn, $name);
-						if ($userId == 0){
+						if (!$userId){
 							$userAnswer[0] = createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
-							$userAnswer[1] = "Ein neuer Benutzer-Account wurde erstellt.";
+							$userAnswer[1] = "Neuer Account wurde erstellt";
 						}
 						else{
 							$accountId = getStudentAccountForUser($conn, $userId, $activatorId);
 							$userAnswer[0] = $userId;
 							if ($accountId == 0){
 								createTemporaryAccountInDB($conn, $activatorId,  $userId, $expiry);
-								$userAnswer[1] = "New temporary account created";
+								$userAnswer[1] = "Neuer Studentenaccount wurde erstellt";
 							}
 							else {
-								updateTemporaryAccount($conn, $accountId, $expiry);
-								$userAnswer[1] = "Updated Account";
+								$userAnswer[0] = 0;
+								$userAnswer[1]="Studentenaccount existiert bereits";
 							}
 						}
 					}
-					// else{
-					// 	$userAnswer[0]=0;
-					// 	$userAnswer[1]="Account Zeitlimit überschritten!";
-					// }
 				}
 				else{
 					$userAnswer[0]=0;
-					$userAnswer[1]="Du hast nicht die nötigen Berechtigungen für diese Aktion";
+					$userAnswer[1]="Nötige Berechtigungen fehlen.";
 				}
 			}
 			echo json_encode($userAnswer);
 			break;
+		}
+
+		case 'formUpdateUsers':
+			{
+				if(isset($_SESSION['StArPl_Id'])){
+					$activatorId = $_SESSION['StArPl_Id'];
+					$userAnswer = array();
+					if(getUserRole($conn, $activatorId) > 0){
+						$expiry = getExpiryDate($_post["datum_gueltig"],$_post["time_gueltig"], $maxAccountLifetime);
+						$accountId = $_post["id"];
+						if(!$expiry){
+							$userAnswer[0]=0;
+							$userAnswer[1]="Account Zeitlimit überschritten!";
+						}
+						elseif (!checkIfDozentOfStudentAccount($conn, $accountId, $activatorId)) {
+							$userAnswer[0]= 0;
+							$userAnswer[1]="Rechte für diese Aktion fehlen.";
+						}
+						else
+						{
+							$updateSuccesful = updateTemporaryAccount($conn, $accountId, $expiry);
+							if($updateSuccesful){
+								$userAnswer[0] = 1;
+								$userAnswer[1] = "Änderungen gespeichert";
+							}
+							else {
+								$userAnswer[0] = 0;
+								$userAnswer[1] = "Account konnte nicht aktualisiert werden.";
+							}
+						}
+					}
+					else{
+						$userAnswer[0] = 0;
+						$userAnswer[1] = "Nötige Berechtigungen fehlen.";
+					}
+				}
+				echo json_encode($userAnswer);
+				break;
 		}
 
 		case 'deleteStudentAccount':
@@ -570,6 +598,11 @@ function getStudentAccountForUser($conn, $userId, $dozentId = null){
 	}
 }
 
+function checkIfDozentOfStudentAccount($conn, $accountId, $dozentId){
+	$result = $conn->query("SELECT * FROM `studentAccounts` WHERE `Id` = 28 and `DozentId` = 3;");
+	return ($result->num_rows > 0);
+}
+
 function getValidStudentAccountForUser($conn, $userId, $dozentId = null){
 	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE (`ExpiryDate` > NOW()) AND `userId`='$userId'";
 	if ($dozentId){
@@ -598,7 +631,18 @@ function createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry){
 
 function updateTemporaryAccount($conn, $accountId, $expiry){
 	$expiry_str = $expiry->format('Y-m-d H:i:s');
+	error_log("UPDATE `studentAccounts` SET `ExpiryDate`='$expiry_str' WHERE Id='$accountId' AND `ExpiryDate`<'$expiry_str'");
 	$conn->query("UPDATE `studentAccounts` SET `ExpiryDate`='$expiry_str' WHERE Id='$accountId'");
+	return ($conn->affected_rows > 0);
+}
+
+function getExpiryDate($expiry_date, $expiry_time, $maxAccountLifetime){
+	$expiry = new DateTime($expiry_date);
+	$time = explode(":",$expiry_time);
+	$expiry-> add(new DateInterval("PT{$time[0]}H{$time[1]}M"));
+	$lifetimeLimit = new DateTime();
+	$lifetimeLimit = $lifetimeLimit->add($maxAccountLifetime);
+	return ($expiry <= $lifetimeLimit) ? $expiry : false;
 }
 
 function createTemporaryUserInDb($conn, $activatorId,  $userName, $expiry ){
@@ -617,6 +661,7 @@ function checkIfAllowedToSeeFile($conn, $fileId, $userId){
 	}
 	return $accessLevel;
 }
+
 
 function getFileById($conn, $fileId){
 	$result = $conn->query("SELECT * FROM `files` WHERE `Id` = '$fileId'; ");
@@ -770,7 +815,7 @@ function loginOpenExchange($url, $post)
 	curl_setopt($curl2, CURLOPT_HEADERFUNCTION,$handleHeaders);
 	$response = curl_exec($curl2);
 	$redirect_url = curl_getinfo($curl2, CURLINFO_REDIRECT_URL);
-	$redirectSuccess = $redirect_url == "https://exchange.hwr-berlin.de/OWA";
+	$redirectSuccess = $redirect_url === "https://exchange.hwr-berlin.de/OWA";
 	return $redirectSuccess;
 }
 

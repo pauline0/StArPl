@@ -148,7 +148,10 @@ function fillDocentList(){
 	{
 		console.log(data);
 		if ($.isEmptyObject(data)){
+			/*Wenn die Rückgabe leer ist, ist der Benutzer kein Stundent, da Studenten sich nicht ohne einen gültigen
+			Account anmelden können */
 			$("#selectDocents").hide();
+			$("#divEditButtons").show();
 		}
 		else {
 			for (var key in data)

@@ -14,14 +14,22 @@
 		<link rel="stylesheet" href="css/own.css">
 	</head>
 	<body>
-		<div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
+		<div class="jumbotron center-block box-header" onclick="//location.reload();" style="cursor: pointer;">
 			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Hochladen</h2>
 			<div class="text-right">
 				<form method="post" action="">
-					<a href="./?edit" class="btn btn-default">
+					<span id="divEditButtons" class="collapse">
+						<a href="./?create" class="btn btn-default">
+							<span class="glyphicon glyphicon-user"></span> Benutzer verwalten
+						</a>
+						<a href="./?edit" id="buttonEdit" class="btn btn-default">
+							<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
+						</a>
+					</span>
+					<!-- <a href="./?edit" class="btn btn-default">
 						<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
-					</a>
+					</a> -->
 					<button type="submit" name="logout" class="btn btn-danger">
 						<span class="glyphicon glyphicon-log-out"></span> Abmelden
 					</button>

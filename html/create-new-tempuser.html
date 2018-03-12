@@ -36,8 +36,8 @@
 				<thead id="tableHeader"></thead>
 				<tbody></tbody>
 			</table>
-			<h3>Temporären Studenten-Account erstellen</h3>
-        <form method="post" action="." name="formCreateUsers" id="formCreateUsers" onsubmit="return createUser();" enctype="multipart/form-data" >
+			<h3 id="userFormTitle">Temporären Studenten-Account erstellen</h3>
+        <form method="post" action="" name="formCreateUsers" id="formCreateUsers" onsubmit="//return createUser();" enctype="multipart/form-data" >
 					<div class="form-group">
             <div class="input-group">
 							<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
@@ -56,9 +56,14 @@
             <button type="submit" class="btn btn-success">
               <span class="glyphicon glyphicon-ok"></span> Zugang erstellen
             </button>
+						<button onclick="resetUserForm()" type="button" id="cancelRefresh" class="btn btn-alarm collapse">
+							<span class="glyphicon glyphicon-remove"></span> Verlängern abbrechen
+						</button>
           </div>
         </form>
-				<div id="formUser-divError" class="alert alert-danger">
+				<div id="formUser-divError" class="alert alert-danger collapse">
+				</div>
+				<div id="formUser-divSuccess" class="alert alert-success collapse">
 				</div>
     </div>
   </body>

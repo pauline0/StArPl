@@ -8,6 +8,7 @@ $(document).ready(function() {
   $('#tableExistingUsers').DataTable();
   reloadUserTable();
   setDateDefault();
+  $("#formCreateUsers").submit(function(event){createUser(event)});
 	$('#formUser-divError').hide();
 });
 
@@ -34,11 +35,10 @@ function reloadUserTable(){
     arrayOneRow.push(getReleasableFilesHtml(createdUsers[key].releaseRequests));
 		arrayOneRow.push(createdUsers[key].ExpiryDate);
     var deleteButton = "<button class='btn btn-danger' onclick='deleteUserAccount("+createdUsers[key].Id + ")'>Löschen</button>";
-    var refreshButton = "<button onclick='refreshAccount("+createdUsers[key].Id + ")'>Verlängern</button>";
+    var refreshButton = "<button onclick='openUserRefreshForm(\""+createdUsers[key].UserName + "\", "+ createdUsers[key].Id + ",\""+createdUsers[key].ExpiryDate + "\")'>Verlängern</button>";
 		arrayOneRow.push(refreshButton);
 		arrayOneRow.push(deleteButton);
     arrayTableCreatedUsers.push(arrayOneRow);
-    console.log(arrayTableCreatedUsers);
   }
 
   userDataTable.DataTable().clear();
@@ -60,22 +60,24 @@ function seeHiddenDoc(id){
 }
 
 
-function createUser(){
+function sendFormData(data){
   var returnValue = false;
-  var data = $('#formCreateUsers').serialize();
-  data += '&action=formCreateUsers';
   $.ajaxSetup({async: false});
   $.post("php/manageBackend.php", data)
   .always(function(data)
   {
+    console.log(data);
     tmpId = data[0];
     if (tmpId >= 1)
     {
-      $('#formLogin-divError').hide();
+      $('#formUser-divError').hide();
+      $('#formUser-divSuccess').show();
+      $('#formUser-divSuccess')[0].innerHTML = data[1];
       returnValue = true;
     }
     else
     {
+      $('#formUser-divSuccess').hide();
       $('#formUser-divError').show();
       if (data[0] == 0)
       {
@@ -88,6 +90,29 @@ function createUser(){
     }
   });
   $.ajaxSetup({async: true});
+  return returnValue;
+}
+
+function createUser(event){
+  alert("create");
+  event.preventDefault();
+  var data = $('#formCreateUsers').serialize();
+  data += '&action=formCreateUsers';
+  returnValue = sendFormData(data);
+  reloadUserTable();
+  return returnValue;
+}
+
+function updateUser(event, id){
+  event.preventDefault();
+  var returnValue = false;
+  var data = $('#formCreateUsers').serialize();
+  data += '&action=formUpdateUsers&id=' + id;;
+  returnValue = sendFormData(data);
+  if (returnValue){
+    reloadUserTable();
+    resetUserForm();
+  }
   return returnValue;
 }
 
@@ -137,4 +162,39 @@ function setDateDefault(){
   dateStr = defaultDate.toISOString().substr(0,10);
   dateInput.value = dateStr;
   dateInput.max = dateStr;
+}
+
+function setExpiryFieldsForUpdateForm(expiry){
+  expiryArr = expiry.split(" ");
+  $("#time_gueltig").val(expiryArr[1].substr(0,5));
+  $("#datum_gueltig").prop("min",expiryArr[0]);
+}
+
+function openUserRefreshForm(name,id, expiry){
+  //Scrolling Trick von https://stackoverflow.com/questions/8884230/jquery-move-to-anchor-location-on-page-load/8884286#8884286
+  $(document).scrollTop( $("#formCreateUsers").offset().top );
+
+  $('#formUser-divSuccess, #formUser-divError').hide();
+  $("#formCreateUsers").unbind( "submit" );
+  $("#formCreateUsers").submit(function(event){updateUser(event, id)});
+
+  $("#userFormTitle").text("Account verlängern");
+  $("#username").val(name);
+  $("#username").prop("disabled", true);
+  $("#formCreateUsers :submit" ).text("Account verlängern")
+  setExpiryFieldsForUpdateForm(expiry);
+
+  $("#cancelRefresh").show();
+}
+
+function resetUserForm(){
+  $('#formUser-divSuccess, #formUser-divError').hide();
+  $("#userFormTitle").text("Temporären Studenten-Account erstellen");
+  $("#formCreateUsers").unbind( "submit" );
+  $("#formCreateUsers").submit(function(event){createUser(event)});
+  $("#username").val("");
+  $("#username").prop("disabled", false);
+  $("#formCreateUsers :submit" ).text("Zugang erstellen");
+  setDateDefault();
+  $("#cancelRefresh").hide();
 }

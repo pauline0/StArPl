@@ -25,19 +25,23 @@ $(document).ready(function() {
 	getGetParas();
 	prepareTableHeader();
 	getOwnUser();
-	if ($_GET().edit)
-	{
-		$('#tableBodyDetailledArbeitEdit').hide();
-	}
 	if (ownUser[0].Id)
 	{
 		$('#divLogoutButton').show();
+		if(ownUser[0].UserRole > 0){
+			$("#divEditButtons").show();
+		}
 		$('#divLoginButton').hide();
 	}
 	else
 	{
 		$('#divLogoutButton').hide();
 		$('#divLoginButton').show();
+	}
+	if ($_GET().edit)
+	{
+		$('#tableBodyDetailledArbeitEdit').hide();
+		$('#buttonEdit').hide();
 	}
 	$('#tableOverview').DataTable
 	(
@@ -87,6 +91,7 @@ function prepareTableHeader()
 	if ($_GET().edit)
 	{
 		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
+		$("body").children().css("max-width", "1170px");
 	}
 	strHtml += '</tr>';
 	$('#tableHeader')[0].innerHTML = strHtml;
