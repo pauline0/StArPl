@@ -1,3 +1,4 @@
+var ownUser;
 ﻿$(document).ready(function() {
 	// FileUploadArbeit
 	$("#FileInputUploadArbeit").fileinput({
@@ -42,6 +43,11 @@
 	// Schlagwörter-datalist füllen
 	fillDataListSchlagwoerter();
 	fillDocentList();
+
+	getOwnUser();
+	if(ownUser[0].UserRole > 0){
+		$("#divEditButtons").show();
+	}
 });
 
 // wird beim hochladen aufgerufen
@@ -160,6 +166,22 @@ function fillDocentList(){
 			}
 			$('#selectDocents')[0].innerHTML = strHtml;
 		}
+	});
+	$.ajaxSetup({async: true});
+}
+
+
+function getOwnUser()
+{
+	var data =
+	{
+		action: "getOwnUser"
+	}
+	$.ajaxSetup({async: false});
+	$.post("php/manageBackend.php", data)
+	.always(function(data)
+	{
+		ownUser = data;
 	});
 	$.ajaxSetup({async: true});
 }

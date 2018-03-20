@@ -123,7 +123,7 @@ function reloadDataTable()
 		arrayOneRow.push(strHtml);
 		if ($_GET().edit)
 		{
-			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '1') // verfügt der User über Bearbeitungsrecht?
+			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '2') // verfügt der User über Bearbeitungsrecht?
 			{
 				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');"><span class="glyphicon glyphicon-pencil"></span></a>');
 			}
@@ -230,7 +230,7 @@ function getArbeitTableHTML(selectedArbeit){
 				'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
 			'</tr>';
 	}
-	if (ownUser[0].UserRole == 1 || ownUser[0].Id == selectedArbeit.userId)
+	if (ownUser[0].UserRole == 2 || ownUser[0].Id == selectedArbeit.userId)
 	{
 		strHtml +=
 			'<tr>' +
@@ -274,7 +274,7 @@ function showArbeitDetailled(Id)
 		if ($_GET().edit)
 		{
 			window.history.replaceState('', '', '?edit&studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
-			if (ownUser[0].Id == selectedArbeit.userId || ownUser[0].UserRole == '1')
+			if (ownUser[0].Id == selectedArbeit.userId || ownUser[0].UserRole == '2')
 			{
 				$('#editButtons').show();
 			}

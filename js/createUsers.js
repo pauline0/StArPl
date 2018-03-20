@@ -81,6 +81,9 @@ function sendFormData(data){
       {
         $('#formUser-divError')[0].innerHTML = data[1];
       }
+      else if (data[0] == -1){
+        location.reload();
+      }
       else
       {
         $('#formUser-divError')[0].innerHTML = '<b>Fehler!</b> Datenbank ist nicht erreichbar.';

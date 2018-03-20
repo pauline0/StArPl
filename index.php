@@ -38,7 +38,12 @@ else if (isset($_REQUEST['create'])){
   }
   else if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
   {
+    if ($_SESSION["StArPl_UserRole"] > 0) {
       include_once('html/create-new-tempuser.html');
+    }
+    else{
+      echo "STOP";
+    }
   }
   else
   {
