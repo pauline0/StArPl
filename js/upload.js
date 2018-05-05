@@ -153,16 +153,16 @@ function fillDocentList(){
 	.always(function(data)
 	{
 		console.log(data);
-		if ($.isEmptyObject(data)){
+		if (!data[0]){
 			/*Wenn die Rückgabe leer ist, ist der Benutzer kein Stundent, da Studenten sich nicht ohne einen gültigen
 			Account anmelden können */
 			$("#selectDocents").hide();
 			$("#divEditButtons").show();
 		}
 		else {
-			for (var key in data)
+			for (var key in data[1])
 			{
-				strHtml += '<option value="' + data[key] + '">'+key + '</option>';
+				strHtml += '<option value="' + data[1][key] + '">'+key + '</option>';
 			}
 			$('#selectDocents')[0].innerHTML = strHtml;
 		}

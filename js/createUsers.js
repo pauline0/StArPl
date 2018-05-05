@@ -95,7 +95,6 @@ function sendFormData(data){
 }
 
 function createUser(event){
-  alert("create");
   event.preventDefault();
   var data = $('#formCreateUsers').serialize();
   data += '&action=formCreateUsers';

@@ -451,23 +451,23 @@ function editArbeit()
 	strHtml += '<div id="add" class="form-inline"><span class="input-group-btn"><input class="form-control" id="schlagwort" placeholder="Neues Schlagwort" list="schlagwoerter" />' +
 		'<button type="button" class="btn btn-success addButton" onclick="addSW();"><i class="glyphicon glyphicon-plus"></i></button></span> </div> </td> </tr>'
 
-	/*strHtml +=
+	strHtml +=
 		'<tr>' +
 			'<th>Datei(en)</th>' +
 			'<td>';
 				for (var file in selectedArbeit.dateien)
 				{
 					var selectedFile = selectedArbeit.dateien[file];
-					strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
+					strHtml += '<div><a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
 					if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
 					{
 						strHtml += '<img src="img/pdf.png">';
 					}
-					strHtml += selectedFile + '</a><br/>';
+					strHtml += selectedFile + '</a><span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+selectedArbeit.Id+')"></span></div>';
 				}
 	strHtml +=
 			'</td>' +
-		'</tr>';*/
+		'</tr>';
 	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
 	$('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
 	$('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
@@ -518,29 +518,56 @@ function displaySearchWords(searchWords){
 }
 
 function removeDeleteRequest(swElement){
-	//remove class delete
 	console.log(swElement);
 	swElement.parent().removeClass("delSW");
-	//add Button for delete Request
 	swElement.parent().html(swElement.parent().text() + '<span class="glyphicon glyphicon-trash" onclick="deleteSW($(this))"></span>');
-
 }
 
 function deleteSW(delButton){
-	//add Class to SW element to be deleted
 	swElement = delButton.parent();
 	console.log(swElement);
 	swElement.addClass("delSW");
-	//add Button to remove Deleterequest
-	//Button: Tooltip: UNDO, removes deleteClass from swElement
 	swElement.html(getSWdeleteText(swElement.text()));
 
 }
+
+function deleteFile(delButton,id){
+	fileElement = delButton.parent();
+	fileElement.addClass("delFile");
+	fileElement.html(getFileDeleteText(fileElement.text(), id))
+}
+
+function rmFileDeleteRequest(undoButton,id){
+	fileElement = undoButton.parent();
+	fileElement.removeClass("delFile");
+	fileElement.html(getFileText(fileElement.text(),id));
+}
+
 function getSWdeleteText(text){
-	return text + '<span class="glyphicon glyphicon-trash " onclick="removeDeleteRequest($(this))"></span>';
+	return text + '<span class="glyphicon glyphicon-repeat " onclick="removeDeleteRequest($(this))"></span>';
 }
 function getSWaddString(text){
 	return "<li id='sw_"+ text +"' class='list-group-item addSW'>" + text + '<span class="glyphicon glyphicon-trash" onclick="removeNewSearchword($(this))"></span></li>';
+}
+
+function getFileDeleteText(text,id){
+	// innerHTML = '<a target="_blank" href="upload/' + id+ '/' + text + '">'+ text + '</a> <span class="glyphicon glyphicon-repeat" onclick="rmFileDeleteRequest($(this))"></span>';
+	// return (text.substr(-4,4) == ".pdf") ? '<img src="img/pdf.png">' + innerHTML : innerHTML;
+	innerHTML = text + '</a><span class="glyphicon glyphicon-repeat" onclick="rmFileDeleteRequest($(this),'+id+')"></span>';
+	if(text.trim().substr(-4,4) == ".pdf"){
+		innerHTML = '<img src="img/pdf.png">' + innerHTML;
+	}
+	innerHTML = '<a target="_blank" href="upload/' + id+ '/' + text + '">' + innerHTML;
+	return innerHTML;
+}
+
+function getFileText(text,id){
+	innerHTML =text + '</a> <span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+id+')"></span>';
+	if(text.trim().substr(-4,4) == ".pdf"){
+		innerHTML = '<img src="img/pdf.png">' + innerHTML;
+	}
+	innerHTML = '<a target="_blank" href="upload/' + id+ '/' + text + '">' + innerHTML;
+	return innerHTML;
 }
 
 function addSW(){
@@ -570,14 +597,20 @@ function saveArbeit()
 	getGetParas();
 	var addSW = [];
 	var delSW = [];
+	var delFiles = [];
 	$("li.addSW").each(function (idx,elem){
 		addSW.push(elem.textContent);
 	});
 	$("li.delSW").each(function (idx, elem){
 		delSW.push(elem.textContent);
 	});
+	$(".delFile").each(function(idx, elem){
+		delFiles.push(elem.textContent);
+	})
+	console.log(delFiles);
 	var data = $('#formSaveArbeit').serialize();
 	data += '&action=formSaveArbeit&id=' + $_GET().id +"&deleteSW="+JSON.stringify(delSW)+"&addSW="+JSON.stringify(addSW);
+	data += '&delFiles='+JSON.stringify(delFiles);
 	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data);
 	$.ajaxSetup({async: true});
