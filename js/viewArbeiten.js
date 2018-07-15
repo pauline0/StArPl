@@ -27,21 +27,30 @@ $(document).ready(function() {
 	getOwnUser();
 	if (ownUser[0].Id)
 	{
+		//$('#logoutLink').show();
+		showLogoutButton()
 		$('#divLogoutButton').show();
 		if(ownUser[0].UserRole > 0){
 			$("#divEditButtons").show();
+			$(".logoutHidden").show();
 		}
 		$('#divLoginButton').hide();
+		$('#loginLink').hide();
 	}
 	else
 	{
 		$('#divLogoutButton').hide();
+		$('#logoutLink').hide();
+		$(".logoutHidden").hide();
 		$('#divLoginButton').show();
+		$('#loginLink').show();
 	}
 	if ($_GET().edit)
 	{
 		$('#tableBodyDetailledArbeitEdit').hide();
 		$('#buttonEdit').hide();
+		$(".logoutHidden").show();
+		$('#editLink').hide();
 	}
 	$('#tableOverview').DataTable
 	(
@@ -65,7 +74,7 @@ $(document).ready(function() {
 	{
 		changeFachbereich($_GET().studiengang);
 	}
-	$('.nav.nav-pills.nav-stacked li')
+	$('.nav.fb_side li')
 	.click
 	(
 		function()
@@ -74,6 +83,20 @@ $(document).ready(function() {
 		}
 	);
 });
+
+function showLogoutButton(){
+	$('#logoutLink').show();
+	$('#logoutLink').click(
+		function(){
+		// 	var data = {logout:""}
+		// 	$.ajaxSetup({async: false});
+		// 	$.post("php/manageBackend.php", data)
+		// 	$.ajaxSetup({async: true});
+		//
+		$("#logoutButton").click()
+	 }
+	)
+}
 
 // erstellt den tableHeader
 function prepareTableHeader()
@@ -91,7 +114,6 @@ function prepareTableHeader()
 	if ($_GET().edit)
 	{
 		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
-		$("body").children().css("max-width", "1170px");
 	}
 	strHtml += '</tr>';
 	$('#tableHeader')[0].innerHTML = strHtml;
@@ -216,6 +238,10 @@ function changeFachbereich(selectedStudiengang)
 		window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 	}
 	resetArbeit();
+	$('.active_fb').removeClass('active_fb');
+	if ( selectedStudiengang && selectedStudiengang.length > 0){
+		$('li:contains("'+selectedStudiengang +'")').addClass('active_fb');
+	}
 	$('#editButtons').hide();
 	$('#leaveButtons').hide();
 }
@@ -551,8 +577,6 @@ function getSWaddString(text){
 }
 
 function getFileDeleteText(text,id){
-	// innerHTML = '<a target="_blank" href="upload/' + id+ '/' + text + '">'+ text + '</a> <span class="glyphicon glyphicon-repeat" onclick="rmFileDeleteRequest($(this))"></span>';
-	// return (text.substr(-4,4) == ".pdf") ? '<img src="img/pdf.png">' + innerHTML : innerHTML;
 	innerHTML = text + '</a><span class="glyphicon glyphicon-repeat" onclick="rmFileDeleteRequest($(this),'+id+')"></span>';
 	if(text.trim().substr(-4,4) == ".pdf"){
 		innerHTML = '<img src="img/pdf.png">' + innerHTML;

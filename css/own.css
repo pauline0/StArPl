@@ -3,19 +3,20 @@ div.box-header
 {
 	border:0px solid #888;
 	box-shadow:0px 2px 5px #ccc;
-	max-width:1113px;
+	/*max-width:1113px;*/
 	padding:20px;
 	text-align:center;
+	margin-bottom: 0px;
 }
 
 /* Optik div-Container-Content*/
 div.box-content
 {
-	border:1px solid #888;
-	box-shadow:0px 2px 5px #ccc;
+	/* box-shadow:0px 2px 5px #ccc; */
+	/* border:1px solid #888; */
 	max-width:1113px;
+	/* background-color:#F8F8FF */
 	padding:20px;
-	background-color:#F8F8FF
 }
 
 /* Tabelle zentrieren, auch möglich mit class="center", aber zusätzliche Implementierung, um nicht jedesmal class="center" schreiben zu müssen */
@@ -32,4 +33,69 @@ a
 .delSW
 {
 	color: grey;
+}
+
+.nav.fb_side > li > a {
+		position: relative;
+    display: block;
+    padding: 10px 15px;
+
+}
+
+.nav.fb_side > li > a:hover {
+		color:#000;
+    background-color: inherit;
+}
+
+.nav.fb_side > li:not(.active_fb){
+	border-left: 1px solid #ccc;
+}
+
+.nav.fb_side > li:not(.active_fb) > a{
+	color: #666;
+}
+
+li.active_fb > a,.nav.fb_side > li:not(.active_fb):hover > a{
+	color: #000;
+}
+
+
+
+
+.active_fb, .nav.fb_side > li:hover{
+	color: #000;
+	border-left: solid 1px #D92425;
+	background-color: inherit;
+}
+
+/* .nav.fb_side > li:hover{
+	color: #000;
+	border-left: #D92425;
+} */
+
+.affix {
+	z-index: 1000;
+	top:0;
+	width:100%;
+}
+
+.navbar.starpl-top-nav {
+	background-color: #D92425;
+}
+
+#inner-starpl-top-nav > li > a {
+	color:#FFF;
+}
+
+#inner-starpl-top-nav > li > a:hover {
+	background-color: inherit;
+	color: #000;
+}
+
+h2 > a, td > a {
+	color: #D92425;
+}
+
+h2 > a, td > a:hover {
+	color: #000;
 }

@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>StArPl</title>
-		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
@@ -37,12 +37,25 @@
 					<a href="./?upload" class="btn btn-default">
 						<span class="glyphicon glyphicon-upload"></span> Hochladen
 					</a>
-					<button type="submit" name="logout" class="btn btn-danger">
+					<button type="submit" id="logoutButton" name="logout" class="hidden">
 						<span class="glyphicon glyphicon-log-out"></span> Abmelden
 					</button>
 				</form>
 			</div>
 		</div>
+		<nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="113">
+			<div class="container">
+				<ul class="nav navbar-nav" id="inner-starpl-top-nav">
+			    <li class="active"><a href="#">StArPl</a></li>
+			    <li class="logoutHidden collapse"><a href="./?create"><span class="glyphicon glyphicon-user"></span>Benutzer verwalten</a></li>
+			    <li class="logoutHidden collapse" id="editLink"><a href="./?edit"><span class="glyphicon glyphicon-pencil"></span> Bearbeiten </a></li>
+			    <li class="logoutHidden uploadLink collapse"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span> Hochladen </a></li>
+					<li id="loginLink" class="collapse"><a href="./?upload"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
+					<li id="logoutLink" class="collapse" onclick="$('#logoutButton').submit()"><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
+			  </ul>
+			</div>
+		</nav>
+
 		<div class="center-block box-content">
 			<div class="row">
 				<div class="col-md-3">
@@ -64,7 +77,7 @@
 					<button class="btn btn-default btn-sm btn-block" value="Versicherung">Versicherung</button>
 					<button class="btn btn-default btn-sm btn-block" value="Wirtschaftsinformatik">Wirtschaftsinformatik</button> -->
 
-					<ul class="nav nav-pills nav-stacked">
+					<ul class="nav fb_side">
 							<li><a>Bank</a></li>
 							<li><a>Bauwesen</a></li>
 							<li><a>Dienstleistungsmanagement</a></li>
