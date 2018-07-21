@@ -4,48 +4,39 @@
 		<meta charset="utf-8">
 		<title>StArPl - Create User</title>
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+		<script src="assets/js/bootstrap.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
 		<script src="js/createUsers.js"></script>
 		<link rel="icon" href="img/icon.ico">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"> -->
+		<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+		<link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
 		<link rel="stylesheet" href="css/own.css">
 	</head>
   <body>
-    <div class="jumbotron center-block box-header" onclick="//location.reload();" style="cursor: pointer;">
-      <h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Temporären Account erstellen</h2>
-      <div class="text-right">
-        <form method="post" action=''>
-					<a href="./?edit" class="btn btn-default">
-						<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
-					</a>
-					<a href="./?upload" class="btn btn-default">
-						<span class="glyphicon glyphicon-upload"></span> Hochladen
-					</a>
-          <button type="submit" name="logout" class="btn btn-danger">
-            <span class="glyphicon glyphicon-log-out"></span> Abmelden
-          </button>
-        </form>
-      </div>
+
+    <div class="jumbotron center-block box-header" onclick="//location.reload();" id="starpl-header">
+      <h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Studenten-Accounts</h2>
     </div>
+
 		<!-- Nav -->
-				<nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="113">
+				<nav class="navbar starpl-top-nav affix-top affix-bottom" data-spy="affix" data-offset-top="153">
 					<div class="container">
 						<ul class="nav navbar-nav" id="inner-starpl-top-nav">
-							<li class="active"><a href="#">StArPl</a></li>
-							<li class="logoutHidden collapse"><a href="./?create"><span class="glyphicon glyphicon-user"></span>Benutzer verwalten</a></li>
+							<li class="active"><a href="/">StArPl</a></li>
 							<li class="logoutHidden collapse" id="editLink"><a href="./?edit"><span class="glyphicon glyphicon-pencil"></span> Bearbeiten </a></li>
-							<!-- <li class="logoutHidden uploadLink collapse"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span> Hochladen </a></li> -->
-							<!-- <li id="loginLink" class="collapse"><a href="./?upload"><span class="glyphicon glyphicon-log-in"></span> Login </a></li> -->
-							<li id="logoutLink" class="collapse" onclick="$('#logoutButton').submit()"><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
+							<li class="logoutHidden uploadLink collapse"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span> Hochladen </a></li>
+							<li id="logoutLink" class="collapse" onclick="logout()" ><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
 						</ul>
 					</div>
 				</nav>
 		<!-- Nav end -->
-    <div class="center-block box-content">
+
+		<div class="center-block box-content">
 			<table class="table table-stripped table-hover table-bordered table-condensed" id="tableExistingUsers">
 				<thead id="tableHeader"></thead>
 				<tbody></tbody>

@@ -4,54 +4,36 @@
 		<meta charset="utf-8">
 		<title>StArPl</title>
 		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+		<script src="assets/js/bootstrap.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
 		<script src="js/viewArbeiten.js"></script>
 		<link rel="icon" href="img/icon.ico">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"> -->
+		<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+		<link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
 		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css">
 		<link rel="stylesheet" href="css/own.css">
 	</head>
 	<body>
-		<div class="jumbotron center-block box-header" onclick="getAllArbeiten();getOwnUser();changeFachbereich();" style="cursor: pointer;">
+
+		<div id="starpl-header" class="jumbotron center-block box-header" onclick="getAllArbeiten();getOwnUser();changeFachbereich();">
 			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
-			<div class="text-right" id="divLoginButton">
-				<a href="./?upload" class="btn btn-default">
-					<span class="glyphicon glyphicon-log-in"></span> Login
-				</a>
-			</div>
-			<div class="text-right" id="divLogoutButton">
-				<form method="post" action="">
-					<span id="divEditButtons" class="collapse">
-						<a href="./?create" class="btn btn-default">
-							<span class="glyphicon glyphicon-user"></span> Benutzer verwalten
-						</a>
-						<a href="./?edit" id="buttonEdit" class="btn btn-default">
-							<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
-						</a>
-					</span>
-					<a href="./?upload" class="btn btn-default">
-						<span class="glyphicon glyphicon-upload"></span> Hochladen
-					</a>
-					<button type="submit" id="logoutButton" name="logout" class="hidden">
-						<span class="glyphicon glyphicon-log-out"></span> Abmelden
-					</button>
-				</form>
-			</div>
 		</div>
+
 		<nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="113">
 			<div class="container">
 				<ul class="nav navbar-nav" id="inner-starpl-top-nav">
-			    <li class="active"><a href="#">StArPl</a></li>
-			    <li class="logoutHidden collapse"><a href="./?create"><span class="glyphicon glyphicon-user"></span>Benutzer verwalten</a></li>
+			    <li class="active"><a href="/">StArPl</a></li>
+			    <li class="logoutHidden collapse"><a href="./?create"><span class="glyphicon glyphicon-education"></span> Studenten-Accounts</a></li>
 			    <li class="logoutHidden collapse" id="editLink"><a href="./?edit"><span class="glyphicon glyphicon-pencil"></span> Bearbeiten </a></li>
 			    <li class="logoutHidden uploadLink collapse"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span> Hochladen </a></li>
 					<li id="loginLink" class="collapse"><a href="./?upload"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
-					<li id="logoutLink" class="collapse" onclick="$('#logoutButton').submit()"><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
+					<li id="logoutLink" class="collapse" onclick="logout()"><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
 			  </ul>
 			</div>
 		</nav>
@@ -59,24 +41,6 @@
 		<div class="center-block box-content">
 			<div class="row">
 				<div class="col-md-3">
-					<!-- <button class="btn btn-default btn-sm btn-block" value="Bank">Bank</button>
-					<button class="btn btn-default btn-sm btn-block" value="Bauwesen">Bauwesen</button>
-					<button class="btn btn-default btn-sm btn-block" value="Dienstleistungsmanagement">Dienstleistungsmanagement</button>
-					<button class="btn btn-default btn-sm btn-block" value="Elektrotechnik">Elektrotechnik</button>
-					<button class="btn btn-default btn-sm btn-block" value="Facility Management">Facility Management</button>
-					<button class="btn btn-default btn-sm btn-block" value="Handel">Handel</button>
-					<button class="btn btn-default btn-sm btn-block" value="IBA">IBA</button value="">
-					<button class="btn btn-default btn-sm btn-block" value="Immobilienwirtschaft">Immobilienwirtschaft</button>
-					<button class="btn btn-default btn-sm btn-block" value="Industrie">Industrie</button>
-					<button class="btn btn-default btn-sm btn-block" value="Informatik">Informatik</button>
-					<button class="btn btn-default btn-sm btn-block" value="Maschinenbau">Maschinenbau</button>
-					<button class="btn btn-default btn-sm btn-block" value="PPM">PPM</button>
-					<button class="btn btn-default btn-sm btn-block" value="Spedition/Logistik">Spedition/Logistik</button>
-					<button class="btn btn-default btn-sm btn-block" value="Steuern/Prüfungswesen">Steuern/Prüfungswesen</button>
-					<button class="btn btn-default btn-sm btn-block" value="Tourismusbetriebswirtschaft">Tourismusbetriebswirtschaft</button>
-					<button class="btn btn-default btn-sm btn-block" value="Versicherung">Versicherung</button>
-					<button class="btn btn-default btn-sm btn-block" value="Wirtschaftsinformatik">Wirtschaftsinformatik</button> -->
-
 					<ul class="nav fb_side">
 							<li><a>Bank</a></li>
 							<li><a>Bauwesen</a></li>

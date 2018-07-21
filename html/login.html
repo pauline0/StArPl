@@ -4,19 +4,23 @@
 		<meta charset="utf-8">
 		<title>StArPl - Login</title>
 		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+		<script src="assets/js/bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
 		<script src="js/login.js"></script>
 		<link rel="icon" href="img/icon.ico">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+		<link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"> -->
 		<link rel="stylesheet" href="css/own.css">
 	</head>
+
 	<body>
-		<div class="jumbotron center-block box-header" onclick="location.reload();" style="cursor: pointer;">
-			<!-- <img src="img/logo.png" width="100px" height="100px" /></span> -->
+		<div class="jumbotron center-block box-header" onclick="location.reload();" id="starpl-header">
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Login</h2>
 		</div>
+
 		<div class="center-block box-content">
 			<form method="post" name="formLogin" id="formLogin" onsubmit="return login();">
 				<h3>Login</h3>
@@ -42,4 +46,5 @@
 			</form>
 		</div>
 	</body>
+
 </html>
