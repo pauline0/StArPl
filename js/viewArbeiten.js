@@ -5,19 +5,7 @@ var arraySelectedArbeiten = null;
 var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
 var ownUser = null;
-var arrayTableDetailledView =
-[
-	['titel', 'Titel'],
-	['student', 'Student'],
-	['studiengang', 'Studiengang'],
-	['language', 'Sprache'],
-	['artOfArbeit', 'Art der Arbeit'],
-	['jahrgang', 'Jahrgang'],
-	['betreuer', 'Betreuer'],
-	['firma', 'Firma'],
-	['kurzfassung', 'Kurzfassung']
-];
-
+var arrayTableDetailledView = settings.detailTableColumns;
 
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
@@ -86,35 +74,23 @@ $(document).ready(function() {
 
 function showLogoutButton(){
 	$('#logoutLink').show();
-	$('#logoutLink').click(
-		function(){
-		// 	var data = {logout:""}
-		// 	$.ajaxSetup({async: false});
-		// 	$.post("php/manageBackend.php", data)
-		// 	$.ajaxSetup({async: true});
-		//
-		$("#logoutButton").click()
-	 }
-	)
 }
 
 // erstellt den tableHeader
 function prepareTableHeader()
 {
-	var strHtml =
-		'<tr>' +
-			'<th>Titel</th>' +
-			'<th>Student</th>' +
-			'<th>Studiengang</th>' +
-			'<th>Sprache</th>' +
-			'<th>Art der Arbeit</th>' +
-			'<th>Jahrgang</th>' +
-			'<th>Betreuer</th>' +
-			'<th>Firma</th>';
+	var strHtml = "<tr>"
+	for (var i = 0; i < settings.viewAllTableColumns.length; i++){
+		if (settings.viewAllTableColumns[i][1]){
+			strHtml += "<th>" + settings.viewAllTableColumns[i][1] + "</th>"
+		}
+	}
+
 	if ($_GET().edit)
 	{
 		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
 	}
+
 	strHtml += '</tr>';
 	$('#tableHeader')[0].innerHTML = strHtml;
 }
@@ -126,23 +102,16 @@ function reloadDataTable()
 	for (var key in arraySelectedArbeiten)
 	{
 		var arrayOneRow = new Array();
-		arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');">' + arraySelectedArbeiten[key].titel + '</a>');
-		arrayOneRow.push(arraySelectedArbeiten[key].student);
-		arrayOneRow.push(arraySelectedArbeiten[key].studiengang);
-		arrayOneRow.push(arraySelectedArbeiten[key].language);
-		arrayOneRow.push(arraySelectedArbeiten[key].artOfArbeit);
-		arrayOneRow.push(arraySelectedArbeiten[key].jahrgang);
-		arrayOneRow.push(arraySelectedArbeiten[key].betreuer);
-		// für die Suche - nicht elegant, aber effektiv ;)
-		var strHtml =
-			arraySelectedArbeiten[key].firma +
-			'<span class="hidden">';
-		for (var schlagwort in arraySelectedArbeiten[key].searchWords)
-		{
-			strHtml += arraySelectedArbeiten[key].searchWords[schlagwort];
+		for (var i = 0; i < settings.viewAllTableColumns.length; i++){
+			[propertyName, renderFunc] = [ settings.viewAllTableColumns[i][0], settings.viewAllTableColumns[i][2]]
+			if (renderFunc){
+				arrayOneRow.push(renderFunc(arraySelectedArbeiten[key]));
+			}
+			else{
+				arrayOneRow.push(arraySelectedArbeiten[key][propertyName]);
+			}
 		}
-		strHtml += '</span>';
-		arrayOneRow.push(strHtml);
+
 		if ($_GET().edit)
 		{
 			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '2') // verfügt der User über Bearbeitungsrecht?
@@ -154,7 +123,9 @@ function reloadDataTable()
 				arrayOneRow.push('');
 			}
 		}
+
 		arrayTableSelectedArbeiten.push(arrayOneRow);
+
 	}
 	$('#tableOverview').DataTable().clear();
 	$('#tableOverview').DataTable().rows.add(arrayTableSelectedArbeiten);
@@ -170,7 +141,7 @@ function getAllArbeiten()
 		action: "getAllArbeiten"
 	}
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
+	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
 		arrayAllArbeiten = data;
@@ -192,7 +163,7 @@ function getAllSearchWordsWithId()
 		action: "getAllSearchWordsWithId"
 	}
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
+	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
 		arrayAllSearchWordsWithId = data;
@@ -218,6 +189,7 @@ function changeFachbereich(selectedStudiengang)
 {
 	arraySelectedArbeiten = new Array();
 	selectedStudiengang = selectedStudiengang || '';
+	selectedStudiengang = selectedStudiengang.trim();
 	for (var key in arrayAllArbeiten)
 	{
 		if (arrayAllArbeiten[key].studiengang == selectedStudiengang || '' == selectedStudiengang || undefined == selectedStudiengang)
@@ -228,6 +200,7 @@ function changeFachbereich(selectedStudiengang)
 	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
+	$('#arbeitSearchwords').hide();
 	reloadDataTable();
 	if ($_GET().edit)
 	{
@@ -239,11 +212,57 @@ function changeFachbereich(selectedStudiengang)
 	}
 	resetArbeit();
 	$('.active_fb').removeClass('active_fb');
+
 	if ( selectedStudiengang && selectedStudiengang.length > 0){
 		$('li:contains("'+selectedStudiengang +'")').addClass('active_fb');
 	}
 	$('#editButtons').hide();
-	$('#leaveButtons').hide();
+	$('.editOnly').hide();
+}
+
+function getSearchwordLabel(content, value, labelClass="default", additionalAttr=""){
+	return '<span value="'+value+'"class="label label-'+labelClass+'"'+ additionalAttr +'>' + content + '</span> '
+}
+
+function renderArbeitKeywords(searchWords){
+	swString = ""
+	if (searchWords){
+		for (var i = 0; i < searchWords.length; i++){
+			swString += getSearchwordLabel(searchWords[i], searchWords[i]) + " ";//'<span class="label label-default">' + searchWords[i] + '</span> '
+		}
+	}
+	return swString;
+}
+
+function renderFiles(selectedArbeit){
+	var strHtml = "";
+	var files = selectedArbeit.dateien;
+	for (var fileIdx = 0; fileIdx < files.length; fileIdx++)
+	{
+		var selectedFile = files[fileIdx];
+		strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id + '/' + selectedFile + '" onclick="downloadFile(' + selectedArbeit.Id + ');">';
+		if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
+		{
+			strHtml += '<img src="'+ settings.iconFilePdf +'">';
+		}
+		strHtml += selectedFile + '</a><br/>';
+	}
+	return strHtml;
+}
+
+function renderFilesEdit(selectedArbeit){
+	var strHtml = "";
+	for (var file in selectedArbeit.dateien)
+	{
+		var selectedFile = selectedArbeit.dateien[file];
+		strHtml += '<div><a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
+		if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
+		{
+			strHtml += '<img src="img/pdf.png">';
+		}
+		strHtml += selectedFile + '</a><span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+selectedArbeit.Id+')"></span></div>';
+	}
+	return strHtml;
 }
 
 function getArbeitTableHTML(selectedArbeit){
@@ -268,35 +287,32 @@ function getArbeitTableHTML(selectedArbeit){
 			'<tr>' +
 				'<th>Datei(en)</th>' +
 				'<td>';
-					for (var file in selectedArbeit.dateien)
-					{
-						var selectedFile = selectedArbeit.dateien[file];
-						strHtml += '<a target="_blank" href="upload/' + selectedArbeit.Id + '/' + selectedFile + '" onclick="downloadFile(' + selectedArbeit.Id + ');">';
-						if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
-						{
-							strHtml += '<img src="img/pdf.png">';
-						}
-						strHtml += selectedFile + '</a><br/>';
-					}
-	strHtml +=
+
+	strHtml += renderFiles(selectedArbeit) +
 				'</td>' +
 			'</tr>';
+
 	return strHtml;
 }
 
+function renderSearchwords(selectedArbeit){
+	var html = "Schlagworte: " + renderArbeitKeywords(selectedArbeit["searchWords"])
+	return html;
+}
 
 // detaillierte Übersicht über eine Arbeit
 function showArbeitDetailled(Id)
 {
-	console.log(Id);
 	var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
 	var selectedArbeit = arrayAllArbeiten[idArray];
 	if (selectedArbeit != undefined)
 	{
 		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(selectedArbeit);
 		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
+		$('#arbeitSearchwords')[0].innerHTML = renderSearchwords(selectedArbeit)
 		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
+		$('#arbeitSearchwords').show()
 		if ($_GET().edit)
 		{
 			window.history.replaceState('', '', '?edit&studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
@@ -308,11 +324,11 @@ function showArbeitDetailled(Id)
 			{
 				$('#editButtons').hide();
 			}
-			$('#leaveButtons').hide();
+			$('.editOnly').hide();
 		}
 		else
 		{
-			$('#leaveButtons').hide();
+			$('.editOnly').hide();
 			$('#editButtons').hide();
 			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
 		}
@@ -333,10 +349,9 @@ function showHiddenArbeit(id){
 		id: id
 	}
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
+	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
-		console.log(data);
 		if (data[0] > 0 ){
 			role = data[0];
 			hiddenArbeit = data[1];
@@ -351,7 +366,7 @@ function showHiddenArbeit(id){
 		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
 		if (role == 2){
-			$('#leaveButtons').hide();
+			$('.editOnly').hide();
 			$('#editButtons').hide();
 			$('#buttonPublishDoc').removeClass("hidden");
 			$('#buttonPublishDoc').click(function(){releaseDocument(hiddenArbeit.Id, hiddenArbeit.studiengang)});//'releaseDocument('+ hiddenArbeit.Id+','+hiddenArbeit.studiengang')';
@@ -366,7 +381,7 @@ function releaseDocument(id, studiengang){
 		id: id
 	}
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
+	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
 		console.log(data);
@@ -384,7 +399,7 @@ function downloadFile(Id)
 		id: Id
 	}
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
+	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
 		var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
@@ -407,13 +422,23 @@ function getOwnUser()
 		action: "getOwnUser"
 	}
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
+	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
 		ownUser = data;
 	});
 	$.ajaxSetup({async: true});
 }
+
+function getOptionsForSelect(name){
+	var options = settings.select[name];
+	var oStr = ""
+	for (var  i = 0; i < options.length; i++){
+		oStr += '<option value="' + options[i] + '">'+ options[i] +'</option>'
+	}
+	return oStr
+}
+
 
 // wechselt in den Bearbeitungsmodus
 function editArbeit()
@@ -427,34 +452,17 @@ function editArbeit()
 		'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" value="' + selectedArbeit[arrayTableDetailledView[0][0]] + '" required />',
 		'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" value="' + selectedArbeit[arrayTableDetailledView[1][0]] + '" required />',
 		'<select class="form-control" id="studiengang" name="studiengang" required>' +
-			'<option value="Bank">Bank</option>' +
-			'<option value="Bauwesen">Bauwesen</option>' +
-			'<option value="Dienstleistungsmanagement">Dienstleistungsmanagement</option>' +
-			'<option value="Elektrotechnik">Elektrotechnik</option>' +
-			'<option value="Facility Management">Facility Management</option>' +
-			'<option value="Handel">Handel</option>' +
-			'<option value="IBA">IBA</option>' +
-			'<option value="Immobilienwirtschaft">Immobilienwirtschaft</option>' +
-			'<option value="Industrie">Industrie</option>' +
-			'<option value="Informatik">Informatik</option>' +
-			'<option value="Maschinenbau">Maschinenbau</option>' +
-			'<option value="PPM">PPM</option>' +
-			'<option value="Spedition/Logistik">Spedition/Logistik</option>' +
-			'<option value="Steuern/Prüfungswesen">Steuern/Prüfungswesen</option>' +
-			'<option value="Tourismusbetriebswirtschaft">Tourismusbetriebswirtschaft</option>' +
-			'<option value="Versicherung">Versicherung</option>' +
-			'<option value="Wirtschaftsinformatik">Wirtschaftsinformatik</option>' +
+			getOptionsForSelect("studiengang") +
 		'</select>',
+
 		'<select class="form-control" id="language" name="language" required>' +
-			'<option value="deutsch">deutsch</option>' +
-			'<option value="englisch">englisch</option>' +
+			getOptionsForSelect("sprache") +
 		'</select>',
 
 		'<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>' +
-			'<option value="Praxistransferbericht">Praxistransferbericht</option>' +
-			'<option value="Studienarbeit">Studienarbeit</option>' +
-			'<option value="Bachelorarbeit">Bachelorarbeit</option>' +
+				getOptionsForSelect("typ") +
 		'</select>',
+
 		'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" value="' + selectedArbeit[arrayTableDetailledView[5][0]] + '" required pattern="[0-9]{4}" />',
 		'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" value="' + selectedArbeit[arrayTableDetailledView[6][0]] + '" required />',
 		'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" value="' + selectedArbeit[arrayTableDetailledView[7][0]] + '" required />'
@@ -473,27 +481,16 @@ function editArbeit()
 			'<th>' + arrayTableDetailledView[arrayTableDetailledView.length - 1][1] + '</th>' +
 			'<td><textarea class="form-control" rows="5" id ="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] + '" name="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] +'" required>' + selectedArbeit[arrayTableDetailledView[arrayTableDetailledView.length - 1][0]] + '</textarea></td>' +
 		'</tr>';
-	strHtml += '<tr> <th> Schlagwörter </th> <td> <div id="searchWords"> searchWords </div>';
-	strHtml += '<div id="add" class="form-inline"><span class="input-group-btn"><input class="form-control" id="schlagwort" placeholder="Neues Schlagwort" list="schlagwoerter" />' +
-		'<button type="button" class="btn btn-success addButton" onclick="addSW();"><i class="glyphicon glyphicon-plus"></i></button></span> </div> </td> </tr>'
-
 	strHtml +=
 		'<tr>' +
 			'<th>Datei(en)</th>' +
 			'<td>';
-				for (var file in selectedArbeit.dateien)
-				{
-					var selectedFile = selectedArbeit.dateien[file];
-					strHtml += '<div><a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
-					if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
-					{
-						strHtml += '<img src="img/pdf.png">';
-					}
-					strHtml += selectedFile + '</a><span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+selectedArbeit.Id+')"></span></div>';
-				}
+	strHtml += renderFilesEdit(selectedArbeit)
 	strHtml +=
+			'<input id="input-b2" name="input-b2" type="file" class="file" data-show-preview="false">' +
 			'</td>' +
 		'</tr>';
+
 	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
 	$('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
 	$('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
@@ -501,8 +498,9 @@ function editArbeit()
 	$('#tableBodyDetailledArbeit').hide();
 	$('#tableBodyDetailledArbeitEdit').show();
 	$('#editButtons').hide();
-	$('#leaveButtons').show();
-	fillSearchwords($_GET().id);
+	$('.editOnly').show	();
+	$("#input-b2").fileinput()
+	displaySearchWordsEdit(selectedArbeit.searchWords);
 }
 
 // verlässt den Bearbeitungsmodus
@@ -511,28 +509,42 @@ function resetArbeit()
 	$('#tableBodyDetailledArbeit').show();
 	$('#tableBodyDetailledArbeitEdit').hide();
 	$('#editButtons').show();
-	$('#leaveButtons').hide();
+	$('.editOnly').hide();
 	return false;
 }
 
-function fillSearchwords(docId){
-	var data =
-	{
-		action: 'getAllSearchWordsForDocument',
-		id: docId
-	}
-	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
-	.always(function(r_data)
-	{
-		console.log(r_data);
-		displaySearchWords(r_data);
-	});
-	$.ajaxSetup({async: true});
+// function fillSearchwords(docId){
+// 	var data =
+// 	{
+// 		action: 'getAllSearchWordsForDocument',
+// 		id: docId
+// 	}
+// 	$.ajaxSetup({async: false});
+// 	$.post(settings.phpBackend, data)
+// 	.always(function(r_data)
+// 	{
+// 		console.log(r_data);
+// 		displaySearchWords(r_data);
+// 	});
+// 	$.ajaxSetup({async: true});
+// }
+
+
+
+function displaySearchWordsEdit(searchWords){
+	$("#arbeitSearchwords").empty();
+	var searchWordHtml = "Schlagworte: "
+	$(searchWords).each(function(i, e){
+		var swContent = e + ' <span class="glyphicon glyphicon-remove" onclick="deleteSW($(this))"></span>';
+		var additionalAttr = 'id="sw_'+ e +'"';
+		searchWordHtml += getSearchwordLabel(swContent,e, "default", additionalAttr)
+	})
+	$("#arbeitSearchwords").html(searchWordHtml);
 }
 
 function getSWListItem(text){
-	return "<li class='list-group-item' id='sw_"+ text +"'>" + text + '<span class="glyphicon glyphicon-trash" onclick="deleteSW($(this))"></span></li>'
+	return "<li class='list-group-item' id='sw_"+ text +"'>" + text +
+	 '<span class="glyphicon glyphicon-remove" onclick="deleteSW($(this))"></span></li>'
 }
 
 function displaySearchWords(searchWords){
@@ -546,7 +558,7 @@ function displaySearchWords(searchWords){
 function removeDeleteRequest(swElement){
 	console.log(swElement);
 	swElement.parent().removeClass("delSW");
-	swElement.parent().html(swElement.parent().text() + '<span class="glyphicon glyphicon-trash" onclick="deleteSW($(this))"></span>');
+	swElement.parent().html(swElement.parent().text() + '<span class="glyphicon glyphicon-remove" onclick="deleteSW($(this))"></span>');
 }
 
 function deleteSW(delButton){
@@ -554,8 +566,15 @@ function deleteSW(delButton){
 	console.log(swElement);
 	swElement.addClass("delSW");
 	swElement.html(getSWdeleteText(swElement.text()));
-
 }
+
+// function deleteSWTag(delButton){
+// 	swElement = delButton.parent();
+// 	console.log(swElement);
+// 	swElement.addClass("delSW");
+// 	swElement.html(getSWdeleteText(swElement.text()));
+// }
+
 
 function deleteFile(delButton,id){
 	fileElement = delButton.parent();
@@ -572,10 +591,13 @@ function rmFileDeleteRequest(undoButton,id){
 function getSWdeleteText(text){
 	return text + '<span class="glyphicon glyphicon-repeat " onclick="removeDeleteRequest($(this))"></span>';
 }
-function getSWaddString(text){
-	return "<li id='sw_"+ text +"' class='list-group-item addSW'>" + text + '<span class="glyphicon glyphicon-trash" onclick="removeNewSearchword($(this))"></span></li>';
-}
+// function getSWaddString(text){
+// 	return "<li id='sw_"+ text +"' class='list-group-item addSW'>" + text + '<span class="glyphicon glyphicon-remove" onclick="removeNewSearchword($(this))"></span></li>';
+// }
 
+function getSWaddString(text) {
+	return  text + ' <span class="glyphicon glyphicon-remove" onclick="removeNewSearchword($(this))"></span>';
+}
 function getFileDeleteText(text,id){
 	innerHTML = text + '</a><span class="glyphicon glyphicon-repeat" onclick="rmFileDeleteRequest($(this),'+id+')"></span>';
 	if(text.trim().substr(-4,4) == ".pdf"){
@@ -596,14 +618,18 @@ function getFileText(text,id){
 
 function addSW(){
 	var text = $("#schlagwort")[0].value;
-	//check if searchword already exists for this document
 	if (text === ""){
 		return;
 	}
-	var swExists = ($("#searchWords li").toArray().some(elem => elem.innerText === text));//.length > 0
+
+	//check if searchword already exists for this document
+	var swExists = ($("#arbeitSearchwords").children("[value='"+ text +"']").length > 0);
 	if (!swExists){
-		var newSwElem = getSWaddString(text);
-		$("#searchWords ul").append(newSwElem);
+		var additionalAttr = "id='sw_"+ text +"'"
+		var swContent = getSWaddString(text);
+		var newSwElem = getSearchwordLabel(swContent,text, "default addSW", additionalAttr)
+		$("#arbeitSearchwords").append(newSwElem);
+
 		$("#schlagwort")[0].value = "";
 	}
 	else{
@@ -622,21 +648,27 @@ function saveArbeit()
 	var addSW = [];
 	var delSW = [];
 	var delFiles = [];
-	$("li.addSW").each(function (idx,elem){
-		addSW.push(elem.textContent);
+	$(".addSW").each(function (idx,elem){
+	 	var value = $(elem).attr("value");
+		if (value){
+			addSW.push(value.trim());
+		}
 	});
-	$("li.delSW").each(function (idx, elem){
-		delSW.push(elem.textContent);
+	$(".delSW").each(function (idx, elem){
+		var value = $(elem).attr("value");
+		if (value){
+			delSW.push(value.trim());
+		}
 	});
 	$(".delFile").each(function(idx, elem){
 		delFiles.push(elem.textContent);
 	})
-	console.log(delFiles);
+
 	var data = $('#formSaveArbeit').serialize();
 	data += '&action=formSaveArbeit&id=' + $_GET().id +"&deleteSW="+JSON.stringify(delSW)+"&addSW="+JSON.stringify(addSW);
 	data += '&delFiles='+JSON.stringify(delFiles);
 	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data);
+	$.post(settings.phpBackend, data);
 	$.ajaxSetup({async: true});
 	resetArbeit();
 	getAllArbeiten();
@@ -660,7 +692,7 @@ function deleteArbeit()
 			id: id
 		}
 		$.ajaxSetup({async: false});
-		$.post("php/manageBackend.php", data)
+		$.post(settings.phpBackend, data)
 		.always(function(data)
 		{
 			// console.log(data);

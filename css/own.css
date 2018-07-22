@@ -32,7 +32,8 @@ a
 
 .delSW
 {
-	color: grey;
+	color: #fff;
+	background-color: #bbb;
 }
 
 .nav.fb_side > li > a {
@@ -81,6 +82,7 @@ li.active_fb > a,.nav.fb_side > li:not(.active_fb):hover > a{
 
 .navbar.starpl-top-nav {
 	background-color: #D92425;
+	margin-bottom: 0px;
 }
 
 #inner-starpl-top-nav > li > a {
@@ -91,11 +93,33 @@ li.active_fb > a,.nav.fb_side > li:not(.active_fb):hover > a{
 	background-color: inherit;
 	color: #000;
 }
-
-h2 > a, td > a {
+/*
+h2 > a, td > a, .pagination > li > a {
 	color: #D92425;
 }
 
-h2 > a, td > a:hover {
+h2 > a:hover, td > a:hover, .pagination > li > a:hover {
 	color: #000;
+} */
+
+div.center-block.box-content{
+	margin-top: 20px;
 }
+/*
+.pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus {
+    background-color: #d92425;
+    border-color: #d92425;
+		color: #fff;
+}
+
+*/
+
+#starpl-header {
+	cursor: pointer;
+}
+
+#arbeitSearchwords{
+	line-height: 1.75em;
+}
+
+/*Bootstrap files generated with https://getbootstrap.com/docs/3.3/customize/ */

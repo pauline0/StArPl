@@ -140,7 +140,7 @@ function getAllCreatedUsers()
 
 function deleteUserAccount(id)
 {
-  if (confirm("Möchten sie wirklich diesen Account löschen? Arbeiten, die von diesem Account erstellt wurden und noch nicht freigegeben wurden, werden dabei gelöscht.")){
+  if (confirm("Möchten Sie wirklich diesen Account löschen? Arbeiten, die von diesem Account erstellt wurden und noch nicht freigegeben wurden, werden dabei gelöscht.")){
   	var data =
   	{
   		action: "deleteStudentAccount",
