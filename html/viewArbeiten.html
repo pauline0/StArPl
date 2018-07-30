@@ -9,6 +9,7 @@
 		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
+		<script src="js/edit.js"></script>
 		<script src="js/viewArbeiten.js"></script>
 		<script src="js/fileinput.min.js"></script> <!-- 4.4.3-10 -->
 		<link rel="icon" href="img/icon.ico">
@@ -27,7 +28,11 @@
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
 		</div>
 
-		<nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="113">
+		<?php
+			include('html/top_navigation.html');
+		?>
+
+		<!-- <nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="113">
 			<div class="container">
 				<ul class="nav navbar-nav" id="inner-starpl-top-nav">
 			    <li class="active"><a href="/">StArPl</a></li>
@@ -38,7 +43,7 @@
 					<li id="logoutLink" class="collapse" onclick="logout()"><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
 			  </ul>
 			</div>
-		</nav>
+		</nav> -->
 
 		<div class="center-block box-content">
 			<div class="row">
@@ -83,10 +88,10 @@
 						<div id="add" class="form-inline editOnly">
 							<span class="input-group-btn">
 								<input class="form-control" id="schlagwort" placeholder="Neues Schlagwort" list="schlagwoerter" />
-								<button type="button" class="btn btn-success addButton" onclick="addSW();">
+								<button type="button" class="btn btn-success addButton" onclick="searchword.add();">
 									<i class="glyphicon glyphicon-plus"></i>
 								</button>
-							</span> 
+							</span>
 						</div>
 						<div class="form-group text-right editOnly" id="leaveButtons">
 							<button onclick="return resetArbeit();" class="btn btn-danger">
