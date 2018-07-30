@@ -40,6 +40,52 @@ function logout(){
 	});
 }
 
+var menu = {
+
+	init : function(user_role){
+		if (user_role !== undefined)
+		{
+			$(".nav_ur").each(function(i, e){
+				e = $(e);
+				(e.data("role") <= user_role) ? e.show() : e.hide()
+			})
+			$('#loginLink').hide();
+		}
+		else
+		{
+			$(".nav_ur").hide();
+			$('#loginLink').show();
+		}
+	}
+}
+
+var user = {
+	currentId : null,
+	currentRole : null,
+	name:null,
+	current:null,
+
+	getCurrent: function(){
+		var data =
+		{
+			action: "getOwnUser"
+		}
+		$.ajaxSetup({async: false});
+		$.post(settings.phpBackend, data)
+		.always(function(data)
+		{
+			if (data.length > 0)
+				user.current = data[0];
+		});
+		$.ajaxSetup({async: true});
+	},
+
+	logout: function(){
+
+	}
+
+}
+
 var settings = {
  	detailTableColumns :
 	[
@@ -100,6 +146,14 @@ var settings = {
 	},
 
 	iconFilePdf: "img/pdf.png",
-	phpBackend: "php/manageBackend.php"
+	phpBackend: "php/manageBackend.php",
+
+	text: {
+		searchwords:"Schlagworte"
+	},
+	errors: {
+		duplicateSearchword:"Dieses Dokument hat schon dieses Schlagwort."
+
+	}
 
 }

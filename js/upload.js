@@ -1,4 +1,3 @@
-var ownUser;
 ﻿$(document).ready(function() {
 	// FileUploadArbeit
 	$("#FileInputUploadArbeit").fileinput({
@@ -44,10 +43,8 @@ var ownUser;
 	fillDataListSchlagwoerter();
 	fillDocentList();
 
-	getOwnUser();
-	if(ownUser[0].UserRole > 0){
-		$("#divEditButtons").show();
-	}
+	user.getCurrent();
+	menu.init(user.current.Id);
 });
 
 // wird beim hochladen aufgerufen
@@ -171,17 +168,17 @@ function fillDocentList(){
 }
 
 
-function getOwnUser()
-{
-	var data =
-	{
-		action: "getOwnUser"
-	}
-	$.ajaxSetup({async: false});
-	$.post("php/manageBackend.php", data)
-	.always(function(data)
-	{
-		ownUser = data;
-	});
-	$.ajaxSetup({async: true});
-}
+// function getOwnUser()
+// {
+// 	var data =
+// 	{
+// 		action: "getOwnUser"
+// 	}
+// 	$.ajaxSetup({async: false});
+// 	$.post("php/manageBackend.php", data)
+// 	.always(function(data)
+// 	{
+// 		ownUser = data;
+// 	});
+// 	$.ajaxSetup({async: true});
+// }

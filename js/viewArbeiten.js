@@ -4,7 +4,7 @@ var arrayIdsArbeiten = null;
 var arraySelectedArbeiten = null;
 var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
-var ownUser = null;
+// var ownUser = null;
 var arrayTableDetailledView = settings.detailTableColumns;
 
 $(document).ready(function() {
@@ -12,34 +12,18 @@ $(document).ready(function() {
 	getAllArbeiten();
 	getGetParas();
 	prepareTableHeader();
-	getOwnUser();
-	if (ownUser[0].Id)
-	{
-		//$('#logoutLink').show();
-		showLogoutButton()
-		$('#divLogoutButton').show();
-		if(ownUser[0].UserRole > 0){
-			$("#divEditButtons").show();
-			$(".logoutHidden").show();
-		}
-		$('#divLoginButton').hide();
-		$('#loginLink').hide();
-	}
-	else
-	{
-		$('#divLogoutButton').hide();
-		$('#logoutLink').hide();
-		$(".logoutHidden").hide();
-		$('#divLoginButton').show();
-		$('#loginLink').show();
-	}
+	user.getCurrent();
+	menu.init(user.current.UserRole);
+	$('#editLink').click(changeToEdit);
+
 	if ($_GET().edit)
 	{
-		$('#tableBodyDetailledArbeitEdit').hide();
-		$('#buttonEdit').hide();
-		$(".logoutHidden").show();
-		$('#editLink').hide();
+		// //$('#tableBodyDetailledArbeitEdit').hide();
+		// $('#buttonEdit').hide();
+		// //$(".logoutHidden").show();
+		// $('#editLink').hide();
 	}
+
 	$('#tableOverview').DataTable
 	(
 		{
@@ -114,7 +98,7 @@ function reloadDataTable()
 
 		if ($_GET().edit)
 		{
-			if (ownUser[0].Id == arraySelectedArbeiten[key].userId || ownUser[0].UserRole == '2') // verfügt der User über Bearbeitungsrecht?
+			if (user.current.Id == arraySelectedArbeiten[key].userId || user.current.UserRole == '2') // verfügt der User über Bearbeitungsrecht?
 			{
 				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');"><span class="glyphicon glyphicon-pencil"></span></a>');
 			}
@@ -183,6 +167,20 @@ function getAllSearchWordsWithId()
 	});
 	$.ajaxSetup({async: true});
 }
+
+function changeToEdit(event){
+	event.preventDefault();
+	var studiengang = window.location.search.match(/studiengang=\w*/);
+	var newstate = "?edit"
+	if (studiengang && studiengang.length > 0) {
+		newstate += "&" + studiengang[0];
+	}
+	window.history.pushState('', '', newstate);
+	getGetParas();
+	prepareTableHeader();
+	reloadDataTable();
+}
+
 
 // wird beim Wechsel des Fachbereichs Aufgerufen
 function changeFachbereich(selectedStudiengang)
@@ -275,7 +273,7 @@ function getArbeitTableHTML(selectedArbeit){
 				'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
 			'</tr>';
 	}
-	if (ownUser[0].UserRole == 2 || ownUser[0].Id == selectedArbeit.userId)
+	if (user.current.UserRole == 2 || user.current.Id == selectedArbeit.userId)
 	{
 		strHtml +=
 			'<tr>' +
@@ -316,7 +314,7 @@ function showArbeitDetailled(Id)
 		if ($_GET().edit)
 		{
 			window.history.replaceState('', '', '?edit&studiengang=' + selectedArbeit.studiengang + '&id=' + selectedArbeit.Id);
-			if (ownUser[0].Id == selectedArbeit.userId || ownUser[0].UserRole == '2')
+			if (user.current.Id == selectedArbeit.userId || user.current.UserRole == '2')
 			{
 				$('#editButtons').show();
 			}
@@ -414,22 +412,6 @@ function downloadFile(Id)
 // ausschließlich für den edit-Bereich erforderlich / sinnvoll
 // ============================================================
 
-// eigener User
-function getOwnUser()
-{
-	var data =
-	{
-		action: "getOwnUser"
-	}
-	$.ajaxSetup({async: false});
-	$.post(settings.phpBackend, data)
-	.always(function(data)
-	{
-		ownUser = data;
-	});
-	$.ajaxSetup({async: true});
-}
-
 function getOptionsForSelect(name){
 	var options = settings.select[name];
 	var oStr = ""
@@ -485,7 +467,7 @@ function editArbeit()
 		'<tr>' +
 			'<th>Datei(en)</th>' +
 			'<td>';
-	strHtml += renderFilesEdit(selectedArbeit)
+	strHtml += edit.renderFiles(selectedArbeit)//renderFilesEdit(selectedArbeit)
 	strHtml +=
 			'<input id="input-b2" name="input-b2" type="file" class="file" data-show-preview="false">' +
 			'</td>' +
@@ -500,7 +482,7 @@ function editArbeit()
 	$('#editButtons').hide();
 	$('.editOnly').show	();
 	$("#input-b2").fileinput()
-	displaySearchWordsEdit(selectedArbeit.searchWords);
+	edit.displaySearchWords(selectedArbeit.searchWords)//displaySearchWordsEdit(selectedArbeit.searchWords);
 }
 
 // verlässt den Bearbeitungsmodus
@@ -512,69 +494,6 @@ function resetArbeit()
 	$('.editOnly').hide();
 	return false;
 }
-
-// function fillSearchwords(docId){
-// 	var data =
-// 	{
-// 		action: 'getAllSearchWordsForDocument',
-// 		id: docId
-// 	}
-// 	$.ajaxSetup({async: false});
-// 	$.post(settings.phpBackend, data)
-// 	.always(function(r_data)
-// 	{
-// 		console.log(r_data);
-// 		displaySearchWords(r_data);
-// 	});
-// 	$.ajaxSetup({async: true});
-// }
-
-
-
-function displaySearchWordsEdit(searchWords){
-	$("#arbeitSearchwords").empty();
-	var searchWordHtml = "Schlagworte: "
-	$(searchWords).each(function(i, e){
-		var swContent = e + ' <span class="glyphicon glyphicon-remove" onclick="deleteSW($(this))"></span>';
-		var additionalAttr = 'id="sw_'+ e +'"';
-		searchWordHtml += getSearchwordLabel(swContent,e, "default", additionalAttr)
-	})
-	$("#arbeitSearchwords").html(searchWordHtml);
-}
-
-function getSWListItem(text){
-	return "<li class='list-group-item' id='sw_"+ text +"'>" + text +
-	 '<span class="glyphicon glyphicon-remove" onclick="deleteSW($(this))"></span></li>'
-}
-
-function displaySearchWords(searchWords){
-	var searchwordStr = "<ul class='list-group'>";
-	for (var i = 0; i < searchWords.length; i++){
-		searchwordStr += getSWListItem(searchWords[i]);
-	}
-	$("#searchWords").html(searchwordStr + "</ul>");
-}
-
-function removeDeleteRequest(swElement){
-	console.log(swElement);
-	swElement.parent().removeClass("delSW");
-	swElement.parent().html(swElement.parent().text() + '<span class="glyphicon glyphicon-remove" onclick="deleteSW($(this))"></span>');
-}
-
-function deleteSW(delButton){
-	swElement = delButton.parent();
-	console.log(swElement);
-	swElement.addClass("delSW");
-	swElement.html(getSWdeleteText(swElement.text()));
-}
-
-// function deleteSWTag(delButton){
-// 	swElement = delButton.parent();
-// 	console.log(swElement);
-// 	swElement.addClass("delSW");
-// 	swElement.html(getSWdeleteText(swElement.text()));
-// }
-
 
 function deleteFile(delButton,id){
 	fileElement = delButton.parent();
@@ -588,16 +507,6 @@ function rmFileDeleteRequest(undoButton,id){
 	fileElement.html(getFileText(fileElement.text(),id));
 }
 
-function getSWdeleteText(text){
-	return text + '<span class="glyphicon glyphicon-repeat " onclick="removeDeleteRequest($(this))"></span>';
-}
-// function getSWaddString(text){
-// 	return "<li id='sw_"+ text +"' class='list-group-item addSW'>" + text + '<span class="glyphicon glyphicon-remove" onclick="removeNewSearchword($(this))"></span></li>';
-// }
-
-function getSWaddString(text) {
-	return  text + ' <span class="glyphicon glyphicon-remove" onclick="removeNewSearchword($(this))"></span>';
-}
 function getFileDeleteText(text,id){
 	innerHTML = text + '</a><span class="glyphicon glyphicon-repeat" onclick="rmFileDeleteRequest($(this),'+id+')"></span>';
 	if(text.trim().substr(-4,4) == ".pdf"){
@@ -614,31 +523,6 @@ function getFileText(text,id){
 	}
 	innerHTML = '<a target="_blank" href="upload/' + id+ '/' + text + '">' + innerHTML;
 	return innerHTML;
-}
-
-function addSW(){
-	var text = $("#schlagwort")[0].value;
-	if (text === ""){
-		return;
-	}
-
-	//check if searchword already exists for this document
-	var swExists = ($("#arbeitSearchwords").children("[value='"+ text +"']").length > 0);
-	if (!swExists){
-		var additionalAttr = "id='sw_"+ text +"'"
-		var swContent = getSWaddString(text);
-		var newSwElem = getSearchwordLabel(swContent,text, "default addSW", additionalAttr)
-		$("#arbeitSearchwords").append(newSwElem);
-
-		$("#schlagwort")[0].value = "";
-	}
-	else{
-		alert("Dieses Dokument hat schon dieses Schlagwort.")
-	}
-}
-
-function removeNewSearchword(elem){
-	elem[0].parentNode.remove();
 }
 
 // speichert die Arbeit
@@ -665,14 +549,16 @@ function saveArbeit()
 	})
 
 	var data = $('#formSaveArbeit').serialize();
-	data += '&action=formSaveArbeit&id=' + $_GET().id +"&deleteSW="+JSON.stringify(delSW)+"&addSW="+JSON.stringify(addSW);
+	data += '&action=formSaveArbeit&id=' + $_GET().id +
+					"&deleteSW="+JSON.stringify(delSW)+
+					"&addSW="+JSON.stringify(addSW);
 	data += '&delFiles='+JSON.stringify(delFiles);
 	$.ajaxSetup({async: false});
 	$.post(settings.phpBackend, data);
 	$.ajaxSetup({async: true});
 	resetArbeit();
 	getAllArbeiten();
-	getOwnUser();
+	user.getCurrent();
 	showArbeitDetailled($_GET().id);
 	arraySearchwordOperations = [];
 	return false;
@@ -706,7 +592,7 @@ function deleteArbeit()
 				alert('Der Bericht konnte nicht gelöscht werden.');
 			}*/
 			getAllArbeiten();
-			getOwnUser();
+			user.getCurrent();
 			changeFachbereich();
 		});
 		$.ajaxSetup({async: true});

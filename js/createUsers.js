@@ -5,6 +5,8 @@ $(document).ready(function() {
   $('#tableExistingUsers').DataTable();
   reloadUserTable();
   setDateDefault();
+  user.getCurrent();
+  menu.init(user.current.UserRole);
   $("#formCreateUsers").submit(function(event){createUser(event)});
 	$('#formUser-divError').hide();
 });
