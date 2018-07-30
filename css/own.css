@@ -17,6 +17,7 @@ div.box-content
 	max-width:1113px;
 	/* background-color:#F8F8FF */
 	padding:20px;
+	min-height: 680px;
 }
 
 /* Tabelle zentrieren, auch möglich mit class="center", aber zusätzliche Implementierung, um nicht jedesmal class="center" schreiben zu müssen */
@@ -89,18 +90,10 @@ li.active_fb > a,.nav.fb_side > li:not(.active_fb):hover > a{
 	color:#FFF;
 }
 
-#inner-starpl-top-nav > li > a:hover {
+#inner-starpl-top-nav > li > a:hover, #inner-starpl-top-nav > li > a:focus {
 	background-color: inherit;
 	color: #000;
 }
-/*
-h2 > a, td > a, .pagination > li > a {
-	color: #D92425;
-}
-
-h2 > a:hover, td > a:hover, .pagination > li > a:hover {
-	color: #000;
-} */
 
 div.center-block.box-content{
 	margin-top: 20px;
@@ -121,5 +114,10 @@ div.center-block.box-content{
 #arbeitSearchwords{
 	line-height: 1.75em;
 }
+
+#inner-starpl-top-nav > .nav_ur_0, #inner-starpl-top-nav > .nav_ur_1 {
+	display: none;
+}
+
 
 /*Bootstrap files generated with https://getbootstrap.com/docs/3.3/customize/ */
