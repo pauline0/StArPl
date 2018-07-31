@@ -16,9 +16,15 @@ div.box-content
 	/* border:1px solid #888; */
 	max-width:1113px;
 	/* background-color:#F8F8FF */
-	padding:20px;
-	min-height: 680px;
+	margin-top: 0px;
+	padding-top:40px;
+/* min-height: 680px; */
 }
+
+#starpl-content {
+	margin-top: 0px;
+}
+
 
 /* Tabelle zentrieren, auch möglich mit class="center", aber zusätzliche Implementierung, um nicht jedesmal class="center" schreiben zu müssen */
 th, tr
@@ -115,7 +121,7 @@ div.center-block.box-content{
 	line-height: 1.75em;
 }
 
-#inner-starpl-top-nav > .nav_ur_0, #inner-starpl-top-nav > .nav_ur_1 {
+#inner-starpl-top-nav > .nav_ur, #loginLink {
 	display: none;
 }
 

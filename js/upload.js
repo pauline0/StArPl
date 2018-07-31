@@ -44,7 +44,7 @@
 	fillDocentList();
 
 	user.getCurrent();
-	menu.init(user.current.Id);
+	menu.init(user.current.UserRole);
 });
 
 // wird beim hochladen aufgerufen

@@ -4,28 +4,25 @@
 		<meta charset="utf-8">
 		<title>StArPl - Login</title>
 		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
-		<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 		<script src="assets/js/bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
 		<script src="js/login.js"></script>
 		<link rel="icon" href="img/icon.ico">
 		<link rel="stylesheet" href="assets/css/bootstrap.min.css">
 		<link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
-		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"> -->
 		<link rel="stylesheet" href="css/own.css">
 	</head>
 
-	<?php
-		include('html/top_navigation.html');
-	?>
 
 	<body>
 		<div class="jumbotron center-block box-header" onclick="location.reload();" id="starpl-header">
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Login</h2>
 		</div>
+		<?php
+		include('html/top_navigation.html');
+		?>
 
-		<div class="center-block box-content">
+		<div class="center-block box-content" id="starpl-content" >
 			<form method="post" name="formLogin" id="formLogin" onsubmit="return login();">
 				<h3>Login</h3>
 				<div class="form-group">

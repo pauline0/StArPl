@@ -42,7 +42,8 @@ else if (isset($_REQUEST['create'])){
       include_once('html/create-new-tempuser.html');
     }
     else{
-      echo "STOP";
+      header("Location: /");
+      die();
     }
   }
   else
