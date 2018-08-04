@@ -1,8 +1,8 @@
 var searchword = {
    inputId: "#schlagwort",
-   readdIcon: ' <span class="glyphicon glyphicon-repeat " onclick="searchword.removeDeleteRequest($(this))"></span>',
-   removeNewIcon: ' <span class="glyphicon glyphicon-remove" onclick="searchword.removeNew($(this))"></span>',
-   deleteIcon: ' <span class="glyphicon glyphicon-remove" onclick="searchword.delete($(this))"></span>',
+   readdIcon: ' <span class="glyphicon glyphicon-repeat glyph-button" onclick="searchword.removeDeleteRequest($(this))"></span>',
+   removeNewIcon: ' <span class="glyphicon glyphicon-remove glyph-button" onclick="searchword.removeNew($(this))"></span>',
+   deleteIcon: ' <span class="glyphicon glyphicon-remove glyph-button" onclick="searchword.delete($(this))"></span>',
 
    getLabel : function(content, value, labelClass="default", additionalAttr=""){
   	return '<span value="'+value+

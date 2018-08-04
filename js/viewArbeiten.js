@@ -56,6 +56,11 @@ $(document).ready(function() {
 	);
 });
 
+window.onpopstate = function(event) {
+	getGetParas();
+	changeFachbereich($_GET().studiengang);
+};
+
 function showLogoutButton(){
 	$('#logoutLink').show();
 }
@@ -202,11 +207,13 @@ function changeFachbereich(selectedStudiengang)
 	reloadDataTable();
 	if ($_GET().edit)
 	{
-		window.history.replaceState('', '', '?edit&studiengang=' + selectedStudiengang);
+		//window.history.replaceState('', '', '?edit&studiengang=' + selectedStudiengang);
+	 window.history.pushState('', '', '?edit&studiengang=' + selectedStudiengang);
 	}
 	else
 	{
-		window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
+		//window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
+		window.history.pushState('', '', '?studiengang=' + selectedStudiengang);
 	}
 	resetArbeit();
 	$('.active_fb').removeClass('active_fb');
