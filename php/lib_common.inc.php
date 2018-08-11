@@ -16,25 +16,32 @@ function connect_to_db(){
 
 function find_user_in_db($user_name)
 {
-	$user_id = 0;
-  $query = "SELECT Id, UserRole FROM userLogin WHERE UserName=?";
+  $conn = connect_to_db();
+  $query = "SELECT Id, UserRole FROM userLogin WHERE UserName=?;";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("s", $user_name);
   $stmt->execute();
   $stmt->bind_result($user_id, $user_role);
-  $stmt->close();
-  return array($user_id, $user_role) ;
+  if ($stmt->fetch()){
+    $stmt->free_result();
+    $stmt->close();
+    return array($user_id, $user_role);
+  }
+  else {
+    $stmt->close();
+    return null;
+  }
 }
 
 function create_user_in_db($user_name, $user_role)
 {
-
+  $conn = connect_to_db();
   $query = "INSERT INTO userLogin (UserName, UserRole) VALUES (?,?);";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("si", $user_name, $user_role);
   $stmt->execute();
   $stmt->close();
-  return $conn->insert_id();
+  return $conn->insert_id;
 }
 
 function find_temporary_user_in_db($user_name){
@@ -54,6 +61,7 @@ function find_temporary_user_in_db($user_name){
     }
   }
   $stmt->close();
+  $user_id?:null;
   return $user_id;
 }
 

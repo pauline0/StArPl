@@ -15,6 +15,7 @@
 
 
 	<body>
+		<?= session_start(); ?>
 		<div class="jumbotron center-block box-header" onclick="location.reload();" id="starpl-header">
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Login</h2>
 		</div>
@@ -26,11 +27,11 @@
 			<form method="post" name="formLogin" id="formLogin" action="index.php?action=login">
 				<h3>Login</h3>
         <input type="hidden" name="FORM_LOGIN_PAGE" value="<?= $loginpage_url ?: "login.php" ?>" />
-        <input type="hidden" name="FORM_LOGIN_REDIRECTION" value="<?= $success_url ?: $_REQUEST["next"] ?>" />
+        <input type="hidden" name="FORM_LOGIN_REDIRECTION" value="<?= ($success_url ?: $_REQUEST["next"]?:"/?action=init")?>" />
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-						<input class="form-control" id="UserName" name="FORM_LOGIN_NAME" placeholder="Benutzername" required autofocus />
+						<input class="form-control" id="UserName" name="FORM_LOGIN_NAME" value="<?= $_SESSION["logindata"]["benutzername"]? $_SESSION["logindata"]["benutzername"] : "" ?>" placeholder="Benutzername" required autofocus />
 					</div>
 				</div>
 				<div class="form-group">
@@ -39,7 +40,15 @@
 						<input class="form-control" type="password" id="Password" name="FORM_LOGIN_PASS" placeholder="Passwort" required />
 					</div>
 				</div>
-				<div id='formLogin-divError' class="alert alert-danger">
+				<div id='formLogin-divError' class="alert alert-danger" <?=($_SESSION["logindata"]["errors"])? "" : "hidden"?>>
+					<ul>
+					<?php
+						foreach($_SESSION["logindata"]["errors"] as &$msg){
+							echo "<li>".$msg."</li>";
+					 	}
+					 	unset($_SESSION["logindata"]["errors"])
+					?>
+				</ul>
 				</div>
 				<div class="form-group">
 					<button type="submit" class="btn btn-success">

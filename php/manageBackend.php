@@ -1,6 +1,8 @@
 <?php
 header("Content-Type: application/json; charset=utf-8"); // JSON-Antwort
 include_once('config.php'); // Datenbankanbindung
+include_once('lib_auth.inc.php');
+include_once('user_utils.php');
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
@@ -8,124 +10,125 @@ error_log(implode(",",array_keys($_post)));
 error_log(implode($_post));
 $action = $_post['action'];
 error_log("Action: ".$action);
-error_log($_SESSION["StArPl_UserRole"]);
+error_log($_SESSION["starpl"]["user_role"]);
 if (!$conn->connect_error)
 {
 	switch ($action)
 	{
-		case 'loginHwr':
-		{
-			$userName = $_post['UserName'];
-			$password = $_post['Password'];
-			$userAnswer = array();
-			if (md5($userName) === '21232f297a57a5a743894a0e4a801fc3' && md5($password) === 'e36c1c30ed01795422f07944ebb65607')
-			{
-				$_SESSION['StArPl_session'] = md5('angucken4all');
-				$userRole = 0; // muss in DB manuell angepasst werden
-				$userId = checkIfUserExist($conn, $userName);
-				if (!$userId)
-				{
-					$userId = createUserInDb($conn, $userName, $userRole);
-				}
-				$_SESSION["StArPl_Id"] =  $userAnswer[0] = $userId;
-				$userAnswer[1] = 'Login erfolgreich';
-			}
-			else if (substr($userName, 0, 2) !== 's_')
-			{
-				//Muss auf iPool ausgelegt werden
-				// Outlook Web Access (HWR-Seite im Schnellzugriff)
-				$goalUrl = 'https://exchange.hwr-berlin.de/CookieAuth.dll?Logon';
-				$post = 'curl=Z2F&flags=0&forcedownlevel=0&formdir=1&trusted=0';
-				$post .= "&username=$userName&password=$password&SubmitCreds=Log+On";
-				$loginSuccessful = loginOpenExchange($goalUrl, $post);
-				if($loginSuccessful){
-					$userId = checkIfUserExist($conn, $userName);
-					if (!$userId)
-					{
-						$userRole = 1;
-						$userId = createUserInDb($conn, $userName, $userRole);
-					}
-					else
-					{
-						$userRole = getUserRole($conn, $userId);
-					}
-					$_SESSION["StArPl_UserRole"] = $userRole;
-					$_SESSION["StArPl_Id"] = $userAnswer[0] = $userId;
-					$userAnswer[1] = 'Login erfolgreich';
-				}
-				else{
-					$userAnswer[0] = 0;
-					$userAnswer[1] = 'Login fehlgeschlagen';
-				}
-			}
-			else if ($userName === 's_brandenburg' || $userName === 's_kleinvik' || $userName === 's_kochp')
-			{
-				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
-				$post = "name=$userName&password=$password";
-				$returnValueLogin = json_decode(fireCURL($url, $post));
-				if ($returnValueLogin->session != '')
-				{
-					$_SESSION['StArPl_session'] = $returnValueLogin->session;
-					$userId = checkIfUserExist($conn, $userName);
-					if (!$userId)
-					{
-						$userRole = 1; // muss in DB manuell angepasst werden
-						$userId = createUserInDb($conn, $userName, $userRole);
-					}
-					else
-					{
-						$userRole = getUserRole($conn, $userId);
-					}
-					$_SESSION["StArPl_Id"] = $userAnswer[0] = $userId;
-					$_SESSION["StArPl_UserRole"] = $userRole;
-					error_log($_SESSION["StArPl_UserRole"]);
-					$userAnswer[1] = 'Login erfolgreich';
-				}
-				else
-				{
-					$userAnswer[0] = 0;
-					$userAnswer[1] = 'Login fehlgeschlagen';
-				}
-			}
-			else if (substr($userName, 0, 2) === 's_'){
-				$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
-				$post = "name=$userName&password=$password";
-				$returnValueLogin = json_decode(fireCURL($url, $post));
-				if (true) //$returnValueLogin->session == '' ||
-				{
-					$_SESSION['StArPl_session'] = "test";//$returnValueLogin->session;
-					try {
-						$userId = findTemporaryUserInDB($conn, $userName);
-						$_SESSION['StArPl_UserRole'] = 0;
-						error_log($_SESSION['StArPl_UserRole']);
-						$userAnswer[0] = $_SESSION['StArPl_Id'] =  $userId;
-						$userAnswer[1] = 'Login erfolgreich';
-					}
-					catch(UserException $e)
-					{
-						$userAnswer[0] = 0;
-						$userAnswer[1] =  $e->getMessage();
-					}
-				}
-				else
-				{
-					$userAnswer[0] = 0;
-					$userAnswer[1] = 'Login fehlgeschlagen';
-				}
-			}
-			else
-			{
-				$userAnswer[0] = 0;
-				$userAnswer[1] = 'Login fehlgeschlagen';
-			}
-			echo json_encode($userAnswer);
-			break;
-		}
+		// case 'loginHwr':
+		// {
+		// 	$userName = $_post['UserName'];
+		// 	$password = $_post['Password'];
+		// 	$userAnswer = array();
+		// 	if (md5($userName) === '21232f297a57a5a743894a0e4a801fc3' && md5($password) === 'e36c1c30ed01795422f07944ebb65607')
+		// 	{
+		// 		$_SESSION['StArPl_session'] = md5('angucken4all');
+		// 		$userRole = 0; // muss in DB manuell angepasst werden
+		// 		$userId = checkIfUserExist($conn, $userName);
+		// 		if (!$userId)
+		// 		{
+		// 			$userId = createUserInDb($conn, $userName, $userRole);
+		// 		}
+		// 		$_SESSION["starpl"]["user_id"] =  $userAnswer[0] = $userId;
+		// 		$userAnswer[1] = 'Login erfolgreich';
+		// 	}
+		// 	else if (substr($userName, 0, 2) !== 's_')
+		// 	{
+		// 		//Muss auf iPool ausgelegt werden
+		// 		//Outlook Web Access (HWR-Seite im Schnellzugriff)
+		// 		$goalUrl = 'https://exchange.hwr-berlin.de/CookieAuth.dll?Logon';
+		// 		$post = 'curl=Z2F&flags=0&forcedownlevel=0&formdir=1&trusted=0';
+		// 		$post .= "&username=$userName&password=$password&SubmitCreds=Log+On";
+		// 		$loginSuccessful = loginOpenExchange($goalUrl, $post);
+		// 		if($loginSuccessful){
+		// 			$userId = checkIfUserExist($conn, $userName);
+		// 			if (!$userId)
+		// 			{
+		// 				$userRole = 1;
+		// 				$userId = createUserInDb($conn, $userName, $userRole);
+		// 			}
+		// 			else
+		// 			{
+		// 				$userRole = getUserRole($conn, $userId);
+		// 			}
+		// 			$_SESSION["starpl"]["user_role"] = $userRole;
+		// 			$_SESSION["starpl"]["user_id"] = $userAnswer[0] = $userId;
+		// 			$userAnswer[1] = 'Login erfolgreich';
+		// 		}
+		// 		else{
+		// 			$userAnswer[0] = 0;
+		// 			$userAnswer[1] = 'Login fehlgeschlagen';
+		// 		}
+		// 	}
+		// 	else if ($userName === 's_brandenburg' || $userName === 's_kleinvik' || $userName === 's_kochp')
+		// 	{
+		// 		$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
+		// 		$post = "name=$userName&password=$password";
+		// 		$returnValueLogin = json_decode(fireCURL($url, $post));
+		// 		if ($returnValueLogin->session != '')
+		// 		{
+		// 			$_SESSION['StArPl_session'] = $returnValueLogin->session;
+		// 			$userId = checkIfUserExist($conn, $userName);
+		// 			if (!$userId)
+		// 			{
+		// 				$userRole = 1; // muss in DB manuell angepasst werden
+		// 				$userId = createUserInDb($conn, $userName, $userRole);
+		// 			}
+		// 			else
+		// 			{
+		// 				$userRole = getUserRole($conn, $userId);
+		// 			}
+		// 			$_SESSION["starpl"]["user_id"] = $userAnswer[0] = $userId;
+		// 			$_SESSION["starpl"]["user_role"] = $userRole;
+		// 			error_log($_SESSION["starpl"]["user_role"]);
+		// 			$_SESSION['auth_token'] = "1234";
+		// 			$userAnswer[1] = 'Login erfolgreich';
+		// 		}
+		// 		else
+		// 		{
+		// 			$userAnswer[0] = 0;
+		// 			$userAnswer[1] = 'Login fehlgeschlagen';
+		// 		}
+		// 	}
+		// 	else if (substr($userName, 0, 2) === 's_'){
+		// 		$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
+		// 		$post = "name=$userName&password=$password";
+		// 		$returnValueLogin = json_decode(fireCURL($url, $post));
+		// 		if (true) //$returnValueLogin->session == '' ||
+		// 		{
+		// 			$_SESSION['StArPl_session'] = "test";//$returnValueLogin->session;
+		// 			try {
+		// 				$userId = findTemporaryUserInDB($conn, $userName);
+		// 				$_SESSION["starpl"]["user_role"] = 0;
+		// 				error_log($_SESSION["starpl"]["user_role"]);
+		// 				$userAnswer[0] = $_SESSION["starpl"]["user_id"] =  $userId;
+		// 				$userAnswer[1] = 'Login erfolgreich';
+		// 			}
+		// 			catch(UserException $e)
+		// 			{
+		// 				$userAnswer[0] = 0;
+		// 				$userAnswer[1] =  $e->getMessage();
+		// 			}
+		// 		}
+		// 		else
+		// 		{
+		// 			$userAnswer[0] = 0;
+		// 			$userAnswer[1] = 'Login fehlgeschlagen';
+		// 		}
+		// 	}
+		// 	else
+		// 	{
+		// 		$userAnswer[0] = 0;
+		// 		$userAnswer[1] = 'Login fehlgeschlagen';
+		// 	}
+		// 	echo json_encode($userAnswer);
+		// 	break;
+		// }
 		case 'formUpload':
 		{
-			if (isset($_SESSION['StArPl_Id']))
+			if (isset($_SESSION["starpl"]["user_id"]))
 			{
-				$fileId = saveDocument($conn, $_SESSION["StArPl_Id"], $_SESSION["StArPl_UserRole"], $_post);
+				$fileId = saveDocument($conn, $_SESSION["starpl"]["user_id"], $_SESSION["starpl"]["user_role"], $_post);
 				$userAnswer = array();
 				if ($fileId)
 				{
@@ -151,7 +154,7 @@ if (!$conn->connect_error)
 		}
 		case 'fileAjaxUpload':
 		{
-			if (isset($_SESSION['StArPl_Id']))
+			if (isset($_SESSION["starpl"]["user_id"]))
 			{
 				$Id = $_post['id'];
 				$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
@@ -169,11 +172,11 @@ if (!$conn->connect_error)
 		}
 		case 'formSaveArbeit':
 		{
-			if (isset($_SESSION['StArPl_Id']))
+			if (isset($_SESSION["starpl"]["user_id"]))
 			{
 				$id = $_post['id'];
 				$answer = array();
-				if($_SESSION["StArPl_UserRole"] >= 2 || isOwnerOfFile($conn, $id, $_SESSION['StArPl_Id']) ){
+				if($_SESSION["starpl"]["user_role"] >= 2 || isOwnerOfFile($conn, $id, $_SESSION["starpl"]["user_id"]) ){
 					$titel = $_post['titel'];
 					$student = $_post['student'];
 					$studiengang = $_post['studiengang'];
@@ -218,10 +221,10 @@ if (!$conn->connect_error)
 
 		case 'getPossibleDocents':
 		{
-			$userId = $_SESSION["StArPl_Id"];
+			$userId = $_SESSION["starpl"]["user_id"];
 			$result = $conn->query("SELECT `UserName`,  `userLogin`.`Id` from `studentAccounts` JOIN `userLogin` ON `userLogin`.`Id` = `DozentId` where `ExpiryDate` > NOW() AND `UserId` = '$userId';");
 			$possibleDocents = array();
-			$isStudentAccount = ($_SESSION["StArPl_UserRole"] === 0);
+			$isStudentAccount = ($_SESSION["starpl"]["user_role"] === 0);
 			while($row = $result->fetch_assoc()){
 				$possibleDocents[$row["UserName"]] = $row["Id"];
 			}
@@ -256,8 +259,8 @@ if (!$conn->connect_error)
 		}
 		case 'getAllArbeiten':
 		{
-			if (isset($_SESSION['StArPl_Id'])){
-				$userId = $_SESSION['StArPl_Id'];
+			if (isset($_SESSION["starpl"]["user_id"])){
+				$userId = $_SESSION["starpl"]["user_id"];
 				$queryStr = "SELECT `files`.* FROM `files` WHERE NOT `privat` OR `DozentId`='$userId' OR `releaseRequests`.ORDER BY `titel` ASC;";
 			}
 			else{
@@ -277,8 +280,8 @@ if (!$conn->connect_error)
 		}
 		case 'getCreatedUsers':{
 			$answer= array();
-			if (isset($_SESSION['StArPl_Id'])){
-				$userId = $_SESSION['StArPl_Id'];
+			if (isset($_SESSION["starpl"]["user_id"])){
+				$userId = $_SESSION["starpl"]["user_id"];
 				$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate`, `fileId`, `titel` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` LEFT JOIN `releaseRequests` ON `studentAccounts`.`Id` = studentAccountId LEFT JOIN `files` ON `files`.`id` = `fileId` where `DozentId` = '$userId';");
 				$allUsers = array();
 				while ($zeile = $result->fetch_assoc())
@@ -301,15 +304,15 @@ if (!$conn->connect_error)
 
 		case 'getOwnUser':
 		{
-			if (isset($_SESSION['StArPl_Id']))
+			if (isset($_SESSION["starpl"]["user_id"]))
 			{
-				$id = $_SESSION['StArPl_Id'];
+				$id = $_SESSION["starpl"]["user_id"];
 				$result = $conn->query("SELECT * FROM `userLogin` WHERE `Id`='$id';");
 				$answer = array();
 				while ($zeile = $result->fetch_assoc())
 				{
 					array_push($answer, $zeile);
-					$_SESSION['StArPl_UserRole'] = $zeile['UserRole'];
+					$_SESSION["starpl"]["user_role"] = $zeile['UserRole'];
 				}
 				echo json_encode($answer);
 			}
@@ -327,7 +330,7 @@ if (!$conn->connect_error)
 		}
 		case 'deleteArbeit': // gibt keine Rückmeldung aus
 		{
-			if (isset($_SESSION['StArPl_Id']))
+			if (isset($_SESSION["starpl"]["user_id"]))
 			{
 				// $userIdOfArbeit = 0;
 				$id = $_post['id'];
@@ -336,7 +339,7 @@ if (!$conn->connect_error)
 				// {
 				// 	$userIdOfArbeit = $zeile['userId'];
 				// }
-				if ($_SESSION['StArPl_UserRole'] >= 2 || isOwnerOfFile($conn,$id,$_SESSION['StArPl_Id']))
+				if ($_SESSION["starpl"]["user_role"] >= 2 || isOwnerOfFile($conn,$id,$_SESSION["starpl"]["user_id"]))
 				{
 					$conn->query("DELETE FROM `files` WHERE `Id`='$id';");
 					$conn->query("DELETE FROM `SearchWords` WHERE `FileId`='$id';");
@@ -366,8 +369,8 @@ if (!$conn->connect_error)
 		{
 			$fileId = $_post["id"];
 			$answer = array();
-			if ($fileId !== 0 && $_SESSION["StArPl_Id"]){
-				$authorizationLevel = checkIfAllowedToSeeFile($conn, $fileId, $_SESSION["StArPl_Id"]);
+			if ($fileId !== 0 && $_SESSION["starpl"]["user_id"]){
+				$authorizationLevel = checkIfAllowedToSeeFile($conn, $fileId, $_SESSION["starpl"]["user_id"]);
 				$answer[0] = $authorizationLevel;
 				if ($authorizationLevel > 0){
 					$answer[1] = getFileById($conn, $fileId);
@@ -384,7 +387,7 @@ if (!$conn->connect_error)
 		{
 			$fileId = $_post["id"];
 			$answer = array();
-			$userId = $_SESSION["StArPl_Id"];
+			$userId = $_SESSION["starpl"]["user_id"];
 			if ($fileId && $userId){
 				$updateFileStr = <<<EOT
 UPDATE `files`
@@ -408,10 +411,10 @@ EOT;
 
 		case 'formCreateUsers':
 		{
-			if(isset($_SESSION['StArPl_Id'])){
-				$activatorId = $_SESSION['StArPl_Id'];
+			if(isset($_SESSION["starpl"]["user_id"])){
+				$activatorId = $_SESSION["starpl"]["user_id"];
 				$userAnswer = array();
-				if($_SESSION["StArPl_Id"] > 0){
+				if($_SESSION["starpl"]["user_id"] > 0){
 					$name = $_post["username"];
 					$expiry = getExpiryDate($_post["datum_gueltig"],$_post["time_gueltig"], $maxAccountLifetime);
 					if(!$expiry){
@@ -458,10 +461,10 @@ EOT;
 
 		case 'formUpdateUsers':
 			{
-				if(isset($_SESSION['StArPl_Id'])){
-					$activatorId = $_SESSION['StArPl_Id'];
+				if(isset($_SESSION["starpl"]["user_id"])){
+					$activatorId = $_SESSION["starpl"]["user_id"];
 					$userAnswer = array();
-					if($_SESSION["StArPl_UserRole"] > 0){
+					if($_SESSION["starpl"]["user_role"] > 0){
 						$expiry = getExpiryDate($_post["datum_gueltig"],$_post["time_gueltig"], $maxAccountLifetime);
 						$accountId = $_post["id"];
 						if(!$expiry){
@@ -501,7 +504,7 @@ EOT;
 		case 'deleteStudentAccount':
 		{
 				$accountId = $_post['id'];
-				$dozentId = $_SESSION["StArPl_Id"];
+				$dozentId = $_SESSION["starpl"]["user_id"];
 				$answer = array();
 				$filesOfStudent = $conn->query("SELECT FileId FROM studentAccounts JOIN releaseRequests ON `studentAccounts`.`Id` = studentAccountId where `DozentId` = '$dozentId' AND `studentAccounts`.`Id`= '$accountId';");
 				while ($row = $filesOfStudent->fetch_assoc()){
@@ -586,7 +589,7 @@ function getStudentAccountForUser($conn, $userId, $dozentId = null){
 }
 
 function checkIfDozentOfStudentAccount($conn, $accountId, $dozentId){
-	$result = $conn->query("SELECT * FROM `studentAccounts` WHERE `Id` = 28 and `DozentId` = 3;");
+	$result = $conn->query("SELECT * FROM `studentAccounts` WHERE `Id` = ".$accountId." and `DozentId` = ".$dozentId.";");
 	return ($result->num_rows > 0);
 }
 
@@ -760,55 +763,6 @@ function deleteFilesForArbeit($id, $arrOfFiles=null){
 	}
 }
 
-
-function loginOpenExchange($url, $post)
-{
-	$curl = curl_init();
-	$headers = [];
-	$handleHeaders = function($curl, $header) use (&$headers)
-	  {
-	    $len = strlen($header);
-	    $header = explode(':', $header, 2);
-	    if (count($header) < 2) // ignore invalid headers
-	      return $len;
-
-	    $name = strtolower(trim($header[0]));
-	    if (!array_key_exists($name, $headers))
-	      $headers[$name] = [trim($header[1])];
-	    else
-	      $headers[$name][] = trim($header[1]);
-
-	    return $len;
-	  };
-	curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_POST, true);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
-	curl_setopt($curl, CURLOPT_HEADER, true);
-	curl_setopt($curl, CURLOPT_HEADERFUNCTION,$handleHeaders);
-	$curl_info= curl_getinfo($curl);
-	$response = curl_exec($curl);
-	$info = curl_getinfo($curl);
-	$header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-	$header = substr($response, 0, $header_size);
-	curl_close($curl);
-	$curl2 = curl_init();
-	$request_headers = array();
-	$cookie =  $headers["set-cookie"][0];
-	$request_headers[] = 'Cookie: '.$cookie;
-	$request_headers[] = 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0';
-	$headers = [];
-	curl_setopt($curl2, CURLOPT_URL, "https://exchange.hwr-berlin.de/");
-	curl_setopt($curl2,  CURLOPT_HTTPHEADER, $request_headers);
-	curl_setopt($curl2, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($curl2, CURLOPT_HEADER, true);
-	curl_setopt($curl2, CURLOPT_HEADERFUNCTION,$handleHeaders);
-	$response = curl_exec($curl2);
-	$redirect_url = curl_getinfo($curl2, CURLINFO_REDIRECT_URL);
-	$redirectSuccess = $redirect_url === "https://exchange.hwr-berlin.de/OWA";
-	return $redirectSuccess;
-}
-
 function saveDocument($conn, $userId, $userRole,$fileParams){
 	if (validateFileParams($fileParams)){
 		$id = $userId;
@@ -857,8 +811,15 @@ function validateFileParams($fileParams){
 }
 
 function isOwnerOfFile($conn,$fileId, $userId){
-	$rows = $conn->query("SELECT * from files where Id=$fileId AND UserId=$userId");
-	return ($rows->num_rows > 0);
+	$query = "SELECT Id FROM files WHERE Id=? AND UserId=$userId";
+	$stmt = $db->prepare($query);
+	$stmt->bind_param("ii", $fileId, $userId);
+	$stmt->execute();
+	$stmt->bind_result($id);
+	//$rows = $conn->query("SELECT * from files where Id=$fileId AND UserId=$userId");
+	if ($stmt->fetch()){
+		$stmt->free_result();
+	}
 }
 
 class UserException extends Exception { }

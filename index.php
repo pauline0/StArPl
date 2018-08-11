@@ -1,6 +1,6 @@
 <?php
 ini_set('display_errors', 'On');
-error_reporting(E_ALL | E_STRICT );
+error_reporting(E_ALL|E_STRICT );
 include_once('php/lib_auth.inc.php');
 include_once('php/lib_common.inc.php');
 session_start();
@@ -18,7 +18,7 @@ if (isset($_GET["action"]) && $_GET["action"] == "login"){
         add_loginError("Bitte wende dich an einen Dozenten.");
       }
     }
-    $_SESSION["StArPl"]["user_name"] = $_POST["FORM_LOGIN_NAME"];
+    $_SESSION["starpl"]["user_name"] = $_POST["FORM_LOGIN_NAME"];
   }
   else {
     add_loginError("Dieser Account kann nicht genutzt werden.");
@@ -26,53 +26,46 @@ if (isset($_GET["action"]) && $_GET["action"] == "login"){
   authenticate($block_students, "login.php", "index.php");
 }
 else {
+  if(isset($_GET["action"]) && $_GET["action"] == "init"){
+    if((isset($_SESSION["user"]) && $_SESSION["user"] !== "anonymous") && !isset($_SESSION["starpl"]["user_id"])){
+      if (isset($_SESSION["starpl"]["user_name"])){
+        if (substr($_SESSION["starpl"]["user_name"], 0, 2) === 's_'){
+          $user_id = find_temporary_user_in_db($_SESSION["starpl"]["user_name"]);
+          if ($user_id){
+            $_SESSION["starpl"]["user_id"] = $user_id;
+            $_SESSION["starpl"]["user_rolle"] = $ROLLE_STUDENT;
+          }
+          else {
+            reset_authentification();
+            authenticate();
+          }
+        }
+        else{
+          list($user_id, $user_role) = find_user_in_db($_SESSION["starpl"]["user_name"]);
+          if (!$user_id){
+            $user_id = create_user_in_db($_SESSION["starpl"]["user_name"], 1);
+            $user_role = 1;
+          }
+          $_SESSION["starpl"]["user_id"] = $user_id;
+          $_SESSION["starpl"]["user_role"] = $user_role;
+        }
+      }
+    }
+  }
   if (isset($_REQUEST['edit']))
   {
-      if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))
-      {
-          logout();
-      }
-      if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
-      {
-          include_once('html/viewArbeiten.html');
-      }
-      else
-      {
-          include_once('html/login.html');
-      }
+    authenticate_starpl("html/viewArbeiten.html","/?edit&", 1 );
   }
   else if (isset($_REQUEST['upload']))
   {
-      if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))
-      {
-          logout();
-      }
-      else if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
-      {
-          include_once('html/upload.html');
-      }
-      else
-      {
-          include_once('html/login.html');
-      }
+    authenticate_starpl("html/upload.html","/?upload&", 1 );
   }
   else if (isset($_REQUEST['create'])){
-    // if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout'])){
-    //   logout();
-    // }
-    // else if (isset($_SESSION['StArPl_Id']) && !isset($_REQUEST['logout']))
-    // {
-      authenticate_starpl(false, "/login.php", '/?upload');
-    // }
-    // else
-    // {
-    //     include_once('html/login.html');
-    // }
-
+    authenticate_starpl("html/create-new-tempuser.html","/?create&", 1 );
   }
   else
   {
-      if (isset($_SESSION['StArPl_Id']) && isset($_REQUEST['logout']))
+      if (isset($_SESSION["starpl"]["user_id"]) && isset($_REQUEST['logout']))
       {
           logout();
       }
@@ -83,15 +76,15 @@ else {
   }
 }
 
-function authenticate_starpl(){
+function authenticate_starpl($html_file, $success_url, $minlevel){
   // User is logged in, but StArPl session variables are not set
-  if((isset($_SESSION["user"]) && $_SESSION["user"] !== "anonymous") && !isset($_SESSION["StArPl"]["user_id"])){
+  if((isset($_SESSION["user"]) && $_SESSION["user"] !== "anonymous") && !isset($_SESSION["starpl"]["user_id"])){
     if (isset($_SESSION["starpl"]["user_name"])){
       if (substr($_SESSION["starpl"]["user_name"], 0, 2) === 's_'){
         $user_id = find_temporary_user_in_db($_SESSION["starpl"]["user_name"]);
         if ($user_id){
           $_SESSION["starpl"]["user_id"] = $user_id;
-          $_SESSION["starpl"]["user_rolle"] = $ROLLE_STUDENT;
+          $_SESSION["starpl"]["user_rolle"] = 0;
         }
         else {
           reset_authentification();
@@ -100,15 +93,20 @@ function authenticate_starpl(){
       else{
         list($user_id, $user_role) = find_user_in_db($_SESSION["starpl"]["user_name"]);
         if (!$user_id){
-          $user_id = create_user_in_db($_SESSION["starpl"]["user_name"], $ROLLE_DOZENT);
-          $user_role = $ROLLE_DOZENT;
+          $user_id = create_user_in_db($_SESSION["starpl"]["user_name"], 1);
+          $user_role = 1;
         }
         $_SESSION["starpl"]["user_id"] = $user_id;
         $_SESSION["starpl"]["user_role"] = $user_role;
       }
     }
   }
-    authenticate(false, "/login.php", '/?upload');
+  if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["starpl"]["user_role"] >= $minlevel){
+    include_once($html_file);
+  }
+  else {
+    authenticate(false, "/login.php", $success_url."action=init" );
+  }
 }
 
 // benötigt, um header-Problem mit jQuery.post() zu umgehen
