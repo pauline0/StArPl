@@ -4,7 +4,7 @@ include_once('config.php');
 $ROLLE_STUDENT=0;
 $ROLLE_DOZENT=1;
 $ROLLE_ADMIN=2;
-
+//$conn = connect_to_db();
 
 function connect_to_db(){
   $server = "localhost";
@@ -45,7 +45,8 @@ function create_user_in_db($user_name, $user_role)
 }
 
 function find_temporary_user_in_db($user_name){
-  $conn = connect_to_db();
+  global $conn;//$conn = connect_to_db();
+
   $query = "SELECT userLogin.Id , ExpiryDate, (`ExpiryDate` > NOW()) AS Valid FROM userLogin LEFT JOIN studentAccounts ON userLogin.Id = studentAccounts.UserId WHERE UserName=?";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("s", $user_name);
@@ -65,13 +66,71 @@ function find_temporary_user_in_db($user_name){
   return $user_id;
 }
 
+function reset_authentification(){
+  unset($_SESSION["starpl"]);
+}
 
+function get_user_role(){
 
+}
+//https://funcptr.net/2013/08/25/user-sessions,-what-data-should-be-stored-where-/
+function check_user_level($user_id, $level,$op=">="){
+  global $conn;//$conn = connect_to_db();
+  // $conn = connect_to_db();
+  $query = "SELECT * FROM userLogin WHERE Id=? AND (UserRole ".$op." $level)";
+  $stmt = $conn->prepare($query);
+  $stmt->bind_param("i", $user_id);
+  $stmt->execute();
+  if($stmt->fetch()){
+    $stmt->free_result();
+    $stmt->close();
+    return true;
+  }
+  else{
+    $stmt->close();
+    return false;
+  }
+}
 
-	// $result = $conn->query("SELECT `Id` FROM `userLogin` WHERE `UserName`='$userName';");
-	// while ($zeile = $result->fetch_assoc())
-	// {
-	// 	$userId = $zeile['Id'];
-	// }
-	// return $userId;
+function check_if_min_dozent($user_id){
+  global $ROLLE_DOZENT;
+  //return (isset($_SESSION["starpl"]["user_role"]) && $_SESSION["starpl"]["user_role"] > $ROLLE_DOZENT);
+  return (isset($user_id) && check_user_level($user_id, $ROLLE_DOZENT));
+}
+
+function check_if_min_admin($user_id){
+  global $ROLLE_ADMIN;
+  return (isset($user_id) && check_user_level($user_id, $ROLLE_ADMIN));
+}
+
+function check_if_min_student($user_id){
+  global $ROLLE_STUDENT;
+  return (isset($user_id) && check_user_level($user_id, $ROLLE_STUDENT));
+}
+
+function check_if_logged_in(){
+  return (isset($_SESSION["starpl"]["user_id"]));
+}
+
+function check_if_csrf(){
+  if (isset($_SESSION["csrf_token"]) && ((isset($_POST["csrf_token"]) && $_POST["csrf_token"] == $_SESSION["csrf_token"]) || (isset($_GET["csrf_token"]) && $_GET["csrf_token"] == $_SESSION["csrf_token"])))
+  {
+      error_log("success");
+      $_SESSION["csrf_detected"] = false;
+  }
+  else
+  {
+      error_log("no_success");
+      $_SESSION["csrf_detected"] = true;
+  }
+}
+
+function set_csrf_token(){
+  $csrf_token = md5(uniqid(rand(), true));
+  $_SESSION["csrf_token"] = $csrf_token;
+}
+
+function sanitize_input_data($data){
+
+}
 ?>

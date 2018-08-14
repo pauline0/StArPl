@@ -2,11 +2,11 @@
   <div class="container">
     <ul class="nav navbar-nav" id="inner-starpl-top-nav">
       <li class="active"><a href="/">StArPl</a></li>
-      <li data-role="1" class="nav_ur collapse"><a href="./?create"><span class="glyphicon glyphicon-education"></span> Studenten-Accounts</a></li>
-      <li data-role="0" class="nav_ur collapse" id="editLink"><a href="./?edit"><span class="glyphicon glyphicon-pencil"></span> Bearbeiten </a></li>
-      <li data-role="0" class="nav_ur collapse"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span> Hochladen </a></li>
-      <li id="loginLink" class="collapse"><a href="./?upload"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
-      <li data-role="0" id="logoutLink" class="nav_ur collapse" onclick="logout()"><a><span class="glyphicon glyphicon-log-out"></span> Abmelden </a></li>
+      <?= (check_if_logged_in() && check_if_min_dozent($_SESSION["starpl"]["user_id"]))? '<li data-role="1" class="nav_ur collapse"><a href="./?create"><span class="glyphicon glyphicon-education"></span> Studenten-Accounts</a></li>' :""; ?>
+      <?= (check_if_logged_in() && check_if_min_student($_SESSION["starpl"]["user_id"]))? '<li data-role="0" class="nav_ur collapse" id="editLink"><a href="./?edit"><span class="glyphicon glyphicon-pencil"></span><span class="hidden-xs"> Bearbeiten </span></a></li>' :""; ?>
+      <?= (check_if_logged_in() && check_if_min_student($_SESSION["starpl"]["user_id"]))? '<li data-role="0" class="nav_ur collapse"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span><span class="hidden-xs"> Hochladen </span></a></li>' :""; ?>
+      <?= (!check_if_logged_in())? '<li id="loginLink" class="collapse"><a href="./login.php"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>' :""; ?>
+      <?= (check_if_logged_in())? '<li data-role="0" id="logoutLink" class="nav_ur collapse" ><a href="./?action=logout"><span class="glyphicon glyphicon-log-out"></span><span class="hidden-xs"> Abmelden </span></a></li>' :""; ?>
     </ul>
   </div>
 </nav>
