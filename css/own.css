@@ -120,9 +120,13 @@ div.center-block.box-content{
 #arbeitSearchwords{
 	line-height: 1.75em;
 }
-
+/* 
 #inner-starpl-top-nav > .nav_ur, #loginLink {
 	display: none;
+} */
+
+.glyph-button {
+	top: 2px;
 }
 
 

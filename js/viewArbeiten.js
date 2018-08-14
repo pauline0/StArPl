@@ -6,7 +6,7 @@ var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
 // var ownUser = null;
 var arrayTableDetailledView = settings.detailTableColumns;
-
+var documentTable = null;
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllArbeiten();
@@ -16,21 +16,36 @@ $(document).ready(function() {
 	menu.init(user.current.UserRole);
 	$('#editLink').click(changeToEdit);
 
-	if ($_GET().edit)
-	{
-		// //$('#tableBodyDetailledArbeitEdit').hide();
-		// $('#buttonEdit').hide();
-		// //$(".logoutHidden").show();
-		// $('#editLink').hide();
-	}
+	edit_col_hidden = ($_GET().edit) ? true : false
+	// {
+	// 	// //$('#tableBodyDetailledArbeitEdit').hide();
+	// 	// $('#buttonEdit').hide();
+	// 	// //$(".logoutHidden").show();
+	// 	// $('#editLink').hide();
+	// }
 
-	$('#tableOverview').DataTable
+	documentTable = $('#tableOverview').DataTable
 	(
 		{
 			"language":
 			{
 				"url": "js/dataTableGerman.json"
-			}
+			},
+			"columnDefs": [
+				{
+						"targets": [0, -2],
+						"render": null
+				},
+				{
+						"targets": [-1],
+						"render": null,
+						"visible":edit_col_hidden
+				},
+				{
+					"targets": '_all',
+					"render": $.fn.dataTable.render.text()
+				}
+			]
 		}
 	);
 	if ($_GET().id)
@@ -75,10 +90,10 @@ function prepareTableHeader()
 		}
 	}
 
-	if ($_GET().edit)
-	{
+	// if ($_GET().edit)
+	// {
 		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
-	}
+	// }
 
 	strHtml += '</tr>';
 	$('#tableHeader')[0].innerHTML = strHtml;
@@ -101,8 +116,8 @@ function reloadDataTable()
 			}
 		}
 
-		if ($_GET().edit)
-		{
+		// if ($_GET().edit)
+		// {
 			if (user.current.Id == arraySelectedArbeiten[key].userId || user.current.UserRole == '2') // verfügt der User über Bearbeitungsrecht?
 			{
 				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].Id + ');"><span class="glyphicon glyphicon-pencil"></span></a>');
@@ -111,7 +126,7 @@ function reloadDataTable()
 			{
 				arrayOneRow.push('');
 			}
-		}
+		// }
 
 		arrayTableSelectedArbeiten.push(arrayOneRow);
 
@@ -181,9 +196,10 @@ function changeToEdit(event){
 		newstate += "&" + studiengang[0];
 	}
 	window.history.pushState('', '', newstate);
+	documentTable.column(-1).visible(true);
 	getGetParas();
-	prepareTableHeader();
-	reloadDataTable();
+	// prepareTableHeader();
+	// reloadDataTable();
 }
 
 
@@ -226,7 +242,7 @@ function changeFachbereich(selectedStudiengang)
 }
 
 function getSearchwordLabel(content, value, labelClass="default", additionalAttr=""){
-	return '<span value="'+value+'"class="label label-'+labelClass+'"'+ additionalAttr +'>' + content + '</span> '
+	return '<span class="label label-'+labelClass+'"'+ additionalAttr +'>' + htmlEncode(content) + '</span> '
 }
 
 function renderArbeitKeywords(searchWords){
@@ -277,7 +293,7 @@ function getArbeitTableHTML(selectedArbeit){
 		strHtml +=
 			'<tr>' +
 				'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
-				'<td>' + selectedArbeit[arrayTableDetailledView[subArray][0]] + '</td>' +
+				'<td>' + htmlEncode(selectedArbeit[arrayTableDetailledView[subArray][0]]) + '</td>' +
 			'</tr>';
 	}
 	if (user.current.UserRole == 2 || user.current.Id == selectedArbeit.userId)
@@ -313,7 +329,7 @@ function showArbeitDetailled(Id)
 	if (selectedArbeit != undefined)
 	{
 		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(selectedArbeit);
-		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + selectedArbeit.titel;
+		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.studiengang + '\');">' + selectedArbeit.studiengang + '</a> > ' + htmlEncode(selectedArbeit.titel);
 		$('#arbeitSearchwords')[0].innerHTML = renderSearchwords(selectedArbeit)
 		$('#divTableOverview').hide();
 		$('#tableDetailledArbeit').show();
@@ -438,8 +454,8 @@ function editArbeit()
 	var cuttedArrayTableDetailledView = arrayTableDetailledView.slice(0, -1);
 	var arrayTableEdit =
 	[
-		'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" value="' + selectedArbeit[arrayTableDetailledView[0][0]] + '" required />',
-		'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" value="' + selectedArbeit[arrayTableDetailledView[1][0]] + '" required />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" required />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" required />',
 		'<select class="form-control" id="studiengang" name="studiengang" required>' +
 			getOptionsForSelect("studiengang") +
 		'</select>',
@@ -452,9 +468,9 @@ function editArbeit()
 				getOptionsForSelect("typ") +
 		'</select>',
 
-		'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" value="' + selectedArbeit[arrayTableDetailledView[5][0]] + '" required pattern="[0-9]{4}" />',
-		'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" value="' + selectedArbeit[arrayTableDetailledView[6][0]] + '" required />',
-		'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" value="' + selectedArbeit[arrayTableDetailledView[7][0]] + '" required />'
+		'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" required pattern="[0-9]{4}" />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" required />',
+		'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" required />'
 	]
 	var strHtml = '';
 	for (var subArray in cuttedArrayTableDetailledView)
@@ -481,6 +497,7 @@ function editArbeit()
 		'</tr>';
 
 	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
+	initEditValues(selectedArbeit);
 	$('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
 	$('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
 	$('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
@@ -489,7 +506,13 @@ function editArbeit()
 	$('#editButtons').hide();
 	$('.editOnly').show	();
 	$("#input-b2").fileinput()
-	edit.displaySearchWords(selectedArbeit.searchWords)//displaySearchWordsEdit(selectedArbeit.searchWords);
+	edit.displaySearchWords(selectedArbeit.searchWords)
+}
+
+function initEditValues(selectedArbeit){
+	for (var i = 0; i < arrayTableDetailledView.length; i++){
+		$("input[name='" + arrayTableDetailledView[i][0] +"']").val(selectedArbeit[arrayTableDetailledView[i][0]])
+	}
 }
 
 // verlässt den Bearbeitungsmodus
@@ -501,6 +524,7 @@ function resetArbeit()
 	$('.editOnly').hide();
 	return false;
 }
+
 
 function deleteFile(delButton,id){
 	fileElement = delButton.parent();
@@ -540,13 +564,13 @@ function saveArbeit()
 	var delSW = [];
 	var delFiles = [];
 	$(".addSW").each(function (idx,elem){
-	 	var value = $(elem).attr("value");
+	 	var value = $(elem).data("sw");
 		if (value){
 			addSW.push(value.trim());
 		}
 	});
 	$(".delSW").each(function (idx, elem){
-		var value = $(elem).attr("value");
+		var value = $(elem).data("sw");
 		if (value){
 			delSW.push(value.trim());
 		}
