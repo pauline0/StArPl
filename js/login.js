@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	getGetParas();
 	initializeForm();
-	$('#formLogin-divError').hide();
+	// $('#formLogin-divError').hide();
 	menu.init();
 });
 

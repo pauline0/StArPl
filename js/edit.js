@@ -4,23 +4,22 @@ var searchword = {
    removeNewIcon: ' <span class="glyphicon glyphicon-remove glyph-button" onclick="searchword.removeNew($(this))"></span>',
    deleteIcon: ' <span class="glyphicon glyphicon-remove glyph-button" onclick="searchword.delete($(this))"></span>',
 
-   getLabel : function(content, value, labelClass="default", additionalAttr=""){
-  	return '<span value="'+value+
-              '"class="label label-'+labelClass+'"'+
+   getLabel : function(value, icon, labelClass="default", additionalAttr=""){
+  	return '<span data-sw="" class="label label-'+labelClass+'"'+
               additionalAttr +'>' +
-                content +
+                htmlEncode(value) + icon +
             '</span> '
   },
 
   delete: function(delButton){
   	swElement = delButton.parent();
   	swElement.addClass("delSW");
-  	swElement.html(swElement.text() + searchword.readdIcon);
+  	swElement.html(htmlEncode(swElement.text()) + searchword.readdIcon);
   },
 
   removeDeleteRequest: function(swElement){
   	swElement.parent().removeClass("delSW");
-  	swElement.parent().html(swElement.parent().text() + searchword.deleteIcon );
+  	swElement.parent().html(htmlEncode(swElement.parent().text()) + searchword.deleteIcon );
   },
 
   removeNew : function(elem){
@@ -28,29 +27,27 @@ var searchword = {
   },
 
   add: function(){
-  	var text = $(this.inputId)[0].value;
+  	var text = $(this.inputId)[0].value.replace("'", "\'");
   	if (text === ""){
   		return;
   	}
+    var value = text.replace('"', '\"');
 
-  	//check if searchword already exists for this document
-  	var swExists = ($(edit.swDiv).children("[value='"+ text +"']").length > 0);
-  	if (!swExists){
-  		var additionalAttr = "id='sw_"+ $(edit.swDiv).children().length.toString() +"'"
-  		var swContent = text + searchword.removeNewIcon;
-  		var newSwElem = searchword.getLabel(swContent,text, "default addSW", additionalAttr)
-  		$(edit.swDiv).append(newSwElem);
+		var additionalAttr = "id='sw_"+ $("#"+edit.swDiv).children().length.toString() +"'"
+		var swContent = text + searchword.removeNewIcon;
+    searchword.append(value, searchword.removeNewIcon, "default addSW", additionalAttr );
+		$(this.inputId)[0].value = "";
+  },
 
-  		$(this.inputId)[0].value = "";
-  	}
-  	else{
-  		alert(settings.errors.duplicateSearchword);
-  	}
+  append: function(value,icon, cssClasses, additionalAttr){
+    var newSwElem = searchword.getLabel(value,icon, cssClasses, additionalAttr)
+    $("#"+edit.swDiv).append(newSwElem);
+    document.getElementById(edit.swDiv).lastElementChild.dataset.sw = value;
   }
 }
 
 var edit = {
-  swDiv:"#arbeitSearchwords",
+  swDiv:"arbeitSearchwords",
 
   renderFiles : function(selectedArbeit){
   	var strHtml = "";
@@ -68,14 +65,13 @@ var edit = {
   },
 
   displaySearchWords : function(searchWords){
-  	$(this.swDiv).empty();
+  	$("#" + this.swDiv).empty();
   	var searchWordHtml = settings.text.searchwords+": "
   	$(searchWords).each(function(i, e){
   		var swContent = e + searchword.deleteIcon;
   		var additionalAttr = 'id="sw_'+ i.toString() +'"';
-  		searchWordHtml += searchword.getLabel(swContent,e, "default", additionalAttr)
+      searchword.append(e, searchword.deleteIcon, "default", additionalAttr);
   	})
-  	$(this.swDiv).html(searchWordHtml);
   }
 
 }

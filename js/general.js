@@ -86,6 +86,17 @@ var user = {
 
 }
 
+function htmlEncode(value){
+	// return $('<div/>').text(value).html();
+	return value.
+	replace(/&/g, '&amp;').
+	replace( /([^\#-~| |!])/g, function(value) {
+		return '&#' + value.charCodeAt(0) + ';';
+	}).
+	replace(/</g, '&lt;').
+	replace(/>/g, '&gt;');
+}
+
 var settings = {
  	detailTableColumns :
 	[
@@ -102,14 +113,14 @@ var settings = {
 
 	viewAllTableColumns : [
 		//Name des Attributs, Tabellen Header Name, Funktion zum Rendern
-		['titel', 'Titel', (arbeit) => { return '<a onclick="showArbeitDetailled(' + arbeit.Id + ');">' + arbeit.titel + '</a>' }],
+		['titel', 'Titel', (arbeit) => { return '<a onclick="showArbeitDetailled(' + arbeit.Id + ');">' + htmlEncode(arbeit.titel) + '</a>' }],
 		['student', 'Student', null],
 		['studiengang', 'Studiengang', null],
 		['language', 'Sprache', null],
 		['artOfArbeit', 'Art der Arbeit', null],
 		['jahrgang', 'Jahrgang', null],
 		['betreuer', 'Betreuer', null],
-		['firma', "Firma", 	(arbeit) => {return arbeit.firma + '<span class="hidden">' + arbeit.searchWords.join(" ") + "</span>"}]
+		['firma', "Firma", 	(arbeit) => {return htmlEncode(arbeit.firma) + '<span class="hidden">' + htmlEncode(arbeit.searchWords.join(" ")) + "</span>"}]
 	],
 
 	select : {
