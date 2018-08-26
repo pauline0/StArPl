@@ -92,11 +92,11 @@ li.active_fb > a,.nav.fb_side > li:not(.active_fb):hover > a{
 	margin-bottom: 0px;
 }
 
-#inner-starpl-top-nav > li > a {
+.inner-starpl-top-nav > li > a {
 	color:#FFF;
 }
 
-#inner-starpl-top-nav > li > a:hover, #inner-starpl-top-nav > li > a:focus {
+.inner-starpl-top-nav > li > a:hover, .inner-starpl-top-nav > li > a:focus {
 	background-color: inherit;
 	color: #000;
 }
@@ -120,7 +120,7 @@ div.center-block.box-content{
 #arbeitSearchwords{
 	line-height: 1.75em;
 }
-/* 
+/*
 #inner-starpl-top-nav > .nav_ur, #loginLink {
 	display: none;
 } */
@@ -129,5 +129,16 @@ div.center-block.box-content{
 	top: 2px;
 }
 
+.inner-starpl-top-nav > .active, .loginLink.active {
+	/* border-radius: 10px; */
+	background-color: #af1d1d;
+}
+
+#starplLink{
+}
+
+.right-menu {
+	float: right;
+}
 
 /*Bootstrap files generated with https://getbootstrap.com/docs/3.3/customize/ */
