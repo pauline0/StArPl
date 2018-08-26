@@ -15,19 +15,26 @@
 
 
 	<body>
-		<?= session_start(); ?>
+		<?php session_start();
+		include("php/lib_common.inc.php");
+		if(check_if_logged_in()){
+			header("Location: /");
+			exit;
+		}
+		?>
 		<div class="jumbotron center-block box-header" onclick="location.reload();" id="starpl-header">
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Login</h2>
 		</div>
 		<?php
+		$login_active = true;
 		include('html/top_navigation.html');
 		?>
 
 		<div class="center-block box-content" id="starpl-content" >
-			<form method="post" name="formLogin" id="formLogin" action="index.php?action=login">
+			<form method="post" name="formLogin" id="formLogin" action="/?action=login">
 				<h3>Login</h3>
         <input type="hidden" name="FORM_LOGIN_PAGE" value="<?= $loginpage_url ?: "login.php" ?>" />
-        <input type="hidden" name="FORM_LOGIN_REDIRECTION" value="<?= ($success_url ?: $_REQUEST["next"]?:"/?action=init")?>" />
+        <input type="hidden" name="FORM_LOGIN_REDIRECTION" value="<?= ($success_url ?: $_REQUEST["next"]?:"")?>" />
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>

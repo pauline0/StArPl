@@ -21,10 +21,11 @@
 		</div>
 
 		<?php
+			$upload_active = true;
 			include('html/top_navigation.html');
 		?>
 		<div class="center-block box-content" id="starpl-content">
-			<form method="post" action="." name="formUpload" id="formUpload" onsubmit="return upload();" enctype="multipart/form-data">
+			<form method="post" action="." name="formUpload" id="formUpload" enctype="multipart/form-data">
 				<h3>Hochladen von Arbeiten</h3>
 				<div class="form-group">
 					<div class="input-group">
@@ -107,7 +108,7 @@
 					<label><input type="checkbox" id="sperrvermerk" name="sperrvermerk" onChange="changeSperrvermerk();" value="0">Sperrvermerk</label>
 				</div>
 				<div class="form-group" id="divFileInputUploadArbeit">
-					<input id="FileInputUploadArbeit" name="FileInputUploadArbeit[]" type="file" class="file-loading" required multiple />
+					<input id="FileInputUploadArbeit" name="FileInputUploadArbeit[]" type="file" class="file-loading" required multiple maxFileSize="2000" />
 				</div>
 				<div class="form-group">
 					<div class="input-group">
@@ -134,10 +135,21 @@
 						<textarea class="form-control" id="kurzfassung" name="kurzfassung" placeholder="Kurzfassung" rows="5" required></textarea>
 					</div>
 				</div>
+				<input hidden name="csrf_token" id="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 				<!-- <div id='formUpload-divError' class="alert alert-danger hide"> -->
 				<!-- </div> -->
+				<?php
+					if (get_user_role($_SESSION["starpl"]["user_id"]) === $ROLLE_STUDENT){
+							echo '<div class="form-group">
+								<div class="input-group">
+									<span class="input-group-addon" title="Diese Lehrkraft wird die Arbeit überprüfen und veröffentlichen."> Zuständige Lehrkraft</span>
+									<select class="form-control" id="selectDocents" name="docentId" required></select>
+								</div>
+							</div>';
+					}
+				?>
+
 				<div class="form-group">
-					<select id="selectDocents" name="docentId" ></select>
 					<button type="submit" class="btn btn-success">
 						<span class="glyphicon glyphicon-upload"></span> Hochladen
 					</button>

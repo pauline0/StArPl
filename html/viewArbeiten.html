@@ -25,6 +25,9 @@
 		</div>
 
 		<?php
+			if (isset($_REQUEST["edit"])){
+				$edit_active = true;
+			}
 			include('html/top_navigation.html');
 		?>
 
@@ -55,8 +58,10 @@
 				</div>
 				<div class="col-md-9">
 					<h2 id="headLineStudiengang"></h2>
+
 					<div id="divTableOverview">
-						<table class="table table-stripped table-hover table-bordered table-condensed" id="tableOverview">
+						<?= (check_if_logged_in()) ? '<a id="toggleDocumentSelection">Nur meine Arbeiten anzeigen </a>': '' ?>
+						<table style="width:100%" class="table table-stripped table-hover table-bordered table-condensed" id="tableOverview" >
 							<thead id="tableHeader"></thead>
 							<tbody></tbody>
 						</table>
@@ -86,7 +91,7 @@
 						</div>
 					</form>
 					<div class="form-group text-right" id="editButtons">
-						<button onclick="deleteArbeit();" class="btn btn-danger">
+						<button onclick="deleteArbeit();" class="btn btn-danger myhidden" >
 							<span class="glyphicon glyphicon-remove"></span> Löschen
 						</button>
 						<button onclick="editArbeit();" class="btn btn-primary">
@@ -95,9 +100,10 @@
 					</div>
 					<div class="form-group text-right hidden" id="buttonPublishDoc">
 						<button class="btn btn-success">
-							<span class="glyphicon glyphicon-ok"></span> Freischalten
+							<span class="glyphicon glyphicon-ok" ></span> Freischalten
 						</button>
 					</div>
+					<input name="csrf_token" id="csrf_token" hidden value="<?= $_SESSION['csrf_token'] ?>" />
 				</div>
 			</div>
 		</div>

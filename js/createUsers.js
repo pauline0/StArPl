@@ -2,7 +2,24 @@
 $(document).ready(function() {
   $('[data-toggle="tooltip"]').tooltip();
   prepareTableHeader();
-  $('#tableExistingUsers').DataTable();
+  $('#tableExistingUsers').DataTable(
+  		{
+  			"language":
+  			{
+  				"url": "js/dataTableGerman.json"
+  			},
+  			"columnDefs": [
+  				{
+  						"targets": [1,-1, -2],
+  						"render": null
+  				},
+  				{
+  					"targets": '_all',
+  					"render": $.fn.dataTable.render.text()
+  				}
+  			]
+  		}
+  	);
   reloadUserTable();
   setDateDefault();
   user.getCurrent();
@@ -50,7 +67,7 @@ function getReleasableFilesHtml(releaseRequests){
   var strHtml = "";
   for (var i = 0; i < releaseRequests.length; i++){
     strHtml += "<a href='/?hidden&id=" + releaseRequests[i][0] + "'>";
-    strHtml +=  releaseRequests[i][1] + '</a> <br>';
+    strHtml +=  htmlEncode(releaseRequests[i][1]) + '</a> <br>';
   }
   return strHtml;
 }
@@ -59,6 +76,9 @@ function seeHiddenDoc(id){
   window.history.replaceState('', '', '?hidden&id=' + id);
 }
 
+function getCsrfToken(){
+	return $("#csrf_token").val();
+}
 
 function sendFormData(data){
   var returnValue = false;
@@ -99,6 +119,7 @@ function sendFormData(data){
 function createUser(event){
   event.preventDefault();
   var data = $('#formCreateUsers').serialize();
+  data += "&csrf_token=" + getCsrfToken();
   data += '&action=formCreateUsers';
   returnValue = sendFormData(data);
   if (returnValue){
@@ -112,6 +133,7 @@ function updateUser(event, id){
   event.preventDefault();
   var returnValue = false;
   var data = $('#formCreateUsers').serialize();
+  data += "&csrf_token=" + getCsrfToken();
   data += '&action=formUpdateUsers&id=' + id;;
   returnValue = sendFormData(data);
   if (returnValue){
@@ -146,7 +168,8 @@ function deleteUserAccount(id)
   	var data =
   	{
   		action: "deleteStudentAccount",
-      id: id
+      id: id,
+      csrf_token: getCsrfToken()
     }
     ;
   	$.ajaxSetup({async: false});

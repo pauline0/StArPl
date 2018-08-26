@@ -20,6 +20,7 @@
       <h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Studenten-Accounts</h2>
     </div>
 		<?php
+			$create_active = true;
 			include('html/top_navigation.html');
 		?>
 		<div class="center-block box-content" id="starpl-content" >
@@ -61,6 +62,7 @@
 			<div id="formUser-divSuccess" class="alert alert-success collapse">
 			</div>
 
+			<input name="csrf_token" id="csrf_token" hidden value="<?= $_SESSION['csrf_token'] ?>" />
     </div>
   </body>
 </html>
