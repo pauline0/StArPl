@@ -1,8 +1,8 @@
 <?php
 header("Content-Type: application/json; charset=utf-8"); // JSON-Antwort
-include_once('config.php'); // Datenbankanbindung
+//include_once('config.php'); // Datenbankanbindung
 include_once('lib_auth.inc.php');
-include_once('user_utils.php');
+include_once('lib_common.inc.php');
 session_start(); // starten der PHP-Session
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
@@ -10,125 +10,16 @@ error_log(implode(",",array_keys($_post)));
 error_log(implode($_post));
 $action = $_post['action'];
 error_log("Action: ".$action);
-error_log($_SESSION["starpl"]["user_role"]);
+check_if_csrf();
 if (!$conn->connect_error)
 {
 	switch ($action)
 	{
-		// case 'loginHwr':
-		// {
-		// 	$userName = $_post['UserName'];
-		// 	$password = $_post['Password'];
-		// 	$userAnswer = array();
-		// 	if (md5($userName) === '21232f297a57a5a743894a0e4a801fc3' && md5($password) === 'e36c1c30ed01795422f07944ebb65607')
-		// 	{
-		// 		$_SESSION['StArPl_session'] = md5('angucken4all');
-		// 		$userRole = 0; // muss in DB manuell angepasst werden
-		// 		$userId = checkIfUserExist($conn, $userName);
-		// 		if (!$userId)
-		// 		{
-		// 			$userId = createUserInDb($conn, $userName, $userRole);
-		// 		}
-		// 		$_SESSION["starpl"]["user_id"] =  $userAnswer[0] = $userId;
-		// 		$userAnswer[1] = 'Login erfolgreich';
-		// 	}
-		// 	else if (substr($userName, 0, 2) !== 's_')
-		// 	{
-		// 		//Muss auf iPool ausgelegt werden
-		// 		//Outlook Web Access (HWR-Seite im Schnellzugriff)
-		// 		$goalUrl = 'https://exchange.hwr-berlin.de/CookieAuth.dll?Logon';
-		// 		$post = 'curl=Z2F&flags=0&forcedownlevel=0&formdir=1&trusted=0';
-		// 		$post .= "&username=$userName&password=$password&SubmitCreds=Log+On";
-		// 		$loginSuccessful = loginOpenExchange($goalUrl, $post);
-		// 		if($loginSuccessful){
-		// 			$userId = checkIfUserExist($conn, $userName);
-		// 			if (!$userId)
-		// 			{
-		// 				$userRole = 1;
-		// 				$userId = createUserInDb($conn, $userName, $userRole);
-		// 			}
-		// 			else
-		// 			{
-		// 				$userRole = getUserRole($conn, $userId);
-		// 			}
-		// 			$_SESSION["starpl"]["user_role"] = $userRole;
-		// 			$_SESSION["starpl"]["user_id"] = $userAnswer[0] = $userId;
-		// 			$userAnswer[1] = 'Login erfolgreich';
-		// 		}
-		// 		else{
-		// 			$userAnswer[0] = 0;
-		// 			$userAnswer[1] = 'Login fehlgeschlagen';
-		// 		}
-		// 	}
-		// 	else if ($userName === 's_brandenburg' || $userName === 's_kleinvik' || $userName === 's_kochp')
-		// 	{
-		// 		$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
-		// 		$post = "name=$userName&password=$password";
-		// 		$returnValueLogin = json_decode(fireCURL($url, $post));
-		// 		if ($returnValueLogin->session != '')
-		// 		{
-		// 			$_SESSION['StArPl_session'] = $returnValueLogin->session;
-		// 			$userId = checkIfUserExist($conn, $userName);
-		// 			if (!$userId)
-		// 			{
-		// 				$userRole = 1; // muss in DB manuell angepasst werden
-		// 				$userId = createUserInDb($conn, $userName, $userRole);
-		// 			}
-		// 			else
-		// 			{
-		// 				$userRole = getUserRole($conn, $userId);
-		// 			}
-		// 			$_SESSION["starpl"]["user_id"] = $userAnswer[0] = $userId;
-		// 			$_SESSION["starpl"]["user_role"] = $userRole;
-		// 			error_log($_SESSION["starpl"]["user_role"]);
-		// 			$_SESSION['auth_token'] = "1234";
-		// 			$userAnswer[1] = 'Login erfolgreich';
-		// 		}
-		// 		else
-		// 		{
-		// 			$userAnswer[0] = 0;
-		// 			$userAnswer[1] = 'Login fehlgeschlagen';
-		// 		}
-		// 	}
-		// 	else if (substr($userName, 0, 2) === 's_'){
-		// 		$url = 'https://webmail.stud.hwr-berlin.de/ajax/login?action=login';
-		// 		$post = "name=$userName&password=$password";
-		// 		$returnValueLogin = json_decode(fireCURL($url, $post));
-		// 		if (true) //$returnValueLogin->session == '' ||
-		// 		{
-		// 			$_SESSION['StArPl_session'] = "test";//$returnValueLogin->session;
-		// 			try {
-		// 				$userId = findTemporaryUserInDB($conn, $userName);
-		// 				$_SESSION["starpl"]["user_role"] = 0;
-		// 				error_log($_SESSION["starpl"]["user_role"]);
-		// 				$userAnswer[0] = $_SESSION["starpl"]["user_id"] =  $userId;
-		// 				$userAnswer[1] = 'Login erfolgreich';
-		// 			}
-		// 			catch(UserException $e)
-		// 			{
-		// 				$userAnswer[0] = 0;
-		// 				$userAnswer[1] =  $e->getMessage();
-		// 			}
-		// 		}
-		// 		else
-		// 		{
-		// 			$userAnswer[0] = 0;
-		// 			$userAnswer[1] = 'Login fehlgeschlagen';
-		// 		}
-		// 	}
-		// 	else
-		// 	{
-		// 		$userAnswer[0] = 0;
-		// 		$userAnswer[1] = 'Login fehlgeschlagen';
-		// 	}
-		// 	echo json_encode($userAnswer);
-		// 	break;
-		// }
 		case 'formUpload':
 		{
-			if (isset($_SESSION["starpl"]["user_id"]))
+			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
 			{
-				$fileId = saveDocument($conn, $_SESSION["starpl"]["user_id"], $_SESSION["starpl"]["user_role"], $_post);
+				$fileId = saveDocument($conn,$_SESSION["starpl"]["user_id"], check_if_min_dozent($_SESSION["starpl"]["user_id"]), $_post);
 				$userAnswer = array();
 				if ($fileId)
 				{
@@ -154,29 +45,31 @@ if (!$conn->connect_error)
 		}
 		case 'fileAjaxUpload':
 		{
-			if (isset($_SESSION["starpl"]["user_id"]))
+			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false )
 			{
 				$Id = $_post['id'];
-				$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
-				$dirUpload = '../upload';
-				$pathNewPics = "$dirUpload/$Id/";
-				mkdir("$pathNewPics", 0755, true);
-				foreach($_FILES as $key => $value)
-				{
-					$tmpName = $value['tmp_name'];
-					$name = $value['name'];
-					move_uploaded_file($tmpName, $pathNewPics . $name);
+				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || isOwnerOfFile($conn, $Id, $_SESSION["starpl"]["user_id"]) ){
+					$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
+					$dirUpload = '../upload';
+					$pathNewPics = "$dirUpload/$Id/";
+					mkdir("$pathNewPics", 0755, true);
+					foreach($_FILES as $key => $value)
+					{
+						$tmpName = $value['tmp_name'];
+						$name = $value['name'];
+						move_uploaded_file($tmpName, $pathNewPics . $name);
+					}
 				}
 			}
 			break;
 		}
 		case 'formSaveArbeit':
 		{
-			if (isset($_SESSION["starpl"]["user_id"]))
+			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
 			{
 				$id = $_post['id'];
 				$answer = array();
-				if($_SESSION["starpl"]["user_role"] >= 2 || isOwnerOfFile($conn, $id, $_SESSION["starpl"]["user_id"]) ){
+				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || isOwnerOfFile($conn, $id, $_SESSION["starpl"]["user_id"]) ){
 					$titel = $_post['titel'];
 					$student = $_post['student'];
 					$studiengang = $_post['studiengang'];
@@ -187,22 +80,25 @@ if (!$conn->connect_error)
 					$firma = $_post['firma'];
 					$kurzfassung = $_post['kurzfassung'];
 					$deleteSearchwords = implode(json_decode($_post['deleteSW']),"','");
+					error_log($deleteSearchwords);
 					$addSearchwords = json_decode($_post['addSW']);
 					$conn->query("UPDATE `files` SET `titel`='$titel', `student`='$student', `studiengang`='$studiengang', `language`='$language', `artOfArbeit`='$artOfArbeit', `jahrgang`='$jahrgang', `betreuer`='$betreuer', `firma`='$firma', `kurzfassung`='$kurzfassung' WHERE `Id`='$id';");
 					$conn->query("DELETE FROM `SearchWords` where `FileId` = '$id' AND `Word` IN ('$deleteSearchwords');");
 					if ($addSearchwords){
 						$addSearchwords = array_unique($addSearchwords);
+						error_log($addSearchwords);
 						$existingSearchwords = getAllSearchWordsForDocument($conn, $id);
 						foreach ($addSearchwords as $value)
 						{
 							if (!in_array($value, $existingSearchwords)){
-								error_log("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$id', '$value');");
 								$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$id', '$value');");
 							}
 						}
 					}
-					$deleteFiles = $_post["delFiles"];
+					$deleteFiles = json_decode($_post["delFiles"]);
 					deleteFilesForArbeit($id, $deleteFiles);
+					$answer[0] = 1;
+					$answer[1] = "Löschen erfolgreich";
 				}
 				else{
 					$answer[0] = 0;
@@ -224,7 +120,7 @@ if (!$conn->connect_error)
 			$userId = $_SESSION["starpl"]["user_id"];
 			$result = $conn->query("SELECT `UserName`,  `userLogin`.`Id` from `studentAccounts` JOIN `userLogin` ON `userLogin`.`Id` = `DozentId` where `ExpiryDate` > NOW() AND `UserId` = '$userId';");
 			$possibleDocents = array();
-			$isStudentAccount = ($_SESSION["starpl"]["user_role"] === 0);
+			$isStudentAccount = check_user_level($userId, 0, "=");
 			while($row = $result->fetch_assoc()){
 				$possibleDocents[$row["UserName"]] = $row["Id"];
 			}
@@ -275,6 +171,7 @@ if (!$conn->connect_error)
 				$allArbeiten[$i]['dateien'] = getFileNamesArray($zeile['Id']);
 				$i++;
 			}
+
 			echo json_encode($allArbeiten);
 			break;
 		}
@@ -312,7 +209,7 @@ if (!$conn->connect_error)
 				while ($zeile = $result->fetch_assoc())
 				{
 					array_push($answer, $zeile);
-					$_SESSION["starpl"]["user_role"] = $zeile['UserRole'];
+					// $_SESSION["starpl"]["user_role"] = $zeile['UserRole'];
 				}
 				echo json_encode($answer);
 			}
@@ -330,16 +227,11 @@ if (!$conn->connect_error)
 		}
 		case 'deleteArbeit': // gibt keine Rückmeldung aus
 		{
-			if (isset($_SESSION["starpl"]["user_id"]))
+			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
 			{
-				// $userIdOfArbeit = 0;
 				$id = $_post['id'];
-				// $result = $conn->query("SELECT `userId` FROM `files` WHERE `Id`='$id';");
-				// while ($zeile = $result->fetch_assoc())
-				// {
-				// 	$userIdOfArbeit = $zeile['userId'];
-				// }
-				if ($_SESSION["starpl"]["user_role"] >= 2 || isOwnerOfFile($conn,$id,$_SESSION["starpl"]["user_id"]))
+				$user_id = $_SESSION["starpl"]["user_id"];
+				if (check_if_min_admin($user_id)|| isOwnerOfFile($conn,$id,$_SESSION["starpl"]["user_id"]))
 				{
 					$conn->query("DELETE FROM `files` WHERE `Id`='$id';");
 					$conn->query("DELETE FROM `SearchWords` WHERE `FileId`='$id';");
@@ -369,11 +261,12 @@ if (!$conn->connect_error)
 		{
 			$fileId = $_post["id"];
 			$answer = array();
-			if ($fileId !== 0 && $_SESSION["starpl"]["user_id"]){
+			if ($fileId !== 0 && $_SESSION["starpl"]["user_id"] && $_SESSION["csrf_detected"] === false) {
 				$authorizationLevel = checkIfAllowedToSeeFile($conn, $fileId, $_SESSION["starpl"]["user_id"]);
 				$answer[0] = $authorizationLevel;
 				if ($authorizationLevel > 0){
 					$answer[1] = getFileById($conn, $fileId);
+					$answer[1]["searchWords"] = getAllSearchWordsForDocument($conn, $fileId);
 				}
 			}
 			else{
@@ -388,7 +281,7 @@ if (!$conn->connect_error)
 			$fileId = $_post["id"];
 			$answer = array();
 			$userId = $_SESSION["starpl"]["user_id"];
-			if ($fileId && $userId){
+			if ($fileId && $userId && $_SESSION["csrf_detected"] === false){
 				$updateFileStr = <<<EOT
 UPDATE `files`
 JOIN `releaseRequests` ON `fileId` = `files`.id
@@ -414,7 +307,7 @@ EOT;
 			if(isset($_SESSION["starpl"]["user_id"])){
 				$activatorId = $_SESSION["starpl"]["user_id"];
 				$userAnswer = array();
-				if($_SESSION["starpl"]["user_id"] > 0){
+				if(($_SESSION["starpl"]["user_id"] > 0) && ($_SESSION["csrf_detected"] === false)){
 					$name = $_post["username"];
 					$expiry = getExpiryDate($_post["datum_gueltig"],$_post["time_gueltig"], $maxAccountLifetime);
 					if(!$expiry){
@@ -441,7 +334,7 @@ EOT;
 							}
 							else {
 								$userAnswer[0] = 0;
-								$userAnswer[1]="Studentenaccount existiert bereits";
+								$userAnswer[1]="Studierendenaccount existiert bereits";
 							}
 						}
 					}
@@ -461,10 +354,10 @@ EOT;
 
 		case 'formUpdateUsers':
 			{
-				if(isset($_SESSION["starpl"]["user_id"])){
+				if(isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false){
 					$activatorId = $_SESSION["starpl"]["user_id"];
 					$userAnswer = array();
-					if($_SESSION["starpl"]["user_role"] > 0){
+					if(check_if_min_dozent($_SESSION["starpl"]["user_id"])){
 						$expiry = getExpiryDate($_post["datum_gueltig"],$_post["time_gueltig"], $maxAccountLifetime);
 						$accountId = $_post["id"];
 						if(!$expiry){
@@ -503,6 +396,7 @@ EOT;
 
 		case 'deleteStudentAccount':
 		{
+			if ($_SESSION["csrf_detected"] === false){
 				$accountId = $_post['id'];
 				$dozentId = $_SESSION["starpl"]["user_id"];
 				$answer = array();
@@ -521,11 +415,15 @@ EOT;
 				}
 				echo json_encode($answer);
 				break;
+			}
 		}
 		case 'incrementDownloads':
 		{
 			$id = $_post['id'];
-			$conn->query("UPDATE `files` SET `downloads`=`downloads`+1 WHERE `id`='$id';");
+			$query = "UPDATE `files` SET `downloads`=`downloads`+1 WHERE `id`= ?;";
+			$stmt = $conn->prepare($query);
+			$stmt->bind_param("i", $id);
+			$stmt->execute();
 			break;
 		}
 		default:
@@ -583,7 +481,6 @@ function getStudentAccountForUser($conn, $userId, $dozentId = null){
 	$queryStr = $queryStr . ";";
 	$result = $conn->query($queryStr);
 	while ($row = $result->fetch_assoc()){
-		error_log(implode(",", $row));
 		return $row["Id"];
 	}
 }
@@ -599,21 +496,13 @@ function getValidStudentAccountForUser($conn, $userId, $dozentId = null){
 		$queryStr = $queryStr . " AND `DozentId` = '$dozentId'";
 	}
 	$queryStr = $queryStr . ";";
-	error_log($queryStr);
 	$result = $conn->query($queryStr);
 	while ($row = $result->fetch_assoc()){
-		error_log(implode(",", array_keys($row)));
 		return $row["Id"];
 	}
 }
 
 // legt einen neuen User in der Datenbank an
-function createUserInDb($conn, $userName, $userRole)
-{
-	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
-	return mysqli_insert_id($conn);
-}
-
 function createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry){
 	$expiry_str = $expiry->format('Y-m-d H:i:s');
 	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
@@ -622,7 +511,6 @@ function createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry){
 
 function updateTemporaryAccount($conn, $accountId, $expiry){
 	$expiry_str = $expiry->format('Y-m-d H:i:s');
-	error_log("UPDATE `studentAccounts` SET `ExpiryDate`='$expiry_str' WHERE Id='$accountId' AND `ExpiryDate`<'$expiry_str'");
 	$conn->query("UPDATE `studentAccounts` SET `ExpiryDate`='$expiry_str' WHERE Id='$accountId'");
 	return ($conn->affected_rows > 0);
 }
@@ -693,7 +581,7 @@ function getFileNamesArray($Id)
 			// einlesen der Verzeichnisses
 			while (($file = readdir($handle)) !== false)
 			{
-				if (filetype($file) != 'dir')
+				if (filetype($directory.$file) != 'dir')
 				{
 					$allFiles[] = $file;
 				}
@@ -707,7 +595,8 @@ function getFileNamesArray($Id)
 // ersetzt Spezialzeichen
 function replaceChars($str)
 {
-	$str = str_replace("\\", "&#92;", $str); // Backslash
+	//todo
+	// $str = str_replace("\\", "&#92;", $str); // Backslash
 	$str = str_replace("'", "&#39;", $str); // einfaches Anführungszeichen
 	$str = str_replace("`", "&#96;", $str); // schräges einfaches Anführungszeichen links (gravis)
 	return $str;
@@ -730,12 +619,9 @@ function fireCURL($url, $post)
 
 
 function getAllSearchWordsForDocument($conn,$documentId){
-	error_log("SELECT `Word` FROM `SearchWords` where `fileId` = '$documentId';");
 	$result = $conn->query("SELECT `Word` FROM `SearchWords` where `fileId` = '$documentId';");
-	error_log($documentId);
 	$searchWordsArray = array();
 	while ($zeile = $result->fetch_assoc()){
-		error_log("SW:" + $zeile["Word"]);
 		array_push($searchWordsArray, $zeile["Word"]);
 	}
 	return $searchWordsArray;
@@ -751,7 +637,9 @@ function deleteFilesForArbeit($id, $arrOfFiles=null){
 			// einlesen der Verzeichnisses
 			while (($file = readdir($handle)) !== false)
 			{
-				if($arrOfFiles !== null || in_array($file, $arrOfFiles )){
+				error_log($file);
+				error_log($arrOfFiles);
+				if($arrOfFiles === null || in_array($file, $arrOfFiles )){
 					if (filetype($file) != 'dir')
 					{
 						unlink($directory.$file);
@@ -763,7 +651,7 @@ function deleteFilesForArbeit($id, $arrOfFiles=null){
 	}
 }
 
-function saveDocument($conn, $userId, $userRole,$fileParams){
+function saveDocument($conn, $userId, $uploaded_by_dozent ,$fileParams){
 	if (validateFileParams($fileParams)){
 		$id = $userId;
 		$titel = $fileParams['titel'];
@@ -776,7 +664,7 @@ function saveDocument($conn, $userId, $userRole,$fileParams){
 		$firma = $fileParams['firma'];
 		$sperrvermerk = (isset($fileParams['sperrvermerk'])) ? $fileParams["sperrvermerk"] : 0;
 		$kurzfassung = $fileParams['kurzfassung'];
-		if ($userRole > 0 ){
+		if ($uploaded_by_dozent){
 			$conn->query("INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`, `downloads`, `privat`) VALUES ('$id', '$titel', '$student', '$studiengang', '$language', '$artOfArbeit', '$jahrgang', '$betreuer', '$firma', '$sperrvermerk', '$kurzfassung', '0', '0');");
 			$fileId = mysqli_insert_id($conn);
 		}
@@ -812,13 +700,19 @@ function validateFileParams($fileParams){
 
 function isOwnerOfFile($conn,$fileId, $userId){
 	$query = "SELECT Id FROM files WHERE Id=? AND UserId=$userId";
-	$stmt = $db->prepare($query);
-	$stmt->bind_param("ii", $fileId, $userId);
+	$stmt = $conn->prepare($query);
+	$stmt->bind_param("i", $fileId);
 	$stmt->execute();
 	$stmt->bind_result($id);
 	//$rows = $conn->query("SELECT * from files where Id=$fileId AND UserId=$userId");
 	if ($stmt->fetch()){
 		$stmt->free_result();
+		$stmt->close();
+		return true;
+	}
+	else {
+		$stmt->close();
+		return false;
 	}
 }
 

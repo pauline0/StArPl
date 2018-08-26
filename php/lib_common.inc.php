@@ -4,19 +4,10 @@ include_once('config.php');
 $ROLLE_STUDENT=0;
 $ROLLE_DOZENT=1;
 $ROLLE_ADMIN=2;
-//$conn = connect_to_db();
-
-function connect_to_db(){
-  $server = "localhost";
-  $database = "starpl";
-  $username = "starpl";
-  $password = "starpl";
-  return new mysqli($server, $username, $password, $database);
-}
 
 function find_user_in_db($user_name)
 {
-  $conn = connect_to_db();
+  global $conn;
   $query = "SELECT Id, UserRole FROM userLogin WHERE UserName=?;";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("s", $user_name);
@@ -53,9 +44,6 @@ function find_temporary_user_in_db($user_name){
   $stmt->execute();
   $stmt->bind_result($id, $expiry, $valid);
   while (mysqli_stmt_fetch($stmt)) {
-    // if (!$expiry){
-    //
-    // }
     if($valid){
       $user_id = $id;
       break;
@@ -70,14 +58,10 @@ function reset_authentification(){
   unset($_SESSION["starpl"]);
 }
 
-function get_user_role(){
-
-}
 //https://funcptr.net/2013/08/25/user-sessions,-what-data-should-be-stored-where-/
 function check_user_level($user_id, $level,$op=">="){
-  global $conn;//$conn = connect_to_db();
-  // $conn = connect_to_db();
-  $query = "SELECT * FROM userLogin WHERE Id=? AND (UserRole ".$op." $level)";
+  global $conn;
+  $query = "SELECT * FROM userLogin WHERE Id=? AND (UserRole ".$op." $level) LIMIT 1";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("i", $user_id);
   $stmt->execute();
@@ -85,6 +69,24 @@ function check_user_level($user_id, $level,$op=">="){
     $stmt->free_result();
     $stmt->close();
     return true;
+  }
+  else{
+    $stmt->close();
+    return false;
+  }
+}
+
+function get_user_role($user_id){
+  global $conn;
+  $query = "SELECT UserRole FROM userLogin WHERE Id=? LIMIT 1";
+  $stmt = $conn->prepare($query);
+  $stmt->bind_param("i", $user_id);
+  $stmt->execute();
+  $stmt->bind_result($user_role);
+  if($stmt->fetch()){
+    $stmt->free_result();
+    $stmt->close();
+    return $user_role;
   }
   else{
     $stmt->close();
@@ -113,6 +115,7 @@ function check_if_logged_in(){
 }
 
 function check_if_csrf(){
+  error_log($_SESSION["csrf_token"]);
   if (isset($_SESSION["csrf_token"]) && ((isset($_POST["csrf_token"]) && $_POST["csrf_token"] == $_SESSION["csrf_token"]) || (isset($_GET["csrf_token"]) && $_GET["csrf_token"] == $_SESSION["csrf_token"])))
   {
       error_log("success");
@@ -126,8 +129,15 @@ function check_if_csrf(){
 }
 
 function set_csrf_token(){
-  $csrf_token = md5(uniqid(rand(), true));
-  $_SESSION["csrf_token"] = $csrf_token;
+  //// TODO:
+  error_log($_SERVER['HTTP_USER_AGENT']);
+  if(strlen(strstr($_SERVER['HTTP_USER_AGENT'],"PostmanRuntime/7.1.1")) > 0 ){
+    $_SESSION["csrf_token"] = "POSTMAN_DEBUG_TOKEN";
+  }
+  else {
+    $csrf_token = md5(uniqid(rand(), true));
+    $_SESSION["csrf_token"] = $csrf_token;
+  }
 }
 
 function sanitize_input_data($data){

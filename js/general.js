@@ -43,19 +43,6 @@ function logout(){
 var menu = {
 
 	init : function(user_role){
-		if (user_role !== undefined)
-		{
-			$(".nav_ur").each(function(i, e){
-				e = $(e);
-				(e.data("role") <= user_role) ? e.show() : e.hide()
-			})
-			$('#loginLink').hide();
-		}
-		else
-		{
-			$(".nav_ur").hide();
-			$('#loginLink').show();
-		}
 	}
 }
 
@@ -120,7 +107,7 @@ var settings = {
 		['artOfArbeit', 'Art der Arbeit', null],
 		['jahrgang', 'Jahrgang', null],
 		['betreuer', 'Betreuer', null],
-		['firma', "Firma", 	(arbeit) => {return htmlEncode(arbeit.firma) + '<span class="hidden">' + htmlEncode(arbeit.searchWords.join(" ")) + "</span>"}]
+		['firma', "Firma", 	(arbeit) => {return htmlEncode(arbeit.firma) + '<span class="hidden">' + ((arbeit.searchWords) ? htmlEncode(arbeit.searchWords.join(" ")) : "") + "</span>"}]
 	],
 
 	select : {
@@ -164,7 +151,7 @@ var settings = {
 	},
 	errors: {
 		duplicateSearchword:"Dieses Dokument hat schon dieses Schlagwort."
-
 	}
+
 
 }
