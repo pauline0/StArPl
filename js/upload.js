@@ -1,10 +1,12 @@
 ﻿$(document).ready(function() {
 	// FileUploadArbeit
+	$('#formUpload').submit(upload);
 	$("#FileInputUploadArbeit").fileinput({
         showUpload: false,
 		allowedFileTypes: ['pdf'],
         overwriteInitial: true,
 		maxFileCount: 20,
+		maxFileSize:2000,
 		browseClass: "btn btn-primary",
         browseLabel: "&nbsp;Datei(en) auswählen [*.pdf]",
 		browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
@@ -48,8 +50,9 @@
 });
 
 // wird beim hochladen aufgerufen
-function upload()
+function upload(event)
 {
+	event.preventDefault()
 	var returnValue = false;
 	var tmpId = 0;
 	var data = $('#formUpload').serialize();
@@ -65,7 +68,48 @@ function upload()
 	{
 		returnValue = uploadFiles(tmpId);
 	}
-	return returnValue;
+	if (returnValue === true){
+		var newLocation = "/?id="+tmpId;
+		if (user.current.UserRole == "0"){
+			newLocation += "&hidden";
+		}
+		document.location.href = newLocation;
+	}
+	else{
+		return returnValue;
+	}
+}
+
+function uploadFilesNew(id){
+	var fileCount =  $('#FileInputUploadArbeit').prop('files').length;
+	var countFinished = 0;
+	var returnValue = false;
+	var form_data = new FormData();
+	var csrf_token = $('#csrf_token').val();
+	for (var i = 0; i < fileCount; i++)
+	{
+		var file_data = $('#FileInputUploadArbeit').prop('files')[i];
+		form_data.append('file' + i, file_data);
+		form_data.append('id', id);
+		form_data.append('action', 'fileAjaxUpload');
+		form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
+		form_data.append('csrf_token', csrf_token);		$.ajaxSetup({async: false});
+		$.ajax({
+			url: './php/manageBackend.php', // point to server-side PHP script
+			dataType: 'text',  // what to expect back from the PHP script, if anything
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: form_data,
+			type: 'post',
+			done: function(){
+				countFinished += 1;
+				if (countFinished == fileCount){
+					return true;
+				}
+			 }
+			});
+	}
 }
 
 // Dateien hochladen
@@ -73,6 +117,7 @@ function uploadFiles(id)
 {
 	var returnValue = false;
 	var form_data = new FormData();
+	var csrf_token = $('#csrf_token').val();
 	for (var i = 0; i < $('#FileInputUploadArbeit').prop('files').length; i++)
 	{
 		var file_data = $('#FileInputUploadArbeit').prop('files')[i];
@@ -81,6 +126,7 @@ function uploadFiles(id)
 	form_data.append('id', id);
 	form_data.append('action', 'fileAjaxUpload');
 	form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
+	form_data.append('csrf_token', csrf_token);
 	$.ajaxSetup({async: false});
 	$.ajax({
 		url: './php/manageBackend.php', // point to server-side PHP script
@@ -93,6 +139,9 @@ function uploadFiles(id)
 		success: function(data)
 		{
 			returnValue = true;
+		},
+		error: function(data,status){
+			returnValue = false;
 		}
 	});
 	$.ajaxSetup({async: true});
@@ -166,19 +215,3 @@ function fillDocentList(){
 	});
 	$.ajaxSetup({async: true});
 }
-
-
-// function getOwnUser()
-// {
-// 	var data =
-// 	{
-// 		action: "getOwnUser"
-// 	}
-// 	$.ajaxSetup({async: false});
-// 	$.post("php/manageBackend.php", data)
-// 	.always(function(data)
-// 	{
-// 		ownUser = data;
-// 	});
-// 	$.ajaxSetup({async: true});
-// }

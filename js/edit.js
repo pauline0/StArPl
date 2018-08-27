@@ -1,3 +1,4 @@
+$.Mustache.add('tag-template', '<span data-sw="" class="label label-{{labelClass}}" {{{additionalAttr}}}> {{value}} {{{icon}}}</span>');
 var searchword = {
    inputId: "#schlagwort",
    readdIcon: ' <span class="glyphicon glyphicon-repeat glyph-button" onclick="searchword.removeDeleteRequest($(this))"></span>',
@@ -5,10 +6,13 @@ var searchword = {
    deleteIcon: ' <span class="glyphicon glyphicon-remove glyph-button" onclick="searchword.delete($(this))"></span>',
 
    getLabel : function(value, icon, labelClass="default", additionalAttr=""){
-  	return '<span data-sw="" class="label label-'+labelClass+'"'+
-              additionalAttr +'>' +
-                htmlEncode(value) + icon +
-            '</span> '
+     var data = {
+       "value":value,
+       "icon":icon,
+       "labelClass":labelClass,
+       "additionalAttr":additionalAttr
+     }
+     return $.Mustache.render('tag-template', data)
   },
 
   delete: function(delButton){
@@ -40,7 +44,7 @@ var searchword = {
   },
 
   append: function(value,icon, cssClasses, additionalAttr){
-    var newSwElem = searchword.getLabel(value,icon, cssClasses, additionalAttr)
+    var newSwElem = searchword.getLabel(value,icon, cssClasses, additionalAttr) + " "
     $("#"+edit.swDiv).append(newSwElem);
     document.getElementById(edit.swDiv).lastElementChild.dataset.sw = value;
   }

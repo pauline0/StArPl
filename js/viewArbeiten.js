@@ -86,12 +86,9 @@ function prepareTableHeader()
 		if (settings.viewAllTableColumns[i][1]){
 			strHtml += "<th>" + settings.viewAllTableColumns[i][1] + "</th>"
 		}
-}
+	}
 
-	// if ($_GET().edit)
-	// {
-		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
-	// }
+	strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
 
 	strHtml += '</tr>';
 	$('#tableHeader')[0].innerHTML = strHtml;
@@ -207,8 +204,8 @@ function changeToEdit(event){
 	event.preventDefault();
 	var studiengang = window.location.search.match(/studiengang=\w*/);
 	var newstate = "?edit"
+	getGetParas();
 	if ($_GET().id){
-		getGetParas();
 		var selectedArbeit = getSelectedArbeit($_GET().id);
 		setButtonsInDetailView(selectedArbeit);
 		newstate += "&" + "id=" + $_GET().id;
@@ -220,9 +217,6 @@ function changeToEdit(event){
 	$("#editLink").addClass("active");
 	window.history.pushState(studiengang[0], studiengang[0], newstate);
 	documentTable.column(-1).visible(true);
-	getGetParas();
-	// prepareTableHeader();
-	// reloadDataTable();
 }
 
 function resetStudiengangSelection(event){
@@ -250,12 +244,10 @@ function changeFachbereich(selectedStudiengang, historyFunc="pushState")
 	reloadDataTable();
 	if ($_GET().edit)
 	{
-		//window.history.replaceState('', '', '?edit&studiengang=' + selectedStudiengang);
 	 window.history[historyFunc]('', '', '?edit&studiengang=' + selectedStudiengang);
 	}
 	else
 	{
-		//window.history.replaceState('', '', '?studiengang=' + selectedStudiengang);
 		window.history[historyFunc]('', '', '?studiengang=' + selectedStudiengang);
 	}
 	resetArbeit();
@@ -519,35 +511,72 @@ function editArbeit()
 
 function buildEditForm(selectedArbeit){
 	var cuttedArrayTableDetailledView = arrayTableDetailledView.slice(0, -1);
-	var arrayTableEdit =
-	[
-		'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" required />',
-		'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" required />',
-		'<select class="form-control" id="studiengang" name="studiengang" required>' +
-			getOptionsForSelect("studiengang") +
-		'</select>',
-
-		'<select class="form-control" id="language" name="language" required>' +
-			getOptionsForSelect("sprache") +
-		'</select>',
-
-		'<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>' +
-				getOptionsForSelect("typ") +
-		'</select>',
-
-		'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" required pattern="[0-9]{4}" />',
-		'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" required />',
-		'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" required />'
-	]
-	var strHtml = '';
-	for (var subArray in cuttedArrayTableDetailledView)
-	{
-		strHtml +=
-			'<tr>' +
-				'<th>' + cuttedArrayTableDetailledView[subArray][1] + '</th>' +
-				'<td>' + arrayTableEdit[subArray] + '</td>' +
-			'</tr>';
+	// var arrayTableEdit =
+	// [
+	// 	'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" required />',
+	// 	'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" required />',
+	// 	'<select class="form-control" id="studiengang" name="studiengang" required>' +
+	// 		getOptionsForSelect("studiengang") +
+	// 	'</select>',
+	//
+	// 	'<select class="form-control" id="language" name="language" required>' +
+	// 		getOptionsForSelect("sprache") +
+	// 	'</select>',
+	//
+	// 	'<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>' +
+	// 			getOptionsForSelect("typ") +
+	// 	'</select>',
+	//
+	// 	'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" required pattern="[0-9]{4}" />',
+	// 	'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" required />',
+	// 	'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" required />'
+	// ]
+	var templateData = {
+		"strTitle" : cuttedArrayTableDetailledView[0][1],
+		"strStudent" : cuttedArrayTableDetailledView[1][1],
+		"strFb" : cuttedArrayTableDetailledView[2][1],
+		"strLang" : cuttedArrayTableDetailledView[3][1],
+		"strType" : cuttedArrayTableDetailledView[4][1],
+		"strJahrgang" : cuttedArrayTableDetailledView[5][1],
+		"strBetreuer" : cuttedArrayTableDetailledView[6][1],
+		"strKurzfassung" : cuttedArrayTableDetailledView[6][1],
+		"fbOptions": getOptionsForSelect("studiengang"),
+		"langOptions": getOptionsForSelect("sprache"),
+		"typeOptions": getOptionsForSelect("typ")
 	}
+	$.Mustache.load('partials/_edit_form.html', function() {
+    $('#tableBodyDetailledArbeitEdit').mustache('tpl-edit', templateData);
+		// $('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
+		initEditValues(selectedArbeit);
+		// $('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
+		// $('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
+		// $('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
+		$('#tableBodyDetailledArbeit').hide();
+		$('#tableBodyDetailledArbeitEdit').show();
+		$('#editButtons').hide();
+		$('.editOnly').show	();
+		$("#editFileInput").fileinput({
+				showUpload: false,
+				allowedFileTypes: ['pdf'],
+						overwriteInitial: true,
+				maxFileCount: 20,
+				maxFileSize:2000,
+				browseClass: "btn btn-primary",
+						browseLabel: "&nbsp;Datei(en) hinzufügen [*.pdf]",
+				browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
+				removeClass: "btn btn-danger",
+						removeLabel: "&nbsp;Löschen" });
+		edit.displaySearchWords(selectedArbeit.searchWords)
+	});
+	var strHtml = '';
+	// for (var subArray in cuttedArrayTableDetailledView)
+	// {
+	// 	strHtml +=
+	// 		'<tr>' +
+	// 			'<th>' + cuttedArrayTableDetailledView[subArray][1] + '</th>' +
+	// 			'<td>' + arrayTableEdit[subArray] + '</td>' +
+	// 		'</tr>';
+	// }
 	strHtml +=
 		'<tr>' +
 			'<th>' + arrayTableDetailledView[arrayTableDetailledView.length - 1][1] + '</th>' +
@@ -563,27 +592,27 @@ function buildEditForm(selectedArbeit){
 			'</td>' +
 		'</tr>';
 
-	$('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
-	initEditValues(selectedArbeit);
-	$('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
-	$('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
-	$('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
-	$('#tableBodyDetailledArbeit').hide();
-	$('#tableBodyDetailledArbeitEdit').show();
-	$('#editButtons').hide();
-	$('.editOnly').show	();
-	$("#editFileInput").fileinput({
-			showUpload: false,
-			allowedFileTypes: ['pdf'],
-					overwriteInitial: true,
-			maxFileCount: 20,
-			maxFileSize:2000,
-			browseClass: "btn btn-primary",
-					browseLabel: "&nbsp;Datei(en) hinzufügen [*.pdf]",
-			browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
-			removeClass: "btn btn-danger",
-					removeLabel: "&nbsp;Löschen" });
-	edit.displaySearchWords(selectedArbeit.searchWords)
+	// $('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
+	// initEditValues(selectedArbeit);
+	// $('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
+	// $('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
+	// $('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
+	// $('#tableBodyDetailledArbeit').hide();
+	// $('#tableBodyDetailledArbeitEdit').show();
+	// $('#editButtons').hide();
+	// $('.editOnly').show	();
+	// $("#editFileInput").fileinput({
+	// 		showUpload: false,
+	// 		allowedFileTypes: ['pdf'],
+	// 				overwriteInitial: true,
+	// 		maxFileCount: 20,
+	// 		maxFileSize:2000,
+	// 		browseClass: "btn btn-primary",
+	// 				browseLabel: "&nbsp;Datei(en) hinzufügen [*.pdf]",
+	// 		browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
+	// 		removeClass: "btn btn-danger",
+	// 				removeLabel: "&nbsp;Löschen" });
+	// edit.displaySearchWords(selectedArbeit.searchWords)
 }
 
 function initEditValues(selectedArbeit){
@@ -630,6 +659,7 @@ function resetArbeit()
 	$('#tableBodyDetailledArbeitEdit').hide();
 	$('#editButtons').show();
 	$('.editOnly').hide();
+	// renderSearchwords();
 	return false;
 }
 
