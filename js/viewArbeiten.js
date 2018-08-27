@@ -708,7 +708,7 @@ function saveArbeit()
 	var delSW = [];
 	var delFiles = [];
 	$(".addSW").each(function (idx,elem){
-	 	var value = $(elem).data("sw");
+	 	var value = $(elem).data("sw").toString();
 		if (value){
 			addSW.push(value.trim());
 		}
