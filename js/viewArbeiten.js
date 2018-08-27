@@ -207,8 +207,8 @@ function changeToEdit(event){
 	event.preventDefault();
 	var studiengang = window.location.search.match(/studiengang=\w*/);
 	var newstate = "?edit"
+	getGetParas();
 	if ($_GET().id){
-		getGetParas();
 		var selectedArbeit = getSelectedArbeit($_GET().id);
 		setButtonsInDetailView(selectedArbeit);
 		newstate += "&" + "id=" + $_GET().id;
