@@ -3,7 +3,7 @@ header("Content-Type: application/json; charset=utf-8"); // JSON-Antwort
 //include_once('config.php'); // Datenbankanbindung
 include_once('lib_auth.inc.php');
 include_once('lib_common.inc.php');
-session_start(); // starten der PHP-Session
+session_start();
 $_post = filter_input_array(INPUT_POST); // es werden nur POST-Variablen akzeptiert, damit nicht mittels Link (get-vars) Anderungen an DB vorgenommen werden können
 $_post = replaceChars($_post);
 error_log(implode(",",array_keys($_post)));
@@ -11,6 +11,16 @@ error_log(implode($_post));
 $action = $_post['action'];
 error_log("Action: ".$action);
 check_if_csrf();
+
+$SAVE_SUCCESSFUL= 'Speichern erfolgreich';
+$SAVE_ERROR = 'Speichern fehlgeschlagen';
+$DELETE_SUCCESS = 'Löschen erfolgreich' ;
+$MISSING_RIGHTS_ERROR = "Nötige Berechtigungen fehlen.";
+$LOGIN_REQUIERED_ERROR = "Erneuter Login erforderlich.";
+$DATABASE_ERROR = 'Datenbankverbindung fehlgeschlagen';
+$CREATE_ACCOUNT_SUCCESS = "Neuer Account wurde erstellt";
+
+
 if (!$conn->connect_error)
 {
 	switch ($action)
@@ -18,41 +28,50 @@ if (!$conn->connect_error)
 		case 'formUpload':
 		{
 			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
-			{
-				$fileId = saveDocument($conn,$_SESSION["starpl"]["user_id"], check_if_min_dozent($_SESSION["starpl"]["user_id"]), $_post);
-				$userAnswer = array();
-				if ($fileId)
 				{
-					$userAnswer[0] = $fileId;
-					$userAnswer[1] = 'Speichern erfolgreich';
+				$is_min_docent = check_if_min_dozent($_SESSION["starpl"]["user_id"]);
+				$file_id = create_document($conn,$_SESSION["starpl"]["user_id"], $is_min_docent , $_post);
+				$userAnswer = array();
+				if ($file_id)
+				{
+					$schlagwoerter = $_post['schlagwort'];
+					foreach ($schlagwoerter as $key => $value)
+					{
+						if ($value)
+						{
+							$value = $conn->real_escape_string($value);
+							$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$file_id', '$value');");
+						}
+					}
+					http_response_code(201);
+					$userAnswer["fileId"] = $file_id;
+					$userAnswer["location"] = 'http://'.$_SERVER['SERVER_NAME']."?id=".$file_id;
+					if(!$is_min_docent){
+						$userAnswer["location"] = $userAnswer["location"]."&hidden";
+					}
 				}
 				else
 				{
-					$userAnswer[0] = 0;
-					$userAnswer[1] = 'Speichern fehlgeschlagen';
-				}
-				echo json_encode($userAnswer);
-				$schlagwoerter = $_post['schlagwort'];
-				foreach ($schlagwoerter as $key => $value)
-				{
-					if ($value)
-					{
-						$value = $conn->real_escape_string($value);
-						$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$fileId', '$value');");
-					}
+					http_response_code(400);
+					$userAnswer["err"] = $SAVE_ERROR;
 				}
 			}
+			else{
+				http_response_code(403);
+				$userAnswer["err"] = $LOGIN_REQUIERED_ERROR;
+			}
+			echo json_encode($userAnswer);
 			break;
 		}
-		case 'fileAjaxUpload':
+		case 'fileUpload':
 		{
 			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false )
 			{
-				$Id = $_post['id'];
-				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || isOwnerOfFile($conn, $Id, $_SESSION["starpl"]["user_id"]) ){
+				$id = $_post['id'];
+				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || is_owner_of_file($conn, $id, $_SESSION["starpl"]["user_id"]) ){
 					$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
 					$dirUpload = '../upload';
-					$pathNewPics = "$dirUpload/$Id/";
+					$pathNewPics = "$dirUpload/$id/";
 					mkdir("$pathNewPics", 0755, true);
 					foreach($_FILES as $key => $value)
 					{
@@ -64,13 +83,13 @@ if (!$conn->connect_error)
 			}
 			break;
 		}
-		case 'formSaveArbeit':
+		case 'formUpdateDocument':
 		{
 			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
 			{
 				$id = $conn->real_escape_string($_post['id']);
 				$answer = array();
-				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || isOwnerOfFile($conn, $id, $_SESSION["starpl"]["user_id"]) ){
+				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || is_owner_of_file($conn, $id, $_SESSION["starpl"]["user_id"]) ){
 					update_document_in_database($conn, $_post, $id);
 					$deleteSearchwords = json_decode($_post['deleteSW']);
 					$deleteSearchwords = array_to_mysql($conn, $deleteSearchwords);
@@ -89,13 +108,13 @@ if (!$conn->connect_error)
 						}
 					}
 					$deleteFiles = json_decode($_post["delFiles"]);
-					deleteFilesForArbeit($id, $deleteFiles);
+					deleteFilesForDocument($id, $deleteFiles);
 					$answer[0] = 1;
-					$answer[1] = "Löschen erfolgreich";
+					$answer[1] = $DELETE_SUCCESS;
 				}
 				else{
 					$answer[0] = 0;
-					$answer[1] = "Nötige Berechtigungen fehlen";
+					$answer[1] = $MISSING_RIGHTS_ERROR;
 				}
 			}
 			break;
@@ -103,23 +122,23 @@ if (!$conn->connect_error)
 		case 'getAllSearchWordsForDocument':
 		{
 			$docId = $_post["id"];
-			$allSearchwords = getAllSearchWordsForDocument($conn,$docId);
-			echo json_encode($allSearchwords);
+			$all_searchwords = getAllSearchWordsForDocument($conn,$docId);
+			echo json_encode($all_searchwords);
 			break;
 		}
 
 		case 'getPossibleDocents':
 		{
-			$userId = $_SESSION["starpl"]["user_id"];
-			$result = $conn->query("SELECT `UserName`,  `userLogin`.`Id` from `studentAccounts` JOIN `userLogin` ON `userLogin`.`Id` = `DozentId` where `ExpiryDate` > NOW() AND `UserId` = '$userId';");
-			$possibleDocents = array();
-			$isStudentAccount = check_user_level($userId, 0, "=");
+			$user_id = $_SESSION["starpl"]["user_id"];
+			$result = $conn->query("SELECT `UserName`,`userLogin`.`Id` from `studentAccounts` JOIN `userLogin` ON `userLogin`.`Id` = `DozentId` where `ExpiryDate` > NOW() AND `UserId` = '$user_id';");
+			$possible_docents = array();
+			$is_student_account = check_user_level($user_id, 0, "=");
 			while($row = $result->fetch_assoc()){
-				$possibleDocents[$row["UserName"]] = $row["Id"];
+				$possible_docents[$row["UserName"]] = $row["Id"];
 			}
 			$answer = array();
-			$answer[0] = $isStudentAccount;
-			$answer[1] = $possibleDocents;
+			$answer[0] = $is_student_account;
+			$answer[1] = $possible_docents;
 			echo json_encode($answer);
 			break;
 		}
@@ -127,52 +146,51 @@ if (!$conn->connect_error)
 		case 'getAllSearchWords':
 		{
 			$result = $conn->query("SELECT DISTINCT `Word` FROM `SearchWords`;");
-			$searchWordsArray = array();
+			$search_words_array = array();
 			while ($zeile = $result->fetch_assoc())
 			{
-				array_push($searchWordsArray, $zeile['Word']);
+				array_push($search_words_array, $zeile['Word']);
 			}
-			echo json_encode($searchWordsArray);
+			echo json_encode($search_words_array);
 			break;
 		}
 		case 'getAllSearchWordsWithId':
 		{
 			$result = $conn->query("SELECT * FROM `SearchWords`;");
-			$searchWordsArray = array();
+			$search_words_array = array();
 			while ($zeile = $result->fetch_assoc())
 			{
-				array_push($searchWordsArray, $zeile);
+				array_push($search_words_array, $zeile);
 			}
-			echo json_encode($searchWordsArray);
+			echo json_encode($search_words_array);
 			break;
 		}
-		case 'getAllArbeiten':
+		case 'getAllDocuments':
 		{
 			if (isset($_SESSION["starpl"]["user_id"])){
-				$userId = $_SESSION["starpl"]["user_id"];
-				$queryStr = "SELECT `files`.* FROM `files` WHERE NOT `privat` OR `DozentId`='$userId' OR `releaseRequests`.ORDER BY `titel` ASC;";
+				$user_id = $_SESSION["starpl"]["user_id"];
 			}
 			else{
 				$queryStr = "SELECT * FROM `files` WHERE NOT `privat`  ORDER BY `titel` ASC;";
 			}
 			$result = $conn->query("SELECT `files`.* FROM `files` WHERE NOT `privat`   ORDER BY `titel` ASC;");
-			$allArbeiten = array();
+			$all_arbeiten = array();
 			$i = 0;
 			while ($zeile = $result->fetch_assoc())
 			{
-				array_push($allArbeiten, $zeile);
-				$allArbeiten[$i]['dateien'] = getFileNamesArray($zeile['Id']);
+				array_push($all_arbeiten, $zeile);
+				$all_arbeiten[$i]['dateien'] = get_file_names_array($zeile['Id']);
 				$i++;
 			}
 
-			echo json_encode($allArbeiten);
+			echo json_encode($all_arbeiten);
 			break;
 		}
 		case 'getCreatedUsers':{
 			$answer= array();
 			if (isset($_SESSION["starpl"]["user_id"])){
-				$userId = $conn->real_escape_string($_SESSION["starpl"]["user_id"]);
-				$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate`, `fileId`, `titel` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` LEFT JOIN `releaseRequests` ON `studentAccounts`.`Id` = studentAccountId LEFT JOIN `files` ON `files`.`id` = `fileId` where `DozentId` = '$userId';");
+				$user_id = $conn->real_escape_string($_SESSION["starpl"]["user_id"]);
+				$result = $conn->query("SELECT `UserName`,`studentAccounts`.`Id`, `ExpiryDate`, `fileId`, `titel` FROM `studentAccounts`  JOIN `userLogin` ON `userLogin`.`Id` = `studentAccounts`.`UserId` LEFT JOIN `releaseRequests` ON `studentAccounts`.`Id` = studentAccountId LEFT JOIN `files` ON `files`.`id` = `fileId` where `DozentId` = '$user_id';");
 				$allUsers = array();
 				while ($zeile = $result->fetch_assoc())
 				{
@@ -217,13 +235,13 @@ if (!$conn->connect_error)
 			}
 			break;
 		}
-		case 'deleteArbeit': // gibt keine Rückmeldung aus
+		case 'deleteDocument': // gibt keine Rückmeldung aus
 		{
 			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
 			{
 				$id = $conn->real_escape_string($_post['id']);
 				$user_id = $conn->real_escape_string($_SESSION["starpl"]["user_id"]);
-				if (check_if_min_admin($user_id)|| isOwnerOfFile($conn,$id,$_SESSION["starpl"]["user_id"]))
+				if (check_if_min_admin($user_id) || is_owner_of_file($conn,$id,$_SESSION["starpl"]["user_id"]))
 				{
 					$conn->query("DELETE FROM `files` WHERE `Id`='$id';");
 					$conn->query("DELETE FROM `SearchWords` WHERE `FileId`='$id';");
@@ -249,16 +267,16 @@ if (!$conn->connect_error)
 			break;
 		}
 
-		case 'getPrivateArbeit':
+		case 'getHiddenDocument':
 		{
-			$fileId = $conn->real_escape_string($_post["id"]);
+			$file_id = $conn->real_escape_string($_post["id"]);
 			$answer = array();
-			if ($fileId !== 0 && $_SESSION["starpl"]["user_id"] && $_SESSION["csrf_detected"] === false) {
-				$authorizationLevel = checkIfAllowedToSeeFile($conn, $fileId, $_SESSION["starpl"]["user_id"]);
+			if ($file_id !== 0 && $_SESSION["starpl"]["user_id"] && $_SESSION["csrf_detected"] === false) {
+				$authorizationLevel = checkIfAllowedToSeeDocument($conn, $file_id, $_SESSION["starpl"]["user_id"]);
 				$answer[0] = $authorizationLevel;
 				if ($authorizationLevel > 0){
-					$answer[1] = getFileById($conn, $fileId);
-					$answer[1]["searchWords"] = getAllSearchWordsForDocument($conn, $fileId);
+					$answer[1] = getFileById($conn, $file_id);
+					$answer[1]["searchWords"] = getAllSearchWordsForDocument($conn, $file_id);
 				}
 			}
 			else{
@@ -270,21 +288,21 @@ if (!$conn->connect_error)
 
 		case "releasePrivateDocument":
 		{
-			$fileId = $conn->real_escape_string($_post["id"]);
+			$file_id = $conn->real_escape_string($_post["id"]);
 			$answer = array();
-			$userId = $conn->real_escape_string($_SESSION["starpl"]["user_id"]);
-			if ($fileId && $userId && $_SESSION["csrf_detected"] === false){
+			$user_id = $conn->real_escape_string($_SESSION["starpl"]["user_id"]);
+			if ($file_id && $user_id && $_SESSION["csrf_detected"] === false){
 				$updateFileStr = <<<EOT
 UPDATE `files`
 JOIN `releaseRequests` ON `fileId` = `files`.id
 JOIN studentAccounts ON studentAccountId = studentAccounts.Id
-SET `privat`= 0, `files`.UserId=$userId
-WHERE `DozentId`='$userId' AND `fileId` = '$fileId';
+SET `privat`= 0, `files`.UserId=$user_id
+WHERE `DozentId`='$user_id' AND `fileId` = '$file_id';
 EOT;
 				$conn->query($updateFileStr);
 				if ($conn->affected_rows > 0){
-					$conn->query("DELETE FROM `releaseRequests` where `FileId` = '$fileId';");
-					$answer[0] = $fileId;
+					$conn->query("DELETE FROM `releaseRequests` where `FileId` = '$file_id';");
+					$answer[0] = $file_id;
 				}
 				else{
 						$answer[0]= 0;
@@ -312,16 +330,16 @@ EOT;
 					}
 					else
 					{
-						$userId = checkIfUserExist($conn, $name);
-						if (!$userId){
+						$user_id = checkIfUserExist($conn, $name);
+						if (!$user_id){
 							$userAnswer[0] = createTemporaryUserInDb($conn, $activatorId,  $name, $expiry);
-							$userAnswer[1] = "Neuer Account wurde erstellt";
+							$userAnswer[1] = $CRE;
 						}
 						else{
-							$accountId = getStudentAccountForUser($conn, $userId, $activatorId);
+							$accountId = getStudentAccountForUser($conn, $user_id, $activatorId);
 							$userAnswer[0] = $accountId;
 							if ($accountId == 0){
-								$userAnswer[0] = createTemporaryAccountInDB($conn, $activatorId,  $userId, $expiry);
+								$userAnswer[0] = createTemporaryAccountInDB($conn, $activatorId,  $user_id, $expiry);
 								$userAnswer[1] = "Neuer Studentenaccount wurde erstellt";
 							}
 							else {
@@ -333,7 +351,7 @@ EOT;
 				}
 				else{
 					$userAnswer[0]=0;
-					$userAnswer[1]="Nötige Berechtigungen fehlen.";
+					$userAnswer[1]= $MISSING_RIGHTS_ERROR;
 				}
 			}
 			else {
@@ -375,12 +393,12 @@ EOT;
 					}
 					else{
 						$userAnswer[0] = 0;
-						$userAnswer[1] = "Nötige Berechtigungen fehlen.";
+						$userAnswer[1] = $MISSING_RIGHTS_ERROR;
 					}
 				}
 				else{
 					$userAnswer[0] = -1;
-					$userAnswer[1] = "Erneuter Login erforderlich.";
+					$userAnswer[1] = $LOGIN_REQUIERED_ERROR;
 				}
 				echo json_encode($userAnswer);
 				break;
@@ -394,9 +412,9 @@ EOT;
 				$answer = array();
 				$filesOfStudent = $conn->query("SELECT FileId FROM studentAccounts JOIN releaseRequests ON `studentAccounts`.`Id` = studentAccountId where `DozentId` = '$dozentId' AND `studentAccounts`.`Id`= '$accountId';");
 				while ($row = $filesOfStudent->fetch_assoc()){
-					$fileId = $row["FileId"];
-					$conn->query("DELETE from `files` WHERE `Id` = '$fileId'");
-					deleteFilesForArbeit($fileId);
+					$file_id = $row["FileId"];
+					$conn->query("DELETE from `files` WHERE `Id` = '$file_id'");
+					deleteFilesForDocument($file_id);
 				}
 				$conn->query("DELETE FROM studentAccounts where `DozentId` = '$dozentId' AND `Id`= '$accountId'");
 				if ($conn->affected_rows > 0 ){
@@ -429,27 +447,27 @@ else
 {
 	$userAnswer = array();
 	$userAnswer[0] = -1;
-	$userAnswer[1] = 'Datenbankverbindung fehlgeschlagen';
+	$userAnswer[1] = $DATABASE_ERROR;
 	echo json_encode($userAnswer);
 }
 
 // überprüft, ob ein User bereits in der Datenbank existiert
 function checkIfUserExist($conn, $userName)
 {
-	$userId = 0;
+	$user_id = 0;
 	$result = $conn->query("SELECT `Id` FROM `userLogin` WHERE `UserName`='$userName';");
 	while ($zeile = $result->fetch_assoc())
 	{
-		$userId = $zeile['Id'];
+		$user_id = $zeile['Id'];
 	}
-	return $userId;
+	return $user_id;
 }
 
-function getStudentAccountForUser($conn, $userId, $dozentId = null){
-	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE `userId`='$userId'";
+function getStudentAccountForUser($conn, $user_id, $dozentId = null){
+	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE `userId`='$user_id'";
 	if ($dozentId){
 		$queryStr = $queryStr . " AND `DozentId` = '$dozentId'";
-		}
+	}
 	$queryStr = $queryStr . ";";
 	$result = $conn->query($queryStr);
 	while ($row = $result->fetch_assoc()){
@@ -462,8 +480,8 @@ function checkIfDozentOfStudentAccount($conn, $accountId, $dozentId){
 	return ($result->num_rows > 0);
 }
 
-function getValidStudentAccountForUser($conn, $userId, $dozentId = null){
-	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE (`ExpiryDate` > NOW()) AND `userId`='$userId'";
+function getValidStudentAccountForUser($conn, $user_id, $dozentId = null){
+	$queryStr = "SELECT `studentAccounts`.`Id`  FROM `studentAccounts` WHERE (`ExpiryDate` > NOW()) AND `userId`='$user_id'";
 	if ($dozentId){
 		$queryStr = $queryStr . " AND `DozentId` = '$dozentId'";
 	}
@@ -475,9 +493,9 @@ function getValidStudentAccountForUser($conn, $userId, $dozentId = null){
 }
 
 // legt einen neuen User in der Datenbank an
-function createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry){
+function createTemporaryAccountInDB($conn, $activatorId, $user_id, $expiry){
 	$expiry_str = $expiry->format('Y-m-d H:i:s');
-	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$userId', '$activatorId',  '$expiry_str');");
+	$conn->query("INSERT INTO `studentAccounts` (`UserId`,`DozentId`,`ExpiryDate`) VALUES ('$user_id', '$activatorId',  '$expiry_str');");
 	return mysqli_insert_id($conn);
 }
 
@@ -499,14 +517,14 @@ function getExpiryDate($expiry_date, $expiry_time, $maxAccountLifetime){
 function createTemporaryUserInDb($conn, $activatorId,  $userName, $expiry ){
 	$userRole = 0;
 	$conn->query("INSERT INTO `userLogin` (`UserName`, `UserRole`) VALUES ('$userName', '$userRole');");
-	$userId = mysqli_insert_id($conn);
-	$accountId = createTemporaryAccountInDB($conn, $activatorId, $userId, $expiry);
+	$user_id = mysqli_insert_id($conn);
+	$accountId = createTemporaryAccountInDB($conn, $activatorId, $user_id, $expiry);
 	return $accountId;
 }
 
-function checkIfAllowedToSeeFile($conn, $fileId, $userId){
+function checkIfAllowedToSeeDocument($conn, $file_id, $user_id){
 	$accessLevel = 0;
-	$result = $conn->query("SELECT (`DozentId`='$userId') AS isDozent FROM `releaseRequests`  JOIN `studentAccounts` ON `studentAccounts`.Id = `studentAccountId` where `FileId` = '$fileId' AND (`UserId`='$userId' OR `DozentId`='$userId');");
+	$result = $conn->query("SELECT (`DozentId`='$user_id') AS isDozent FROM `releaseRequests`  JOIN `studentAccounts` ON `studentAccounts`.Id = `studentAccountId` where `FileId` = '$file_id' AND (`UserId`='$user_id' OR `DozentId`='$user_id');");
 	while($row = $result-> fetch_assoc()){
 		$accessLevel = ($row["isDozent"]) ? 2 : 1;
 	}
@@ -514,11 +532,11 @@ function checkIfAllowedToSeeFile($conn, $fileId, $userId){
 }
 
 
-function getFileById($conn, $fileId){
-	$result = $conn->query("SELECT * FROM `files` WHERE `Id` = '$fileId'; ");
+function getFileById($conn, $file_id){
+	$result = $conn->query("SELECT * FROM `files` WHERE `Id` = '$file_id'; ");
 	while ($file = $result->fetch_assoc())
 	{
-		$file['dateien'] = getFileNamesArray($file['Id']);
+		$file['dateien'] = get_file_names_array($file['Id']);
 		return $file;
 	}
 }
@@ -533,15 +551,15 @@ function findTemporaryUserInDB($conn, $userName){
 			throw new UserException("Für diesen Benutzer existieren keine gültigen Accounts");
 		}
 		if ($zeile["Valid"]){
-			$userId = $zeile["Id"];
-			return $userId;
+			$user_id = $zeile["Id"];
+			return $user_id;
 		}
 	}
 	throw new UserException("Alle temporären Accounts dieses Nutzers sind nicht mehr gültig.");
 }
 
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus
-function getFileNamesArray($Id)
+function get_file_names_array($Id)
 {
 	$allFiles = array();
 	$directory = "../upload/$Id/";
@@ -592,14 +610,14 @@ function fireCURL($url, $post)
 
 function getAllSearchWordsForDocument($conn,$documentId){
 	$result = $conn->query("SELECT `Word` FROM `SearchWords` where `fileId` = '$documentId';");
-	$searchWordsArray = array();
+	$search_words_array = array();
 	while ($zeile = $result->fetch_assoc()){
-		array_push($searchWordsArray, $zeile["Word"]);
+		array_push($search_words_array, $zeile["Word"]);
 	}
-	return $searchWordsArray;
+	return $search_words_array;
 }
 
-function deleteFilesForArbeit($id, $arrOfFiles=null){
+function deleteFilesForDocument($id, $arrOfFiles=null){
 	$directory = "../upload/$id/";
 	if (is_dir($directory))
 	{
@@ -623,22 +641,23 @@ function deleteFilesForArbeit($id, $arrOfFiles=null){
 	}
 }
 
-function saveDocument($conn, $userId, $uploaded_by_dozent ,$fileParams){
+function create_document($conn, $user_id, $uploaded_by_dozent ,$fileParams){
 	if (validateFileParams($fileParams)){
 		if ($uploaded_by_dozent){
-			$fileId = save_document_in_database($conn, $fileParams, $userId, '0' );#mysqli_insert_id($conn);
+			$file_id = save_document_in_database($conn, $fileParams, $user_id, '0' );#mysqli_insert_id($conn);
 		}
 		else {
 			$docentId = $fileParams["docentId"];
-			$studentAccountId = getValidStudentAccountForUser($conn, $userId, $docentId);
+			$studentAccountId = getValidStudentAccountForUser($conn, $user_id, $docentId);
 			if ($studentAccountId > 0){
-				$fileId = save_document_in_database($conn, $fileParams, $userId, '1' );#mysqli_insert_id($conn);
-				$result = $conn->query("INSERT INTO `releaseRequests`(`studentAccountId`, `fileId`) VALUES ('$studentAccountId','$fileId');");
+				$file_id = save_document_in_database($conn, $fileParams, $user_id, '1' );#mysqli_insert_id($conn);
+				$result = $conn->query("INSERT INTO `releaseRequests`(`studentAccountId`, `fileId`) VALUES ('$studentAccountId','$file_id');");
 			}
 		}
-		return $fileId;
+		return $file_id;
 	}
 	else{
+		error_log("Invalid file parameters");
 		return false;
 	}
 }
@@ -646,7 +665,9 @@ function saveDocument($conn, $userId, $uploaded_by_dozent ,$fileParams){
 function save_document_in_database($conn, $file_params, $uploader_id, $privat){
 	$query = "INSERT INTO `files`(`userId`, `titel`, `student`, `studiengang`, `language`, `artOfArbeit`, `jahrgang`, `betreuer`, `firma`, `sperrvermerk`, `kurzfassung`, `downloads`, `privat`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '0','$privat');";
 	$stmt = $conn->prepare($query);
-	$stmt->bind_param("issssssssis", $uploader_id,
+	error_log($stmt);
+	$sperrvermerk = (isset($file_params["sperrvermerk"])?$file_params["sperrvermerk"]:"0");
+	$stmt->bind_param("issssssssss", $uploader_id,
 																	$file_params["titel"],
 																	$file_params["student"],
 																	$file_params["studiengang"],
@@ -655,7 +676,7 @@ function save_document_in_database($conn, $file_params, $uploader_id, $privat){
 																	$file_params["jahrgang"],
 																	$file_params["betreuer"],
 																	$file_params["firma"],
-																	$file_params["sperrvermerk"],
+																	$sperrvermerk,
 																	$file_params["kurzfassung"]
 																	);
 	$stmt->execute();
@@ -664,7 +685,7 @@ function save_document_in_database($conn, $file_params, $uploader_id, $privat){
 	return $rv;
 }
 
-function update_document_in_database($conn, $file_params, $fileId){
+function update_document_in_database($conn, $file_params, $file_id){
 	$query = "UPDATE `files` SET `titel`=?, `student`=?, `studiengang`=?, `language`=?, `artOfArbeit`=?, `jahrgang`=?, `betreuer`=?, `firma`=?, `kurzfassung`=? WHERE `Id`=?;";
 	$stmt = $conn->prepare($query);
 	$stmt->bind_param("sssssssssi",
@@ -677,7 +698,7 @@ function update_document_in_database($conn, $file_params, $fileId){
 										$file_params["betreuer"],
 										$file_params["firma"],
 										$file_params["kurzfassung"],
-										$fileId);
+										$file_id);
 	$stmt->execute();
 	$rv = ($conn->affected_rows > 0 );
 	$stmt->close();
@@ -685,12 +706,12 @@ function update_document_in_database($conn, $file_params, $fileId){
 }
 
 
-function saveSearchWord($fileId, $searchWordsArray){
-	foreach ($schlagwoerter as $key => $value)
+function saveSearchWord($file_id, $search_words_array){
+	foreach ($searchWordsArray as $key => $value)
 	{
 		if ($value)
 		{
-			$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$fileId', '$value');");
+			$conn->query("INSERT INTO `SearchWords` (`FileId`, `Word`) VALUES ('$file_id', '$value');");
 		}
 	}
 }
@@ -706,10 +727,10 @@ function validateFileParams($fileParams){
 	return true;
 }
 
-function isOwnerOfFile($conn,$fileId, $userId){
-	$query = "SELECT Id FROM files WHERE Id=? AND UserId=$userId";
+function is_owner_of_file($conn,$file_id, $user_id){
+	$query = "SELECT Id FROM files WHERE Id=? AND UserId=$user_id";
 	$stmt = $conn->prepare($query);
-	$stmt->bind_param("i", $fileId);
+	$stmt->bind_param("i", $file_id);
 	$stmt->execute();
 	$stmt->bind_result($id);
 	if ($stmt->fetch()){

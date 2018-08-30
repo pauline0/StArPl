@@ -49,7 +49,6 @@ var menu = {
 var user = {
 	currentId : null,
 	currentRole : null,
-	name:null,
 	current:null,
 
 	getCurrent: function(){

@@ -9,7 +9,7 @@ var arrayTableDetailledView = settings.detailTableColumns;
 var documentTable = null;
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
-	getAllArbeiten();
+	getAllDocuments();
 	getGetParas();
 	prepareTableHeader();
 	user.getCurrent();
@@ -88,10 +88,7 @@ function prepareTableHeader()
 		}
 }
 
-	// if ($_GET().edit)
-	// {
-		strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
-	// }
+	strHtml += '<th><span class="glyphicon glyphicon-pencil"></span></th>';
 
 	strHtml += '</tr>';
 	$('#tableHeader')[0].innerHTML = strHtml;
@@ -135,12 +132,12 @@ function reloadDataTable()
 }
 
 // lädt alle Arbeiten aus der Datenbank
-function getAllArbeiten()
+function getAllDocuments()
 {
 	arrayIdsArbeiten = new Array();
 	var data =
 	{
-		action: "getAllArbeiten"
+		action: "getAllDocuments"
 	}
 	$.ajaxSetup({async: false});
 	$.post(settings.phpBackend, data)
@@ -411,7 +408,7 @@ function getHiddenArbeit(id){
 	var role;
 	var data =
 	{
-		action: "getPrivateArbeit",
+		action: "getHiddenDocument",
 		id: id,
 		csrf_token: getCsrfToken()
 	}
@@ -603,7 +600,7 @@ function uploadFilesO(id){
 		var file_data = $('#editFileInput').prop('files')[i];
 		form_data.append('file' + i, file_data);
 		form_data.append('id', id);
-		form_data.append('action', 'fileAjaxUpload');
+		form_data.append('action', 'fileUpload');
 		form_data.append('csrf_token', csrf_token);		$.ajaxSetup({async: false});
 		$.ajax({
 			url: './php/manageBackend.php', // point to server-side PHP script
@@ -676,7 +673,7 @@ function uploadFiles(id)
 		form_data.append('file' + i, file_data);
 	}
 	form_data.append('id', id);
-	form_data.append('action', 'fileAjaxUpload');
+	form_data.append('action', 'fileUpload');
 	form_data.append('csrf_token', csrf_token);
 	$.ajaxSetup({async: false});
 	$.ajax({
@@ -722,9 +719,9 @@ function saveArbeit()
 	$(".delFile").each(function(idx, elem){
 		delFiles.push(elem.textContent.trim());
 	})
-	var data = $('#formSaveArbeit').serialize();
+	var data = $('#formUpdateDocument').serialize();
 	data += "&csrf_token=" +getCsrfToken();
-	data += '&action=formSaveArbeit&id=' + $_GET().id +
+	data += '&action=formUpdateDocument&id=' + $_GET().id +
 					"&deleteSW="+JSON.stringify(delSW)+
 					"&addSW="+JSON.stringify(addSW);
 	data += '&delFiles='+JSON.stringify(delFiles);
@@ -733,7 +730,7 @@ function saveArbeit()
 	$.ajaxSetup({async: true});
 	returnValue = uploadFiles($_GET().id);
 	resetArbeit();
-	getAllArbeiten();
+	getAllDocuments();
 	user.getCurrent();
 	showArbeitDetailled($_GET().id);
 	arraySearchwordOperations = [];
@@ -741,7 +738,7 @@ function saveArbeit()
 }
 
 // löscht eine Arbeit vollständig
-function deleteArbeit()
+function deleteDocument()
 {
 	if (confirm('Möchten Sie diese Arbeit wirklich löschen?'))
 	{
@@ -750,7 +747,7 @@ function deleteArbeit()
 		var id = arrayAllArbeiten[idArray].Id;
 		var data =
 		{
-			action: "deleteArbeit",
+			action: "deleteDocument",
 			id: id,
 			csrf_token: getCsrfToken()
 		}
@@ -768,7 +765,7 @@ function deleteArbeit()
 			{
 				alert('Der Bericht konnte nicht gelöscht werden.');
 			}*/
-			getAllArbeiten();
+			getAllDocuments();
 			user.getCurrent();
 			changeFachbereich();
 		});

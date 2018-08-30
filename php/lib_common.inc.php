@@ -129,7 +129,7 @@ function check_if_csrf(){
 }
 
 function set_csrf_token(){
-  //// TODO:
+  //// TODO: Just for debugging purposes
   error_log($_SERVER['HTTP_USER_AGENT']);
   if(strlen(strstr($_SERVER['HTTP_USER_AGENT'],"PostmanRuntime/7.1.1")) > 0 ){
     $_SESSION["csrf_token"] = "POSTMAN_DEBUG_TOKEN";
@@ -140,7 +140,23 @@ function set_csrf_token(){
   }
 }
 
-function sanitize_input_data($data){
-
+function get_fb_id($human_readable_name){
+  {
+    $fbs = array(
+        "bank" => 1,
+        "bauwesen" => 2,
+        "dl" => 3,
+        "elektrotechnik" => 4,
+        "fm" => 5,
+        "handel" => 6,
+        "iba" => 7,
+        "immobilien" => 8,
+        "industrie" => 9,
+        "informatik" => 10,
+        "maschinenbau" => 11,
+        "ppm" => 12,
+    );
+    return $kurse[substr($long_kurs, 0, 3)];
+  }
 }
 ?>
