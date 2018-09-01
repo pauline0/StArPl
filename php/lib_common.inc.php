@@ -8,7 +8,7 @@ $ROLLE_ADMIN=2;
 function find_user_in_db($user_name)
 {
   global $conn;
-  $query = "SELECT Id, UserRole FROM userLogin WHERE UserName=?;";
+  $query = "SELECT id, user_role FROM user_login WHERE user_name=?;";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("s", $user_name);
   $stmt->execute();
@@ -26,8 +26,8 @@ function find_user_in_db($user_name)
 
 function create_user_in_db($user_name, $user_role)
 {
-  $conn = connect_to_db();
-  $query = "INSERT INTO userLogin (UserName, UserRole) VALUES (?,?);";
+  global $conn;
+  $query = "INSERT INTO user_login (user_name, user_role) VALUES (?,?);";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("si", $user_name, $user_role);
   $stmt->execute();
@@ -36,9 +36,9 @@ function create_user_in_db($user_name, $user_role)
 }
 
 function find_temporary_user_in_db($user_name){
-  global $conn;//$conn = connect_to_db();
+  global $conn;
 
-  $query = "SELECT userLogin.Id , ExpiryDate, (`ExpiryDate` > NOW()) AS Valid FROM userLogin LEFT JOIN studentAccounts ON userLogin.Id = studentAccounts.UserId WHERE UserName=?";
+  $query = "SELECT user_login.id , expiry_date, (`expiry_date` > NOW()) AS valid FROM user_login LEFT JOIN student_accounts ON user_login.id = student_accounts.user_id WHERE user_name=?";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("s", $user_name);
   $stmt->execute();
@@ -59,9 +59,10 @@ function reset_authentification(){
 }
 
 //https://funcptr.net/2013/08/25/user-sessions,-what-data-should-be-stored-where-/
-function check_user_level($user_id, $level,$op=">="){
+function check_user_level($user_id, $level, $exact_match=false){
   global $conn;
-  $query = "SELECT * FROM userLogin WHERE Id=? AND (UserRole ".$op." $level) LIMIT 1";
+  $op = ($exact_match) ? "=" : ">=";
+  $query = "SELECT * FROM user_login WHERE id=? AND (user_role ".$op." $level) LIMIT 1";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("i", $user_id);
   $stmt->execute();
@@ -78,7 +79,7 @@ function check_user_level($user_id, $level,$op=">="){
 
 function get_user_role($user_id){
   global $conn;
-  $query = "SELECT UserRole FROM userLogin WHERE Id=? LIMIT 1";
+  $query = "SELECT user_role FROM user_login WHERE id=? LIMIT 1";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("i", $user_id);
   $stmt->execute();
@@ -96,7 +97,6 @@ function get_user_role($user_id){
 
 function check_if_min_dozent($user_id){
   global $ROLLE_DOZENT;
-  //return (isset($_SESSION["starpl"]["user_role"]) && $_SESSION["starpl"]["user_role"] > $ROLLE_DOZENT);
   return (isset($user_id) && check_user_level($user_id, $ROLLE_DOZENT));
 }
 
@@ -115,7 +115,6 @@ function check_if_logged_in(){
 }
 
 function check_if_csrf(){
-  error_log($_SESSION["csrf_token"]);
   if (isset($_SESSION["csrf_token"]) && ((isset($_POST["csrf_token"]) && $_POST["csrf_token"] == $_SESSION["csrf_token"]) || (isset($_GET["csrf_token"]) && $_GET["csrf_token"] == $_SESSION["csrf_token"])))
   {
       error_log("success");

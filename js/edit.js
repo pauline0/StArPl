@@ -54,12 +54,12 @@ var edit = {
   	for (var file in selectedArbeit.dateien)
   	{
   		var selectedFile = selectedArbeit.dateien[file];
-  		strHtml += '<div><a target="_blank" href="upload/' + selectedArbeit.Id+ '/' + selectedFile + '">';
+  		strHtml += '<div><a target="_blank" href="upload/' + selectedArbeit.id+ '/' + selectedFile + '">';
   		if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
   		{
   			strHtml += '<img src="'+settings.iconFilePdf+'">';
   		}
-  		strHtml += selectedFile + '</a><span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+selectedArbeit.Id+')"></span></div>';
+  		strHtml += selectedFile + '</a><span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+selectedArbeit.id+')"></span></div>';
   	}
   	return strHtml;
   },

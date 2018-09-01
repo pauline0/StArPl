@@ -3,10 +3,15 @@ error_reporting(-1);
 ini_set("error_log", "/tmp/php-error.log");
 error_log( "Hello, errors!" );
 $server = "localhost";
-$database = "starpl";
+$database = "starpl2";
 $username = "starpl";
 $password = "starpl";
 $conn = new mysqli($server, $username, $password, $database);
+
+if (mysqli_connect_errno())
+{
+  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+}
 
 $ROLLE_STUDENT = 0;
 $ROLLE_DOZENT = 1;

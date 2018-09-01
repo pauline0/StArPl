@@ -28,34 +28,20 @@
 			if (isset($_REQUEST["edit"])){
 				$edit_active = true;
 			}
+			include('php/locales/de_DE.inc.php');
 			include('html/top_navigation.html');
+			include('php/lib_helper.inc.php');
 		?>
 
 		<div class="center-block box-content" id="starpl-content">
 			<div class="row">
+
 				<div class="col-md-3">
 					<ul class="nav fb_side">
-							<li><a>Bank</a></li>
-							<li><a>Bauwesen</a></li>
-							<li><a>Dienstleistungsmanagement</a></li>
-							<li><a>Elektrotechnik</a></li>
-							<li><a>Facility Management</a></li>
-							<li><a>Handel</a></li>
-							<li><a>IBA</a></li>
-							<li><a>Immobilienwirtschaft</a></li>
-							<li><a>Industrie</a></li>
-							<li><a>Informatik</a></li>
-							<li><a>Maschinenbau</a></li>
-							<li><a>PPM</a></li>
-							<li><a>Spedition/Logistik</a></li>
-							<li><a>Steuern/Prüfungswesen</a></li>
-							<li><a>Tourismusbetriebswirtschaft</a></li>
-							<li><a>Versicherung</a></li>
-							<li><a>Wirtschaftsinformatik</a></li>
-						</ul>
-
-
+							<?= generate_site_navigation($FB_NAMES) ?>
+					</ul>
 				</div>
+
 				<div class="col-md-9">
 					<h2 id="headLineStudiengang"></h2>
 

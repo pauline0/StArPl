@@ -74,6 +74,7 @@ var user = {
 
 function htmlEncode(value){
 	// return $('<div/>').text(value).html();
+	if (!value) return " "
 	return value.
 	replace(/&/g, '&amp;').
 	replace( /([^\#-~| |!])/g, function(value) {
@@ -86,27 +87,27 @@ function htmlEncode(value){
 var settings = {
  	detailTableColumns :
 	[
-		['titel', 'Titel'],
+		['title', 'Titel'],
 		['student', 'Student'],
-		['studiengang', 'Studiengang'],
+		['fb', 'Studiengang'],
 		['language', 'Sprache'],
-		['artOfArbeit', 'Art der Arbeit'],
-		['jahrgang', 'Jahrgang'],
-		['betreuer', 'Betreuer'],
-		['firma', 'Firma'],
-		['kurzfassung', 'Kurzfassung']
+		['type', 'Art der Arbeit'],
+		['year', 'Jahrgang'],
+		['docent', 'Betreuer'],
+		['company', 'Firma'],
+		['abstract', 'Kurzfassung']
 	],
 
 	viewAllTableColumns : [
 		//Name des Attributs, Tabellen Header Name, Funktion zum Rendern
-		['titel', 'Titel', (arbeit) => { return '<a onclick="showArbeitDetailled(' + arbeit.Id + ');">' + htmlEncode(arbeit.titel) + '</a>' }],
+		['title', 'Titel', (arbeit) => { return '<a onclick="showArbeitDetailled(' + arbeit.id + ');">' + htmlEncode(arbeit.title) + '</a>' }],
 		['student', 'Student', null],
-		['studiengang', 'Studiengang', null],
+		['fb', 'Studiengang', null],
 		['language', 'Sprache', null],
-		['artOfArbeit', 'Art der Arbeit', null],
-		['jahrgang', 'Jahrgang', null],
-		['betreuer', 'Betreuer', null],
-		['firma', "Firma", 	(arbeit) => {return htmlEncode(arbeit.firma) + '<span class="hidden">' + ((arbeit.searchWords) ? htmlEncode(arbeit.searchWords.join(" ")) : "") + "</span>"}]
+		['type', 'Art der Arbeit', null],
+		['year', 'Jahrgang', null],
+		['docent', 'Betreuer', null],
+		['company', "Firma", 	(arbeit) => {return htmlEncode(arbeit.company) + '<span class="hidden">' + ((arbeit.searchWords) ? htmlEncode(arbeit.searchWords.join(" ")) : "") + "</span>"}]
 	],
 
 	select : {
