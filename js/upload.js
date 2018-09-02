@@ -147,14 +147,9 @@ function uploadFiles(id, redirect_location)
 		form_data.append('file' + i, file_data);
 	}
 	form_data.append('id', id);
-<<<<<<< HEAD
 	form_data.append('action', 'fileAjaxUpload');
 	form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
 	form_data.append('csrf_token', csrf_token);
-=======
-	form_data.append('action', 'fileUpload');
-	form_data.append('csrf_token', $('#csrf_token')[0].value);
->>>>>>> master
 	$.ajaxSetup({async: false});
 	$.ajax({
 		url: './php/manageBackend.php', // point to server-side PHP script
@@ -167,13 +162,7 @@ function uploadFiles(id, redirect_location)
 		success: function(data)
 		{
 			returnValue = true;
-<<<<<<< HEAD
-		},
-		error: function(data,status){
-			returnValue = false;
-=======
 			document.location.href = redirect_location;
->>>>>>> master
 		}
 	});
 	$.ajaxSetup({async: true});
