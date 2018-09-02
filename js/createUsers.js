@@ -1,29 +1,47 @@
 
+var userTable;
+
 $(document).ready(function() {
   $('[data-toggle="tooltip"]').tooltip();
-  prepareTableHeader();
-  $('#tableExistingUsers').DataTable(
+  //prepareTableHeader();
+  userTable = $('#tableExistingUsers').DataTable(
   		{
   			"language":
   			{
   				"url": "js/dataTableGerman.json"
   			},
+        "ajax": "/php/table.php?action=createdUsers",
   			"columnDefs": [
+          {
+            "targets": 1,
+            "render": function(data, type, row){
+              return getReleasableFilesHtml(data);
+            },
+          },
+          {
+            "targets": 3,
+            "render": function(data, type, row){
+              return "<button onclick='openUserRefreshForm(\""+row[0] + "\", "+ data + ",\""+row[2] + "\")'>Verlängern</button>";
+            },
+          },
   				{
-  						"targets": [1,-1, -2],
-  						"render": null
-  				},
+  						"targets": 4,
+  						"render": function(data, type, row, meta){
+                  // if(type === 'display'){
+                    return "<button class='btn btn-danger' onclick='deleteUserAccount("+row[3]+ ")'>Löschen</button>";
+                  // }
+              }
+          },
   				{
   					"targets": '_all',
-  					"render": $.fn.dataTable.render.text()
+  					"render": $.fn.dataTable.render.text(),
+            "sortable": true
   				}
   			]
   		}
   	);
-  reloadUserTable();
+//reloadUserTable();
   setDateDefault();
-  user.getCurrent();
-  menu.init(user.current.UserRole);
   $("#formCreateUsers").submit(function(event){createUser(event)});
 	$('#formUser-divError').hide();
 });
@@ -48,11 +66,11 @@ function reloadUserTable(){
   for (var key in createdUsers)
 	{
 		var arrayOneRow = new Array();
-		arrayOneRow.push(createdUsers[key].UserName);
-    arrayOneRow.push(getReleasableFilesHtml(createdUsers[key].releaseRequests));
-		arrayOneRow.push(createdUsers[key].ExpiryDate);
-    var deleteButton = "<button class='btn btn-danger' onclick='deleteUserAccount("+createdUsers[key].Id + ")'>Löschen</button>";
-    var refreshButton = "<button onclick='openUserRefreshForm(\""+createdUsers[key].UserName + "\", "+ createdUsers[key].Id + ",\""+createdUsers[key].ExpiryDate + "\")'>Verlängern</button>";
+		arrayOneRow.push(createdUsers[key].user_name);
+    arrayOneRow.push(getReleasableFilesHtml(createdUsers[key].release_requests));
+		arrayOneRow.push(createdUsers[key].expiry_date);
+    var deleteButton = "<button class='btn btn-danger' onclick='deleteUserAccount("+createdUsers[key].id + ")'>Löschen</button>";
+    var refreshButton = "<button onclick='openUserRefreshForm(\""+createdUsers[key].user_name + "\", "+ createdUsers[key].id + ",\""+createdUsers[key].expiry_date + "\")'>Verlängern</button>";
 		arrayOneRow.push(refreshButton);
 		arrayOneRow.push(deleteButton);
     arrayTableCreatedUsers.push(arrayOneRow);
@@ -80,20 +98,18 @@ function getCsrfToken(){
 	return $("#csrf_token").val();
 }
 
-function sendFormData(data){
+function sendFormData(data, onSuccess){
   var returnValue = false;
-  $.ajaxSetup({async: false});
   $.post("php/manageBackend.php", data)
   .always(function(data)
   {
-    console.log(data);
     tmpId = data[0];
     if (tmpId >= 1)
     {
       $('#formUser-divError').hide();
       $('#formUser-divSuccess').show();
       $('#formUser-divSuccess')[0].innerHTML = data[1];
-      returnValue = true;
+      onSuccess()
     }
     else
     {
@@ -112,7 +128,6 @@ function sendFormData(data){
       }
     }
   });
-  $.ajaxSetup({async: true});
   return returnValue;
 }
 
@@ -121,11 +136,12 @@ function createUser(event){
   var data = $('#formCreateUsers').serialize();
   data += "&csrf_token=" + getCsrfToken();
   data += '&action=formCreateUsers';
-  returnValue = sendFormData(data);
-  if (returnValue){
-    reloadUserTable();
+  onSuccess = function(){
+    // reloadUserTable();
+    userTable.ajax.reload()
     resetUserFormFields();
   }
+  sendFormData(data, onSuccess);
   return false;
 }
 
@@ -135,11 +151,12 @@ function updateUser(event, id){
   var data = $('#formCreateUsers').serialize();
   data += "&csrf_token=" + getCsrfToken();
   data += '&action=formUpdateUsers&id=' + id;;
-  returnValue = sendFormData(data);
-  if (returnValue){
-    reloadUserTable();
+  onSuccess = function(){
+    // reloadUserTable();
+    userTable.ajax.reload()
     resetUserFormFields();
   }
+  sendFormData(data, onSuccess);
   return false;
 }
 
@@ -151,15 +168,13 @@ function getAllCreatedUsers()
 		action: "getCreatedUsers"
   }
   ;
-	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data)
 	.always(function(r_data)
 	{
-    console.log(r_data);;
+    console.log(r_data);
 		createdUsers = r_data;
+    return createdUsers;
 	});
-	$.ajaxSetup({async: true});
-  return createdUsers;
 }
 
 function deleteUserAccount(id)
@@ -172,15 +187,12 @@ function deleteUserAccount(id)
       csrf_token: getCsrfToken()
     }
     ;
-  	$.ajaxSetup({async: false});
   	$.post("php/manageBackend.php", data)
   	.always(function(data)
   	{
-      console.log(data);
+      getAllCreatedUsers();
+      userTable.ajax.reload()
   	});
-  	$.ajaxSetup({async: true});
-    getAllCreatedUsers();
-    reloadUserTable();
   }
 }
 

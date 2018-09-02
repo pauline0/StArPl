@@ -3,9 +3,13 @@
 	<head>
 		<meta charset="utf-8">
 		<title>StArPl</title>
+<<<<<<< HEAD
 		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.2/mustache.js"></script>
 		<script src="https://raw.githack.com/jonnyreeves/jquery-Mustache/master/jquery.mustache.js"></script>
+=======
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+>>>>>>> master
 		<script src="assets/js/bootstrap.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
@@ -22,7 +26,7 @@
 	</head>
 	<body>
 
-		<div id="starpl-header" class="jumbotron center-block box-header" onclick="getAllArbeiten();user.getCurrent();changeFachbereich();">
+		<div id="starpl-header" class="jumbotron center-block box-header" onclick="getAllDocuments();user.getCurrent();changeFachbereich();">
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform</h2>
 		</div>
 
@@ -30,13 +34,17 @@
 			if (isset($_REQUEST["edit"])){
 				$edit_active = true;
 			}
+			include('php/locales/de_DE.inc.php');
 			include('html/top_navigation.html');
+			include('php/lib_helper.inc.php');
 		?>
 
 		<div class="center-block box-content" id="starpl-content">
 			<div class="row">
+
 				<div class="col-md-3">
 					<ul class="nav fb_side">
+<<<<<<< HEAD
 							<li id="fb_0"><a>Bank</a></li>
 							<li id="fb_1"><a>Bauwesen</a></li>
 							<li id="fb_2"><a>Dienstleistungsmanagement</a></li>
@@ -57,7 +65,12 @@
 						</ul>
 
 
+=======
+							<?= generate_site_navigation($FB_NAMES) ?>
+					</ul>
+>>>>>>> master
 				</div>
+
 				<div class="col-md-9">
 					<h2 id="headLineStudiengang"></h2>
 
@@ -68,7 +81,7 @@
 							<tbody></tbody>
 						</table>
 					</div>
-					<form method="post" name="formSaveArbeit" id="formSaveArbeit" onsubmit="return saveArbeit();" enctype="multipart/form-data">
+					<form method="post" name="formUpdateDocument" id="formUpdateDocument" onsubmit="return saveArbeit();" enctype="multipart/form-data">
 						<table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
 							<thead></thead>
 							<tbody id="tableBodyDetailledArbeit"></tbody>
@@ -93,7 +106,7 @@
 						</div>
 					</form>
 					<div class="form-group text-right" id="editButtons">
-						<button onclick="deleteArbeit();" class="btn btn-danger myhidden" >
+						<button onclick="deleteDocument();" class="btn btn-danger myhidden" >
 							<span class="glyphicon glyphicon-remove"></span> Löschen
 						</button>
 						<button onclick="editArbeit();" class="btn btn-primary">

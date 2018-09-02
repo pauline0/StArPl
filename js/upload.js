@@ -39,14 +39,12 @@
 		{
 			$('#formUpload').find('.addButton').removeAttr('disabled');
 		}
-	});
-
+	})
+	.on('submit', uploadForm);
 	// Schlagwörter-datalist füllen
 	fillDataListSchlagwoerter();
 	fillDocentList();
 
-	user.getCurrent();
-	menu.init(user.current.UserRole);
 });
 
 // wird beim hochladen aufgerufen
@@ -112,8 +110,33 @@ function uploadFilesNew(id){
 	}
 }
 
+function uploadForm(event)
+{
+	event.preventDefault();
+	var returnValue = false;
+	var tmpId = 0;
+	var data = $('#formUpload').serialize();
+	data += '&action=formUpload';
+	$.post(settings.phpBackend, data)
+	.done(function(data, status, xhr){
+		var tmpId = data["fileId"];
+		console.log("success")
+		var redirect_location = data["location"];
+		uploadFiles(tmpId, redirect_location);
+	})
+	.fail(function(data, status, xhr)
+		{
+			showErrors();
+		}
+	);
+}
+
+function showErrors(){
+	console.log("not implemented yet");
+}
+
 // Dateien hochladen
-function uploadFiles(id)
+function uploadFiles(id, redirect_location)
 {
 	var returnValue = false;
 	var form_data = new FormData();
@@ -124,9 +147,14 @@ function uploadFiles(id)
 		form_data.append('file' + i, file_data);
 	}
 	form_data.append('id', id);
+<<<<<<< HEAD
 	form_data.append('action', 'fileAjaxUpload');
 	form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
 	form_data.append('csrf_token', csrf_token);
+=======
+	form_data.append('action', 'fileUpload');
+	form_data.append('csrf_token', $('#csrf_token')[0].value);
+>>>>>>> master
 	$.ajaxSetup({async: false});
 	$.ajax({
 		url: './php/manageBackend.php', // point to server-side PHP script
@@ -139,9 +167,13 @@ function uploadFiles(id)
 		success: function(data)
 		{
 			returnValue = true;
+<<<<<<< HEAD
 		},
 		error: function(data,status){
 			returnValue = false;
+=======
+			document.location.href = redirect_location;
+>>>>>>> master
 		}
 	});
 	$.ajaxSetup({async: true});
@@ -156,7 +188,6 @@ function fillDataListSchlagwoerter()
 	{
 		action: "getAllSearchWords"
 	}
-	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{
@@ -166,7 +197,6 @@ function fillDataListSchlagwoerter()
 		}
 		$('#schlagwoerter')[0].innerHTML = strHtml;
 	});
-	$.ajaxSetup({async: true});
 }
 
 // wird beim Klick auf Sperrvermerk ausgeführt
@@ -194,14 +224,10 @@ function fillDocentList(){
 	{
 		action: "getPossibleDocents"
 	}
-	$.ajaxSetup({async: false});
 	$.post("php/manageBackend.php", data)
 	.always(function(data)
 	{
-		console.log(data);
 		if (!data[0]){
-			/*Wenn die Rückgabe leer ist, ist der Benutzer kein Stundent, da Studenten sich nicht ohne einen gültigen
-			Account anmelden können */
 			$("#selectDocents").hide();
 			$("#divEditButtons").show();
 		}
@@ -213,5 +239,4 @@ function fillDocentList(){
 			$('#selectDocents')[0].innerHTML = strHtml;
 		}
 	});
-	$.ajaxSetup({async: true});
 }

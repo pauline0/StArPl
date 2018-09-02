@@ -1,3 +1,4 @@
+
 ﻿<!DOCTYPE html>
 <html>
 	<head>
@@ -20,6 +21,8 @@
 			<h2><span class="glyphicon glyphicon-file"></span> StudienArbeitenPlattform - Hochladen</h2>
 		</div>
 
+		<?php include('php/lib_helper.inc.php'); ?>
+		<?php include('php/locales/de_DE.inc.php'); ?>
 		<?php
 			$upload_active = true;
 			include('html/top_navigation.html');
@@ -43,25 +46,7 @@
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-education"></i></span>
 						<select class="form-control" id="studiengang" name="studiengang" required>
-							<!-- value-Werte zu empfehlen aufgrund eventueller Sprachvielfalt (gleiche value für gleichen Studiengang) -->
-							<option value="">Studiengang...</option>
-							<option value="Bank">Bank</option>
-							<option value="Bauwesen">Bauwesen</option>
-							<option value="Dienstleistungsmanagement">Dienstleistungsmanagement</option>
-							<option value="Elektrotechnik">Elektrotechnik</option>
-							<option value="Facility Management">Facility Management</option>
-							<option value="Handel">Handel</option>
-							<option value="IBA">IBA</option>
-							<option value="Immobilienwirtschaft">Immobilienwirtschaft</option>
-							<option value="Industrie">Industrie</option>
-							<option value="Informatik">Informatik</option>
-							<option value="Maschinenbau">Maschinenbau</option>
-							<option value="PPM">PPM</option>
-							<option value="Spedition/Logistik">Spedition/Logistik</option>
-							<option value="Steuern/Prüfungswesen">Steuern/Prüfungswesen</option>
-							<option value="Tourismusbetriebswirtschaft">Tourismusbetriebswirtschaft</option>
-							<option value="Versicherung">Versicherung</option>
-							<option value="Wirtschaftsinformatik">Wirtschaftsinformatik</option>
+							<?= generate_options($FB_NAMES, $FB_PLACEHOLDER); ?>
 						</select>
 					</div>
 				</div>
@@ -69,9 +54,7 @@
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-bullhorn"></i></span>
 						<select class="form-control" id="language" name="language" required>
-							<option value="">Sprache...</option>
-							<option value="deutsch">deutsch</option>
-							<option value="englisch">englisch</option>
+							<?= generate_options($LANG_NAMES, $LANG_PLACEHOLDER); ?>
 						</select>
 					</div>
 				</div>
@@ -79,10 +62,7 @@
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-file"></i></span>
 						<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>
-							<option value="">Art der Arbeit...</option>
-							<option value="Praxistransferbericht">Praxistransferbericht</option>
-							<option value="Studienarbeit">Studienarbeit</option>
-							<option value="Bachelorarbeit">Bachelorarbeit</option>
+							<?= generate_options($TYPE_NAMES, $TYPE_PLACEHOLDER); ?>
 						</select>
 					</div>
 				</div>
@@ -136,8 +116,6 @@
 					</div>
 				</div>
 				<input hidden name="csrf_token" id="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-				<!-- <div id='formUpload-divError' class="alert alert-danger hide"> -->
-				<!-- </div> -->
 				<?php
 					if (get_user_role($_SESSION["starpl"]["user_id"]) === $ROLLE_STUDENT){
 							echo '<div class="form-group">
@@ -148,9 +126,11 @@
 							</div>';
 					}
 				?>
+				<!-- <div id='formUpload-divError' class="alert alert-danger hide">
+				</div> -->
 
 				<div class="form-group">
-					<button type="submit" class="btn btn-success">
+					<button type="submit" class="btn btn-success" >
 						<span class="glyphicon glyphicon-upload"></span> Hochladen
 					</button>
 				</div>
