@@ -41,16 +41,21 @@ else {
   else if (isset($_REQUEST['create'])){
     authenticate_starpl("html/create-new-tempuser.html","/?create", 1 );
   }
+  else if (isset($_REQUEST['site_notice'])){
+    include("html/site_notice.html");
+    exit;
+  }
   else
   {
-      if (isset($_SESSION["starpl"]["user_id"]) && isset($_REQUEST['logout']))
-      {
-          logout();
-      }
-      else
-      {
-          include_once('html/viewArbeiten.html');
-      }
+      // if (isset($_SESSION["starpl"]["user_id"]) && isset($_REQUEST['logout']))
+      // {
+      //     logout();
+      // }
+      // else
+      // {
+          include('html/viewArbeiten.html');
+          exit;
+      // }
   }
 }
 
