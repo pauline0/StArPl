@@ -1,0 +1,118 @@
+<script id="tpl-show" type="text/html">
+    <table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
+      <thead></thead>
+      <tbody>
+        <tr>
+          <th>
+            {{strTitle}}
+          </th>
+          <td>
+            {{document.title}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strStudent}}
+          </th>
+          <td>
+            {{document.student}}
+          </td>
+        <tr>
+        </tr>
+          <th>
+            {{strFb}}
+          </th>
+          <td>
+            {{document.fb}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strLang}}
+          </th>
+          <td>
+            {{document.language}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strType}}
+          </th>
+          <td>
+            {{document.type}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strJahrgang}}
+          </th>
+          <td>
+            {{document.year}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strDocent}}
+          </th>
+          <td>
+            {{document.docent}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strAbstract}}
+          </th>
+          <td>
+            {{document.abstract}}
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strCompany}}
+          </th>
+          <td>
+            {{document.company}}
+          </td>
+        </tr>
+        <tr>
+          <th>Downloads</th>
+          <td id="downloadsValue"> {{document.downloads}} </td>
+        </tr>
+        <tr>
+          <th>{{strFiles}}</th>
+            <td>
+            {{#files}}
+              <a target="_blank"
+                href="upload/{{document.id}}/{{.}}"
+                onclick="downloadFile({{document.id}});">
+                <img src="img/pdf.png">
+                {{.}}
+              </a><br/>
+            {{/files}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="arbeitSearchwords">
+      {{strSearchwords}}:
+      {{#document.searchWords}}
+        <span class="label label-default"> {{.}} </span> &nbsp
+      {{/document.searchWords}}
+    </h4>
+    {{#editable}}
+    <div class="form-group text-right" id="editButtons">
+      <button onclick="deleteDocument();" class="btn btn-danger myhidden" >
+        <span class="glyphicon glyphicon-remove"></span> Löschen
+      </button>
+      <button onclick="editArbeit();" class="btn btn-primary">
+        <span class="glyphicon glyphicon-pencil"></span> Bearbeiten
+      </button>
+    </div>
+    {{/editable}}
+    <div class="form-group text-right hidden" id="buttonPublishDoc">
+      <button class="btn btn-success">
+        <span class="glyphicon glyphicon-ok" ></span> Freischalten
+      </button>
+    </div>
+  </div>
+</script>

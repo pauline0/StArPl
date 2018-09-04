@@ -89,7 +89,7 @@ function uploadFilesNew(id){
 		var file_data = $('#FileInputUploadArbeit').prop('files')[i];
 		form_data.append('file' + i, file_data);
 		form_data.append('id', id);
-		form_data.append('action', 'fileAjaxUpload');
+		form_data.append('action', 'fileUpload');
 		form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
 		form_data.append('csrf_token', csrf_token);		$.ajaxSetup({async: false});
 		$.ajax({
@@ -147,7 +147,7 @@ function uploadFiles(id, redirect_location)
 		form_data.append('file' + i, file_data);
 	}
 	form_data.append('id', id);
-	form_data.append('action', 'fileAjaxUpload');
+	form_data.append('action', 'fileUpload');
 	form_data.append('sperrvermerk', $('#sperrvermerk')[0].value);
 	form_data.append('csrf_token', csrf_token);
 	$.ajaxSetup({async: false});

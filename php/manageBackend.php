@@ -64,7 +64,6 @@ if (!$conn->connect_error)
 				http_response_code(403);
 				$userAnswer["err"] = $LOGIN_REQUIERED_ERROR;
 			}
-			error_log($userAnswer);
 			echo json_encode($userAnswer);
 			break;
 		}
@@ -718,11 +717,11 @@ function update_document_in_database($conn, $file_params, $file_id){
 	var_dump($file_params);
 	$stmt = $conn->prepare($query);
 	$stmt->bind_param("sssssssssi",
-										$file_params["titel"],
+										$file_params["title"],
 										$file_params["student"],
-										$file_params["studiengang"],
+										$file_params["fb"],
 									  $file_params["language"],
-										$file_params["artOfArbeit"],
+										$file_params["type"],
 										$file_params["year"],
 										$file_params["docent"],
 										$file_params["company"],
@@ -730,6 +729,9 @@ function update_document_in_database($conn, $file_params, $file_id){
 										$file_id);
 	$stmt->execute();
 	$rv = ($conn->affected_rows > 0 );
+	if (!$rv){
+		error_log(mysqli_error($conn));
+	}
 	$stmt->close();
 	return $rv;
 }

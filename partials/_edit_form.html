@@ -1,0 +1,111 @@
+<script id="tpl-edit" type="text/html">
+  <form method="post" name="formUpdateDocument" id="formUpdateDocument" onsubmit="return saveArbeit();" enctype="multipart/form-data">
+    <table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
+      <thead></thead>
+      <tbody>
+        <tr>
+          <th>
+            {{strTitle}}
+          </th>
+          <td>
+            <input class="form-control" id="title" name="title" required />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strStudent}}
+          </th>
+          <td>
+            <input class="form-control" id="student" name="student" required />
+          </td>
+        <tr>
+        </tr>
+          <th>
+            {{strFb}}
+          </th>
+          <td>
+            <select class="form-control" id="fb" name="fb" required>
+              {{{fbOptions}}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strLang}}
+          </th>
+          <td>
+            <select class="form-control" id="language" name="language" required>
+              {{{langOptions}}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strType}}
+          </th>
+          <td>
+            <select class="form-control" id="type" name="type" required>
+              {{{typeOptions}}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strJahrgang}}
+          </th>
+          <td>
+            <input class="form-control" id="year" name="year" required pattern="[0-9]{4}" />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strDocent}}
+          </th>
+          <td>
+            <input class="form-control" id="docent" name="docent" required />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strAbstract}}
+          </th>
+          <td>
+            <textarea class="form-control" rows="5" id="abstract" name="abstract" required>{{abstract}}</textarea>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            {{strCompany}}
+          </th>
+          <td>
+            <input class="form-control" id="company" name="company" required />
+          </td>
+        </tr>
+        <tr>
+          <th>{{strFiles}}</th>
+            <td>
+              {{{files}}}
+              <input id="editFileInput" name="editFileInput" type="file" class="file" data-show-preview="false" multiple>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="arbeitSearchwords"></h4>
+    <div id="add" class="form-inline editOnly">
+      <span class="input-group-btn">
+        <input class="form-control" id="schlagwort" placeholder="Neues Schlagwort" list="schlagwoerter" />
+        <button type="button" class="btn btn-success addButton" onclick="searchword.add();">
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </span>
+    </div>
+    <div class="form-group text-right editOnly" id="leaveButtons">
+      <button id="resetButton" class="btn btn-danger">
+        <span class="glyphicon glyphicon-remove"></span> Abbrechen
+      </button>
+      <button type="submit" class="btn btn-success">
+        <span class="glyphicon glyphicon-ok"></span> Speichern
+      </button>
+    </div>
+  </form>
+</script>

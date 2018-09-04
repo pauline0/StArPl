@@ -3,16 +3,6 @@
 	<head>
 		<meta charset="utf-8">
 		<title>StArPl</title>
-		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.2/mustache.js"></script>
-		<script src="https://raw.githack.com/jonnyreeves/jquery-Mustache/master/jquery.mustache.js"></script>
-		<script src="assets/js/bootstrap.min.js"></script>
-		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
-		<script src="js/general.js"></script>
-		<script src="js/edit.js"></script>
-		<script src="js/viewArbeiten.js"></script>
-		<script src="js/fileinput.min.js"></script> <!-- 4.4.3-10 -->
 		<link rel="icon" href="img/icon.ico">
 		<link rel="stylesheet" href="assets/css/bootstrap.min.css">
 		<link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
@@ -46,54 +36,28 @@
 
 				<div class="col-md-9">
 					<h2 id="headLineStudiengang"></h2>
-
-					<div id="divTableOverview">
-						<?= (check_if_logged_in()) ? '<a id="toggleDocumentSelection">Nur meine Arbeiten anzeigen </a>': '' ?>
-						<table style="width:100%" class="table table-stripped table-hover table-bordered table-condensed" id="tableOverview" >
-							<thead id="tableHeader"></thead>
-							<tbody></tbody>
-						</table>
-					</div>
-					<form method="post" name="formUpdateDocument" id="formUpdateDocument" onsubmit="return saveArbeit();" enctype="multipart/form-data">
-						<table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
-							<thead></thead>
-							<tbody id="tableBodyDetailledArbeit"></tbody>
-							<tbody id="tableBodyDetailledArbeitEdit"></tbody>
-						</table>
-						<h4 id="arbeitSearchwords"></h4>
-						<div id="add" class="form-inline editOnly">
-							<span class="input-group-btn">
-								<input class="form-control" id="schlagwort" placeholder="Neues Schlagwort" list="schlagwoerter" />
-								<button type="button" class="btn btn-success addButton" onclick="searchword.add();">
-									<i class="glyphicon glyphicon-plus"></i>
-								</button>
-							</span>
+						<div id="divTableOverview">
+							<?= (check_if_logged_in()) ? '<a id="toggleDocumentSelection">Nur meine Arbeiten anzeigen </a>': '' ?>
+							<table style="width:100%" class="table table-stripped table-hover table-bordered table-condensed" id="tableOverview" >
+								<thead id="tableHeader"></thead>
+								<tbody></tbody>
+							</table>
 						</div>
-						<div class="form-group text-right editOnly" id="leaveButtons">
-							<button onclick="return resetArbeit();" class="btn btn-danger">
-								<span class="glyphicon glyphicon-remove"></span> Abbrechen
-							</button>
-							<button type="submit" class="btn btn-success">
-								<span class="glyphicon glyphicon-ok"></span> Speichern
-							</button>
+						<div id="updateDocument">
 						</div>
-					</form>
-					<div class="form-group text-right" id="editButtons">
-						<button onclick="deleteDocument();" class="btn btn-danger myhidden" >
-							<span class="glyphicon glyphicon-remove"></span> Löschen
-						</button>
-						<button onclick="editArbeit();" class="btn btn-primary">
-							<span class="glyphicon glyphicon-pencil"></span> Bearbeiten
-						</button>
 					</div>
-					<div class="form-group text-right hidden" id="buttonPublishDoc">
-						<button class="btn btn-success">
-							<span class="glyphicon glyphicon-ok" ></span> Freischalten
-						</button>
-					</div>
-					<input name="csrf_token" id="csrf_token" hidden value="<?= $_SESSION['csrf_token'] ?>" />
 				</div>
-			</div>
 		</div>
+		<input name="csrf_token" id="csrf_token" hidden value="<?= $_SESSION['csrf_token'] ?>" />
+		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.2/mustache.js"></script>
+		<script src="https://raw.githack.com/jonnyreeves/jquery-Mustache/master/jquery.mustache.js"></script>
+		<script src="assets/js/bootstrap.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+		<script src="js/general.js"></script>
+		<script src="js/edit.js"></script>
+		<script src="js/viewArbeiten.js"></script>
+		<script src="js/fileinput.min.js"></script> <!-- 4.4.3-10 -->
 	</body>
 </html>

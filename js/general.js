@@ -100,7 +100,7 @@ var settings = {
 
 	viewAllTableColumns : [
 		//Name des Attributs, Tabellen Header Name, Funktion zum Rendern
-		['title', 'Titel', (arbeit) => { return '<a onclick="showArbeitDetailled(' + arbeit.id + ');">' + htmlEncode(arbeit.title) + '</a>' }],
+		['title', 'Titel', (arbeit) => { return '<a onclick="showDocument(' + arbeit.id + ');">' + htmlEncode(arbeit.title) + '</a>' }],
 		['student', 'Student', null],
 		['fb', 'Studiengang', null],
 		['language', 'Sprache', null],
@@ -111,7 +111,7 @@ var settings = {
 	],
 
 	select : {
-		studiengang : [
+		fb : [
 	   "Bank",
 	   "Bauwesen",
 	   "Dienstleistungsmanagement",
@@ -131,12 +131,12 @@ var settings = {
 		  "Wirtschaftsinformatik"
 		],
 
-		sprache :[
+		language :[
 			"deutsch",
 			"englisch"
 		],
 
-		typ : [
+		type : [
 			"Praxistransferbericht",
 			"Studienarbeit",
 			"Bachelorarbeit"

@@ -15,7 +15,7 @@ function generate_options($human_readable_names, $empty, $values=null){
 function generate_site_navigation($fb_names){
   $sidebar_string = "";
   foreach($fb_names as $value => $option_name){
-    $sidebar_string =  $sidebar_string."<li><a id='fb_".$value."'>".$option_name."</li></a>\n";
+    $sidebar_string =  $sidebar_string."<li><a id='fb_".$value."'>".$option_name."</a></li>\n";
   }
   return $sidebar_string;
 }

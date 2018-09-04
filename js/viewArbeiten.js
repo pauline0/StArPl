@@ -4,9 +4,24 @@ var arrayIdsArbeiten = null;
 var arraySelectedArbeiten = null;
 var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
-// var ownUser = null;
+
 var arrayTableDetailledView = settings.detailTableColumns;
 var documentTable = null;
+
+var templates = {
+	show: null,
+	edit: null
+}
+
+function loadMustacheTemplate(name, tpl_name,path, onload){
+	$.get(path, function(data) {
+		// Fetch the <script /> block from the loaded external
+		// template file which contains our greetings template.
+		templates[name] = $(data).filter("#"+tpl_name).html();
+		onload()
+	});
+}
+
 $(document).ready(function() {
 	// Navigation zwischen den Fachbereichen
 	getAllDocuments();
@@ -48,10 +63,10 @@ $(document).ready(function() {
 	if ($_GET().id)
 	{
 		if($_GET().hidden){
-			showHiddenArbeit($_GET().id)
+			showHiddenDocument($_GET().id)
 		}
 		else{
-			showArbeitDetailled($_GET().id);
+			showDocument($_GET().id);
 		}
 	}
 	else
@@ -70,7 +85,6 @@ $(document).ready(function() {
 
 window.onpopstate = function(event) {
 	getGetParas();
-	console.log("pop_state");
 	changeFachbereich($_GET().studiengang, "replaceState");
 };
 
@@ -115,7 +129,7 @@ function reloadDataTable()
 		// {
 			if (user.current.id == arraySelectedArbeiten[key].user_id || user.current.user_role == '2') // verfügt der User über Bearbeitungsrecht?
 			{
-				arrayOneRow.push('<a onclick="showArbeitDetailled(' + arraySelectedArbeiten[key].id + ');"><span class="glyphicon glyphicon-pencil"></span></a><span hidden> own </span>');
+				arrayOneRow.push('<a onclick="showDocument(' + arraySelectedArbeiten[key].id + ');"><span class="glyphicon glyphicon-pencil"></span></a><span hidden> own </span>');
 			}
 			else
 			{
@@ -205,7 +219,7 @@ function changeToEdit(event){
 	var newstate = "?edit"
 	getGetParas();
 	if ($_GET().id){
-		var selectedArbeit = getSelectedArbeit($_GET().id);
+		var selectedArbeit = getSelectedDocument($_GET().id);
 		setButtonsInDetailView(selectedArbeit);
 		newstate += "&" + "id=" + $_GET().id;
 	}
@@ -249,7 +263,7 @@ function changeFachbereich(selectedStudiengang, historyFunc="pushState")
 	{
 		window.history[historyFunc]('', '', '?studiengang=' + selectedStudiengang);
 	}
-	resetArbeit();
+	resetDocument();
 	$('.active_fb').removeClass('active_fb');
 
 	if ( selectedStudiengang && selectedStudiengang.length > 0){
@@ -278,102 +292,63 @@ function renderArbeitKeywords(searchWords){
 	return swString;
 }
 
-function renderFiles(selectedArbeit){
-	var strHtml = "";
-	var files = selectedArbeit.dateien;
-	for (var fileIdx = 0; fileIdx < files.length; fileIdx++)
-	{
-		var selectedFile = files[fileIdx];
-		strHtml += '<a target="_blank" href="upload/' + selectedArbeit.id + '/' + selectedFile + '" onclick="downloadFile(' + selectedArbeit.id + ');">';
-		if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
-		{
-			strHtml += '<img src="'+ settings.iconFilePdf +'">';
-		}
-		strHtml += selectedFile + '</a><br/>';
-	}
-	return strHtml;
-}
-
-function renderFilesEdit(selectedArbeit){
-	var strHtml = "";
-	for (var file in selectedArbeit.dateien)
-	{
-		var selectedFile = selectedArbeit.dateien[file];
-		strHtml += '<div><a target="_blank" href="upload/' + selectedArbeit.id+ '/' + selectedFile + '">';
-		if (selectedFile.substr(selectedFile.length - 4, 4) == '.pdf')
-		{
-			strHtml += '<img src="img/pdf.png">';
-		}
-		strHtml += selectedFile + ' </a> <span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+selectedArbeit.id+')"></span></div>';
-	}
-	return strHtml;
-}
-
-function getArbeitTableHTML(selectedArbeit){
-	var strHtml = '';
-	for (var subArray in arrayTableDetailledView)
-	{
-		strHtml +=
-			'<tr>' +
-				'<th>' + arrayTableDetailledView[subArray][1] + '</th>' +
-				'<td>' + htmlEncode(selectedArbeit[arrayTableDetailledView[subArray][0]]) + '</td>' +
-			'</tr>';
-	}
-	if (user.current.user_role == 2 || user.current.id == selectedArbeit.user_id)
-	{
-		strHtml +=
-			'<tr>' +
-				'<th>Downloads</th>' +
-				'<td id="downloadsValue">' + selectedArbeit.downloads + '</td>' +
-			'</tr>';
-	}
-	strHtml +=
-			'<tr>' +
-				'<th>Datei(en)</th>' +
-				'<td>';
-
-	strHtml += renderFiles(selectedArbeit) +
-				'</td>' +
-			'</tr>';
-
-	return strHtml;
-}
-
 function renderSearchwords(selectedArbeit){
 	var html = "Schlagworte: " + renderArbeitKeywords(selectedArbeit["searchWords"])
 	return html;
 }
 
-function getSelectedArbeit(id){
+function getSelectedDocument(id){
 	var idArray = $.inArray(id.toString(), arrayIdsArbeiten);
 	return arrayAllArbeiten[idArray];
 }
 
 // detaillierte Übersicht über eine Arbeit
 
-function showArbeitDetailled(Id)
+function showDocument(id)
 {
-	var selectedArbeit = getSelectedArbeit(Id);
+	var selectedDocument = getSelectedDocument(id);
 
-	if (selectedArbeit != undefined)
-	{
-		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(selectedArbeit);
-		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedArbeit.fb + '\');">' + selectedArbeit.fb + '</a> > ' + htmlEncode(selectedArbeit.title);
-		$('#arbeitSearchwords')[0].innerHTML = renderSearchwords(selectedArbeit)
-		$('#divTableOverview').hide();
-		$('#tableDetailledArbeit').show();
-		$('#arbeitSearchwords').show()
+	var initShowView = function(){
+		$('#updateDocument').empty();
+		$('#updateDocument').append(Mustache.render(templates.show, templateData));
 		if ($_GET().edit)
 		{
-			window.history.replaceState('', '', '?edit&studiengang=' + selectedArbeit.fb + '&id=' + selectedArbeit.id);
-			setButtonsInDetailView(selectedArbeit);
+			window.history.replaceState('', '', '?edit&studiengang=' + selectedDocument.fb + '&id=' + selectedDocument.id);
+			setButtonsInDetailView(selectedDocument);
 		}
 		else
 		{
-			$('.editOnly').hide();
 			$('#editButtons').hide();
-			window.history.replaceState('', '', '?studiengang=' + selectedArbeit.fb + '&id=' + selectedArbeit.id);
+			window.history.replaceState('', '', '?studiengang=' + selectedDocument.fb + '&id=' + selectedDocument.id);
 		}
+	}
+
+	if (selectedDocument != undefined)
+	{
+		var templateData = {
+			"strTitle": settings.detailTableColumns[0][1],
+			"strStudent": settings.detailTableColumns[1][1],
+			"strFb": settings.detailTableColumns[2][1],
+			"strLang": settings.detailTableColumns[3][1],
+			"strType": settings.detailTableColumns[4][1],
+			"strJahrgang": settings.detailTableColumns[5][1],
+			"strDocent": settings.detailTableColumns[6][1],
+			"strCompany": settings.detailTableColumns[7][1],
+			"strAbstract": settings.detailTableColumns[8][1],
+			"strFiles": "Datei(en)",
+			"strSearchwords": "Schlagwörter",
+			"document": selectedDocument,
+			"files": selectedDocument.dateien,
+			"editable": true
+		}
+		if (templates.show){
+			initShowView()
+		}
+		else {
+			loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
+		}
+		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedDocument.fb + '\');">' + selectedDocument.fb + '</a> > ' + htmlEncode(selectedDocument.title);
+		$('#divTableOverview').hide();
 	}
 	else
 	{
@@ -390,15 +365,14 @@ function setButtonsInDetailView(selectedArbeit){
 	{
 		$('#editButtons').hide();
 	}
-	$('.editOnly').hide();
 }
 
 function getCsrfToken(){
 	return $("#csrf_token").val();
 }
 
-function getHiddenArbeit(id){
-	var hiddenArbeit;
+function getHiddenDocument(id){
+	var hiddenDocument;
 	var role;
 	var data =
 	{
@@ -412,34 +386,63 @@ function getHiddenArbeit(id){
 	{
 		if (data[0] >= 0 ){
 			role = data[0];
-			hiddenArbeit = data[1];
+			hiddenDocument = data[1];
 		}
 		else{
 			changeFachbereich();
 		}
 	});
 	$.ajaxSetup({async: true});
-	return hiddenArbeit;
+	return hiddenDocument;
 }
 
-function showHiddenArbeit(id){
-	arrayIdsArbeiten = new Array();
-	var hiddenArbeit = getHiddenArbeit(id);
-	if (hiddenArbeit){
-		$('#tableBodyDetailledArbeit')[0].innerHTML = getArbeitTableHTML(hiddenArbeit);
-		$('#arbeitSearchwords')[0].innerHTML = renderSearchwords(hiddenArbeit)
-		$('#divTableOverview').hide();
-		$('#tableDetailledArbeit').show();
-		$('.editOnly').hide();
-		arrayAllArbeiten.push(hiddenArbeit);
-		if (user.current.user_role >=  1){
-			$('#editButtons').hide();
-			$('#buttonPublishDoc').removeClass("hidden");
-			$('#buttonPublishDoc').unbind("click");
-			$('#buttonPublishDoc').click(function(){
-				releaseDocument(hiddenArbeit.id, hiddenArbeit.fb)
-			});
+function showHiddenDocument(id){
+	var hiddenDocument = getHiddenDocument(id);
+
+	var initShowView = function(){
+		$('#updateDocument').empty();
+		$('#updateDocument').append(Mustache.render(templates.show, templateData));
+			setButtonsInDetailView(hiddenDocument);
+			if (user.current.user_role >=  1){
+				$('#editButtons').hide();
+				$('#buttonPublishDoc').removeClass("hidden");
+				$('#buttonPublishDoc').unbind("click");
+				$('#buttonPublishDoc').click(function(){
+					releaseDocument(hiddenDocument.id, hiddenDocument.fb)
+				});
+			}
 		}
+
+	if (hiddenDocument != undefined)
+	{
+		var templateData = {
+			"strTitle": settings.detailTableColumns[0][1],
+			"strStudent": settings.detailTableColumns[1][1],
+			"strFb": settings.detailTableColumns[2][1],
+			"strLang": settings.detailTableColumns[3][1],
+			"strType": settings.detailTableColumns[4][1],
+			"strJahrgang": settings.detailTableColumns[5][1],
+			"strDocent": settings.detailTableColumns[6][1],
+			"strCompany": settings.detailTableColumns[7][1],
+			"strAbstract": settings.detailTableColumns[8][1],
+			"strFiles": "Datei(en)",
+			"strSearchwords": "Schlagwörter",
+			"document": hiddenDocument,
+			"files": hiddenDocument.dateien,
+			"editable": true
+		}
+		if (templates.show){
+			initShowView()
+		}
+		else {
+			loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
+		}
+		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + hiddenDocument.fb + '\');">' + hiddenDocument.fb + '</a> > ' + htmlEncode(hiddenDocument.title);
+		$('#divTableOverview').hide();
+	}
+	else
+	{
+		changeFachbereich();
 	}
 }
 
@@ -461,23 +464,21 @@ function releaseDocument(id, studiengang){
 }
 
 // zählt den Counter für Downloads hoch
-function downloadFile(Id)
+function downloadFile(id)
 {
 	var data =
 	{
 		action: 'incrementDownloads',
-		id: Id
+		id: id
 	}
-	$.ajaxSetup({async: false});
 	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
-		var idArray = $.inArray(Id.toString(), arrayIdsArbeiten);
+		var idArray = $.inArray(id.toString(), arrayIdsArbeiten);
 		arrayAllArbeiten[idArray].downloads = parseInt(arrayAllArbeiten[idArray].downloads)
 		arrayAllArbeiten[idArray].downloads += 1;
 		$('#downloadsValue')[0].innerHTML = arrayAllArbeiten[idArray].downloads;
 	});
-	$.ajaxSetup({async: true});
 }
 
 // ============================================================
@@ -493,13 +494,23 @@ function getOptionsForSelect(name){
 	return oStr
 }
 
+function getOptionsForSelectIndex(name){
+	var options = settings.select[name];
+	var oStr = ""
+	for (var  i = 0; i < options.length; i++){
+		oStr += '<option value="' + i + '">'+ options[i] +'</option>'
+	}
+	return oStr
+}
+
+
 
 // wechselt in den Bearbeitungsmodus
 function editArbeit()
 {
 	getGetParas();
 	if ($_GET().hidden){
-		var selectedArbeit = getHiddenArbeit($_GET().id);
+		var selectedArbeit = getHiddenDocument($_GET().id);
 	}
 	else {
 		var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
@@ -509,49 +520,29 @@ function editArbeit()
 }
 
 function buildEditForm(selectedArbeit){
-	var cuttedArrayTableDetailledView = arrayTableDetailledView.slice(0, -1);
-	// var arrayTableEdit =
-	// [
-	// 	'<input class="form-control" id ="' + arrayTableDetailledView[0][0] + '" name="' + arrayTableDetailledView[0][0] + '" required />',
-	// 	'<input class="form-control" id ="' + arrayTableDetailledView[1][0] + '" name="' + arrayTableDetailledView[1][0] + '" required />',
-	// 	'<select class="form-control" id="studiengang" name="studiengang" required>' +
-	// 		getOptionsForSelect("studiengang") +
-	// 	'</select>',
-	//
-	// 	'<select class="form-control" id="language" name="language" required>' +
-	// 		getOptionsForSelect("sprache") +
-	// 	'</select>',
-	//
-	// 	'<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>' +
-	// 			getOptionsForSelect("typ") +
-	// 	'</select>',
-	//
-	// 	'<input class="form-control" id ="' + arrayTableDetailledView[5][0] + '" name="' + arrayTableDetailledView[5][0] + '" required pattern="[0-9]{4}" />',
-	// 	'<input class="form-control" id ="' + arrayTableDetailledView[6][0] + '" name="' + arrayTableDetailledView[6][0] + '" required />',
-	// 	'<input class="form-control" id ="' + arrayTableDetailledView[7][0] + '" name="' + arrayTableDetailledView[7][0] + '" required />'
-	// ]
 	var templateData = {
-		"strTitle" : cuttedArrayTableDetailledView[0][1],
-		"strStudent" : cuttedArrayTableDetailledView[1][1],
-		"strFb" : cuttedArrayTableDetailledView[2][1],
-		"strLang" : cuttedArrayTableDetailledView[3][1],
-		"strType" : cuttedArrayTableDetailledView[4][1],
-		"strJahrgang" : cuttedArrayTableDetailledView[5][1],
-		"strBetreuer" : cuttedArrayTableDetailledView[6][1],
-		"strKurzfassung" : cuttedArrayTableDetailledView[6][1],
-		"fbOptions": getOptionsForSelect("studiengang"),
-		"langOptions": getOptionsForSelect("sprache"),
-		"typeOptions": getOptionsForSelect("typ")
+		"strTitle" : settings.detailTableColumns[0][1],
+		"strStudent" : settings.detailTableColumns[1][1],
+		"strFb" : settings.detailTableColumns[2][1],
+		"strLang" : settings.detailTableColumns[3][1],
+		"strType" : settings.detailTableColumns[4][1],
+		"strJahrgang" : settings.detailTableColumns[5][1],
+		"strDocent" : settings.detailTableColumns[6][1],
+		"strCompany" : settings.detailTableColumns[7][1],
+		"abstract": selectedArbeit.abstract,
+		"strAbstract" : settings.detailTableColumns[8][1],
+		"strFiles" :"Datei(en)",
+		"fbOptions": getOptionsForSelectIndex("fb"),
+		"langOptions": getOptionsForSelectIndex("language"),
+		"typeOptions": getOptionsForSelectIndex("type"),
+		"files":edit.renderFiles(selectedArbeit)
 	}
 	$.Mustache.load('partials/_edit_form.html', function() {
-    $('#tableBodyDetailledArbeitEdit').mustache('tpl-edit', templateData);
-		// $('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
+		$('#updateDocument').empty();
+		$('#updateDocument').mustache('tpl-edit', templateData);
 		initEditValues(selectedArbeit);
-		// $('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
-		// $('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
-		// $('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
-		$('#tableBodyDetailledArbeit').hide();
-		$('#tableBodyDetailledArbeitEdit').show();
+		// $('#tableBodyDetailledArbeit').hide();
+		// $('#tableBodyDetailledArbeitEdit').show();
 		$('#editButtons').hide();
 		$('.editOnly').show	();
 		$("#editFileInput").fileinput({
@@ -566,57 +557,24 @@ function buildEditForm(selectedArbeit){
 				removeClass: "btn btn-danger",
 						removeLabel: "&nbsp;Löschen" });
 		edit.displaySearchWords(selectedArbeit.searchWords)
+		$('#resetButton').unbind("click");
+		$('#resetButton').click(function(){
+			showDocument(selectedArbeit.id)
+		});
 	});
-	var strHtml = '';
-	// for (var subArray in cuttedArrayTableDetailledView)
-	// {
-	// 	strHtml +=
-	// 		'<tr>' +
-	// 			'<th>' + cuttedArrayTableDetailledView[subArray][1] + '</th>' +
-	// 			'<td>' + arrayTableEdit[subArray] + '</td>' +
-	// 		'</tr>';
-	// }
-	strHtml +=
-		'<tr>' +
-			'<th>' + arrayTableDetailledView[arrayTableDetailledView.length - 1][1] + '</th>' +
-			'<td><textarea class="form-control" rows="5" id ="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] + '" name="' + arrayTableDetailledView[arrayTableDetailledView.length - 1][0] +'" required>' + selectedArbeit[arrayTableDetailledView[arrayTableDetailledView.length - 1][0]] + '</textarea></td>' +
-		'</tr>';
-	strHtml +=
-		'<tr>' +
-			'<th>Datei(en)</th>' +
-			'<td>';
-	strHtml += edit.renderFiles(selectedArbeit)//renderFilesEdit(selectedArbeit)
-	strHtml +=
-			'<input id="editFileInput" name="editFileInput" type="file" class="file" data-show-preview="false" multiple>' +
-			'</td>' +
-		'</tr>';
 
-	// $('#tableBodyDetailledArbeitEdit')[0].innerHTML = strHtml;
-	// initEditValues(selectedArbeit);
-	// $('#studiengang')[0].value = selectedArbeit[arrayTableDetailledView[2][0]];
-	// $('#language')[0].value = selectedArbeit[arrayTableDetailledView[3][0]];
-	// $('#artOfArbeit')[0].value = selectedArbeit[arrayTableDetailledView[4][0]];
-	// $('#tableBodyDetailledArbeit').hide();
-	// $('#tableBodyDetailledArbeitEdit').show();
-	// $('#editButtons').hide();
-	// $('.editOnly').show	();
-	// $("#editFileInput").fileinput({
-	// 		showUpload: false,
-	// 		allowedFileTypes: ['pdf'],
-	// 				overwriteInitial: true,
-	// 		maxFileCount: 20,
-	// 		maxFileSize:2000,
-	// 		browseClass: "btn btn-primary",
-	// 				browseLabel: "&nbsp;Datei(en) hinzufügen [*.pdf]",
-	// 		browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
-	// 		removeClass: "btn btn-danger",
-	// 				removeLabel: "&nbsp;Löschen" });
-	// edit.displaySearchWords(selectedArbeit.searchWords)
 }
 
-function initEditValues(selectedArbeit){
+function initEditValues(selectedDocument){
 	for (var i = 0; i < arrayTableDetailledView.length; i++){
-		$("input[name='" + arrayTableDetailledView[i][0] +"']").val(selectedArbeit[arrayTableDetailledView[i][0]])
+		var curProp = arrayTableDetailledView[i][0];
+		if(settings.select[curProp]){
+			var val = settings.select[curProp].indexOf(selectedDocument[curProp]);
+			$("select[name='" + arrayTableDetailledView[i][0] +"']").val(val);
+		}
+		else{
+			$("input[name='" + arrayTableDetailledView[i][0] +"']").val(selectedDocument[curProp])
+		}
 	}
 }
 
@@ -652,7 +610,7 @@ function uploadFilesO(id){
 }
 
 // verlässt den Bearbeitungsmodus
-function resetArbeit()
+function resetDocument()
 {
 	$('#tableBodyDetailledArbeit').show();
 	$('#tableBodyDetailledArbeitEdit').hide();
@@ -761,10 +719,10 @@ function saveArbeit()
 	$.post(settings.phpBackend, data);
 	$.ajaxSetup({async: true});
 	returnValue = uploadFiles($_GET().id);
-	resetArbeit();
+	resetDocument();
 	getAllDocuments();
 	user.getCurrent();
-	showArbeitDetailled($_GET().id);
+	showDocument($_GET().id);
 	arraySearchwordOperations = [];
 	return false;
 }
