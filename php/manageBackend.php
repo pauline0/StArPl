@@ -49,7 +49,7 @@ if (!$conn->connect_error)
 					}
 					http_response_code(201);
 					$userAnswer["fileId"] = $file_id;
-					$userAnswer["location"] = 'http://'.$_SERVER['SERVER_NAME']."?id=".$file_id;
+					$userAnswer["location"] = 'https://'.$_SERVER['SERVER_NAME']."?id=".$file_id;
 					if(!$is_min_docent){
 						$userAnswer["location"] = $userAnswer["location"]."&hidden";
 					}
@@ -569,23 +569,6 @@ function get_file_by_id($conn, $file_id){
 		return $document;
 	}
 }
-
-// function findTemporaryUserInDB($conn, $userName){
-// 	$result = $conn->query("SELECT `user_login`.`id`,`expiry_date`, (`expiry_date` > NOW()) AS `valid` FROM `user_login` LEFT JOIN `student_accounts` ON `user_login`.id = `student_accounts`.`user_id` WHERE `user_name`='$userName';");
-// 	if(!$result){
-// 		throw UserException("UserName oder Passwort falsch.");
-// 	}
-// 	while ($zeile = $result->fetch_assoc()){
-// 		if (!$zeile["ExpiryDate"]){
-// 			throw new UserException("Für diesen Benutzer existieren keine gültigen Accounts");
-// 		}
-// 		if ($zeile["Valid"]){
-// 			$user_id = $zeile["Id"];
-// 			return $user_id;
-// 		}
-// 	}
-// 	throw new UserException("Alle temporären Accounts dieses Nutzers sind nicht mehr gültig.");
-// }
 
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus
 function get_file_names_array($Id)

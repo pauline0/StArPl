@@ -15,8 +15,6 @@ var templates = {
 
 function loadMustacheTemplate(name, tpl_name,path, onload){
 	$.get(path, function(data) {
-		// Fetch the <script /> block from the loaded external
-		// template file which contains our greetings template.
 		templates[name] = $(data).filter("#"+tpl_name).html();
 		onload()
 	});
@@ -255,6 +253,7 @@ function changeFachbereich(selectedStudiengang, historyFunc="pushState")
 	$('#tableDetailledArbeit').hide();
 	$('#arbeitSearchwords').hide();
 	reloadDataTable();
+	getGetParas();
 	if ($_GET().edit)
 	{
 	 window.history[historyFunc]('', '', '?edit&studiengang=' + selectedStudiengang);
@@ -311,6 +310,7 @@ function showDocument(id)
 	var initShowView = function(){
 		$('#updateDocument').empty();
 		$('#updateDocument').append(Mustache.render(templates.show, templateData));
+		getGetParas()
 		if ($_GET().edit)
 		{
 			window.history.replaceState('', '', '?edit&studiengang=' + selectedDocument.fb + '&id=' + selectedDocument.id);
