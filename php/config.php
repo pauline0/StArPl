@@ -17,5 +17,5 @@ $ROLLE_STUDENT = 0;
 $ROLLE_DOZENT = 1;
 $ROLLE_ADMIN = 2;
 
-$maxAccountLifetime = new DateInterval("P7D");
+$max_account_lifetime = new DateInterval("P7D");
 ?>

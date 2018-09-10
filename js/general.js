@@ -19,29 +19,13 @@ function getGetParas()
 	}
 }
 
-function logout(){
-//	$("#logoutButton").click();
-	var logoutData = new FormData();
-	logoutData.append("logout", "")
-	$.ajaxSetup({
-	    data : logoutData,
-	    processData: false,
-	    contentType: false,
-			async:false
-	});
-	$.post("index.php",function(){
-		studiengang = location.search.match(/studiengang=[\w|%]+/)
-		if (studiengang){
-			location.href = "?" + studiengang[0];
-		}
-		else {
-			location.href = ""
-		}
-	});
-}
+// window.$_GET = function(param){
+// 		if (last_query_str === undefined || last_query_str != window.location.search){
+//
+// 		}
+// }
 
 var menu = {
-
 	init : function(user_role){
 	}
 }

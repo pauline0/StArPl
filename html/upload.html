@@ -33,7 +33,7 @@
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
-						<input class="form-control" id="titel" name="titel" placeholder="Titel" required autofocus />
+						<input class="form-control" id="title" name="title" placeholder="Titel" required autofocus />
 					</div>
 				</div>
 				<div class="form-group">
@@ -45,7 +45,7 @@
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-education"></i></span>
-						<select class="form-control" id="studiengang" name="studiengang" required>
+						<select class="form-control" id="fb" name="fb" required>
 							<?= generate_options($FB_NAMES, $FB_PLACEHOLDER); ?>
 						</select>
 					</div>
@@ -61,7 +61,7 @@
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-file"></i></span>
-						<select class="form-control" id="artOfArbeit" name="artOfArbeit" required>
+						<select class="form-control" id="type" name="type" required>
 							<?= generate_options($TYPE_NAMES, $TYPE_PLACEHOLDER); ?>
 						</select>
 					</div>
@@ -69,23 +69,23 @@
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-						<input class="form-control" id="jahrgang" name="jahrgang" placeholder="Jahrgang" pattern="[0-9]{4}" required />
+						<input class="form-control" id="year" name="year" placeholder="Jahrgang" pattern="[0-9]{4}" required />
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-						<input class="form-control" id="betreuer" name="betreuer" placeholder="Betreuer" required />
+						<input class="form-control" id="docent" name="docent" placeholder="Betreuer" required />
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
-						<input class="form-control" id="firma" name="firma" placeholder="Firma" required />
+						<input class="form-control" id="company" name="company" placeholder="Firma" required />
 					</div>
 				</div>
 				<div class="checkbox">
-					<label><input type="checkbox" id="sperrvermerk" name="sperrvermerk" onChange="changeSperrvermerk();" value="0">Sperrvermerk</label>
+					<label><input type="checkbox" id="sperrvermerk" name="restricted" onChange="changeSperrvermerk();" value="0">Sperrvermerk</label>
 				</div>
 				<div class="form-group" id="divFileInputUploadArbeit">
 					<input id="FileInputUploadArbeit" name="FileInputUploadArbeit[]" type="file" class="file-loading" required multiple maxFileSize="2000" />
@@ -112,7 +112,7 @@
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-text-size"></i></span>
-						<textarea class="form-control" id="kurzfassung" name="kurzfassung" placeholder="Kurzfassung" rows="5" required></textarea>
+						<textarea class="form-control" id="abstract" name="abstract" placeholder="Kurzfassung" rows="5" required></textarea>
 					</div>
 				</div>
 				<input hidden name="csrf_token" id="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">

@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>StArPl - Login</title>
-		<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="assets/js/bootstrap.min.js"></script>
 		<script src="js/general.js"></script>
 		<script src="js/login.js"></script>
