@@ -75,22 +75,32 @@
           </td>
         </tr>
         <tr>
-          <th>Downloads</th>
-          <td id="downloadsValue"> {{document.downloads}} </td>
-        </tr>
-        <tr>
-          <th>{{strFiles}}</th>
-            <td>
-            {{#files}}
-              <a target="_blank"
-                href="upload/{{document.id}}/{{.}}"
-                onclick="downloadFile({{document.id}});">
-                <img src="img/pdf.png">
-                {{.}}
-              </a><br/>
-            {{/files}}
+          <th>
+            {{strRestricted}}
+          </th>
+          <td>
+            {{restrictedVal}}
           </td>
         </tr>
+        {{^restricted}}
+          <tr>
+            <th>Downloads</th>
+            <td id="downloadsValue"> {{document.downloads}} </td>
+          </tr>
+          <tr>
+            <th>{{strFiles}}</th>
+              <td>
+              {{#files}}
+                <a target="_blank"
+                  href="upload/{{document.id}}/{{.}}"
+                  onclick="downloadFile({{document.id}});">
+                  <img src="img/pdf.png">
+                  {{.}}
+                </a><br/>
+              {{/files}}
+            </td>
+          </tr>
+      {{/restricted}}
       </tbody>
     </table>
     <h4 id="arbeitSearchwords">
@@ -104,7 +114,7 @@
       <button onclick="deleteDocument();" class="btn btn-danger myhidden" >
         <span class="glyphicon glyphicon-remove"></span> Löschen
       </button>
-      <button onclick="editArbeit();" class="btn btn-primary">
+      <button id="editButton" class="btn btn-primary">
         <span class="glyphicon glyphicon-pencil"></span> Bearbeiten
       </button>
     </div>

@@ -1,5 +1,5 @@
 <script id="tpl-edit" type="text/html">
-  <form method="post" name="formUpdateDocument" id="formUpdateDocument" onsubmit="return saveArbeit();" enctype="multipart/form-data">
+  <form method="post" name="formUpdateDocument" id="formUpdateDocument" enctype="multipart/form-data">
     <table class="table table-stripped table-hover table-bordered table-condensed" id="tableDetailledArbeit">
       <thead></thead>
       <tbody>
@@ -75,6 +75,14 @@
         </tr>
         <tr>
           <th>
+            {{strRestricted}}
+          </th>
+          <td>
+            <label><input type="checkbox" id="sperrvermerk" name="restricted" value="1" {{#restricted}}checked{{/restricted}}></label>
+          </td>
+        </tr>
+        <tr>
+          <th>
             {{strCompany}}
           </th>
           <td>
@@ -103,7 +111,7 @@
       <button id="resetButton" class="btn btn-danger">
         <span class="glyphicon glyphicon-remove"></span> Abbrechen
       </button>
-      <button type="submit" class="btn btn-success">
+      <button id="saveButton" class="btn btn-success">
         <span class="glyphicon glyphicon-ok"></span> Speichern
       </button>
     </div>

@@ -79,9 +79,14 @@ var settings = {
 		['year', 'Jahrgang'],
 		['docent', 'Betreuer'],
 		['company', 'Firma'],
-		['abstract', 'Kurzfassung']
+		['abstract', 'Kurzfassung'],
+		['restricted', 'Sperrvermerk']
 	],
-
+	yesno :
+	[
+		"nein",
+		"ja"
+	],
 	viewAllTableColumns : [
 		//Name des Attributs, Tabellen Header Name, Funktion zum Rendern
 		['title', 'Titel', (arbeit) => { return '<a onclick="showDocument(' + arbeit.id + ');">' + htmlEncode(arbeit.title) + '</a>' }],

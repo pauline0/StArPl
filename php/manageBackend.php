@@ -95,6 +95,7 @@ if (!$conn->connect_error)
 				$id = $conn->real_escape_string($_post['id']);
 				$answer = array();
 				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || is_owner_of_file($conn, $id, $_SESSION["starpl"]["user_id"]) ){
+					$_post["restricted"] = $_post["restricted"]?:0;
 					update_document_in_database($conn, $_post, $id);
 					$delete_sws = json_decode($_post['deleteSW']);
 					$delete_sws = array_to_mysql($conn, $delete_sws);
@@ -654,7 +655,7 @@ function create_document($conn, $user_id, $uploaded_by_dozent ,$file_params){
 function save_document_in_database($conn, $file_params, $uploader_id, $privat){
 	$query = "INSERT INTO `files`(`user_id`, `title`, `student`, `fb`, `language`, `type`, `year`, `docent`, `company`, `restricted`, `abstract`, `downloads`, `private`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '0','$privat');";
 	$stmt = $conn->prepare($query);
-	$restricted = (isset($file_params["sperrvermerk"])?$file_params["sperrvermerk"]:"0");
+	$restricted = (isset($file_params["restricted"])?$file_params["restricted"]:"0");
 	$stmt->bind_param("issssssssss", $uploader_id,
 																	$file_params["title"],
 																	$file_params["student"],
@@ -677,10 +678,10 @@ function save_document_in_database($conn, $file_params, $uploader_id, $privat){
 }
 
 function update_document_in_database($conn, $file_params, $file_id){
-	$query = "UPDATE `files` SET `title`=?, `student`=?, `fb`=?, `language`=?, `type`=?, `year`=?, `docent`=?, `company`=?, `abstract`=? WHERE `id`=?;";
+	$query = "UPDATE `files` SET `title`=?, `student`=?, `fb`=?, `language`=?, `type`=?, `year`=?, `docent`=?, `company`=?,`restricted`=?, `abstract`=? WHERE `id`=?;";
 	var_dump($file_params);
 	$stmt = $conn->prepare($query);
-	$stmt->bind_param("sssssssssi",
+	$stmt->bind_param("ssssssssisi",
 										$file_params["title"],
 										$file_params["student"],
 										$file_params["fb"],
@@ -689,6 +690,7 @@ function update_document_in_database($conn, $file_params, $file_id){
 										$file_params["year"],
 										$file_params["docent"],
 										$file_params["company"],
+										$file_params["restricted"],
 										$file_params["abstract"],
 										$file_id);
 	$stmt->execute();

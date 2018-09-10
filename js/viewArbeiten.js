@@ -83,7 +83,19 @@ $(document).ready(function() {
 
 window.onpopstate = function(event) {
 	getGetParas();
-	changeFachbereich($_GET().studiengang, "replaceState");
+	if ($_GET().id)
+	{
+		if($_GET().hidden){
+			showHiddenDocument($_GET().id)
+		}
+		else{
+			showDocument($_GET().id);
+		}
+	}
+	else
+	{
+		changeFachbereich($_GET().studiengang, "replaceState");
+	}
 };
 
 function showLogoutButton(){
@@ -321,6 +333,8 @@ function showDocument(id)
 			$('#editButtons').hide();
 			window.history.replaceState('', '', '?studiengang=' + selectedDocument.fb + '&id=' + selectedDocument.id);
 		}
+		$("#editButton").unbind("click");
+		$("#editButton").click(editArbeit);
 	}
 
 	if (selectedDocument != undefined)
@@ -335,6 +349,9 @@ function showDocument(id)
 			"strDocent": settings.detailTableColumns[6][1],
 			"strCompany": settings.detailTableColumns[7][1],
 			"strAbstract": settings.detailTableColumns[8][1],
+			"strRestricted": settings.detailTableColumns[9][1],
+			"restricted": (selectedDocument.restricted === "1"),
+			"restrictedVal": settings.yesno[selectedDocument.restricted],
 			"strFiles": "Datei(en)",
 			"strSearchwords": "Schlagwörter",
 			"document": selectedDocument,
@@ -411,7 +428,13 @@ function showHiddenDocument(id){
 					releaseDocument(hiddenDocument.id, hiddenDocument.fb)
 				});
 			}
-		}
+			$("#editButton").unbind("click");
+			$("#editButton").click(function(){
+				editArbeit(function(){
+					showHiddenDocument($_GET().id);
+				})
+			})
+	}
 
 	if (hiddenDocument != undefined)
 	{
@@ -425,6 +448,9 @@ function showHiddenDocument(id){
 			"strDocent": settings.detailTableColumns[6][1],
 			"strCompany": settings.detailTableColumns[7][1],
 			"strAbstract": settings.detailTableColumns[8][1],
+			"strRestricted": settings.detailTableColumns[9][1],
+			"restricted": (hiddenDocument.restricted === "1"),
+			"restrictedVal": settings.yesno[hiddenDocument.restricted],
 			"strFiles": "Datei(en)",
 			"strSearchwords": "Schlagwörter",
 			"document": hiddenDocument,
@@ -506,20 +532,25 @@ function getOptionsForSelectIndex(name){
 
 
 // wechselt in den Bearbeitungsmodus
-function editArbeit()
+function editArbeit(hiddenDocument=false)
 {
 	getGetParas();
 	if ($_GET().hidden){
 		var selectedArbeit = getHiddenDocument($_GET().id);
+		var newstate = '?edit&hidden&id=' + $_GET().id
+		selectedArbeit.hidden = true
 	}
 	else {
 		var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
 		var selectedArbeit = arrayAllArbeiten[idArray];
+		var newstate = '?edit&id=' + $_GET().id
+		selectedArbeit.hidden = false
 	}
+	window.history.pushState('', '', newstate);
 	buildEditForm(selectedArbeit);
 }
 
-function buildEditForm(selectedArbeit){
+function buildEditForm(selectedDocument,hiddenDocument){
 	var templateData = {
 		"strTitle" : settings.detailTableColumns[0][1],
 		"strStudent" : settings.detailTableColumns[1][1],
@@ -529,22 +560,22 @@ function buildEditForm(selectedArbeit){
 		"strJahrgang" : settings.detailTableColumns[5][1],
 		"strDocent" : settings.detailTableColumns[6][1],
 		"strCompany" : settings.detailTableColumns[7][1],
-		"abstract": selectedArbeit.abstract,
+		"abstract": selectedDocument.abstract,
 		"strAbstract" : settings.detailTableColumns[8][1],
+		"strRestricted": settings.detailTableColumns[9][1],
+		"restricted": (selectedDocument.restricted === "1"),
 		"strFiles" :"Datei(en)",
 		"fbOptions": getOptionsForSelectIndex("fb"),
 		"langOptions": getOptionsForSelectIndex("language"),
 		"typeOptions": getOptionsForSelectIndex("type"),
-		"files":edit.renderFiles(selectedArbeit)
+		"files":edit.renderFiles(selectedDocument)
 	}
 	$.Mustache.load('partials/_edit_form.html', function() {
 		$('#updateDocument').empty();
 		$('#updateDocument').mustache('tpl-edit', templateData);
-		initEditValues(selectedArbeit);
-		// $('#tableBodyDetailledArbeit').hide();
-		// $('#tableBodyDetailledArbeitEdit').show();
+		initEditValues(selectedDocument);
 		$('#editButtons').hide();
-		$('.editOnly').show	();
+		$('.editOnly').show();
 		$("#editFileInput").fileinput({
 				showUpload: false,
 				allowedFileTypes: ['pdf'],
@@ -556,13 +587,24 @@ function buildEditForm(selectedArbeit){
 				browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
 				removeClass: "btn btn-danger",
 						removeLabel: "&nbsp;Löschen" });
-		edit.displaySearchWords(selectedArbeit.searchWords)
+		edit.displaySearchWords(selectedDocument.searchWords)
 		$('#resetButton').unbind("click");
-		$('#resetButton').click(function(){
-			showDocument(selectedArbeit.id)
-		});
-	});
-
+		if (selectedDocument.hidden){
+			$('#resetButton').click(function(){
+				showHiddenDocument(selectedDocument.id)
+			});
+		}
+		else{
+			$('#resetButton').click(function(){
+				showDocument(selectedDocument.id)
+			});
+		}
+		$('#saveButton').unbind("click");
+		$("#saveButton").click(function(){
+			saveDocument(selectedDocument.hidden)
+		}
+		);
+	})
 }
 
 function initEditValues(selectedDocument){
@@ -573,7 +615,7 @@ function initEditValues(selectedDocument){
 			$("select[name='" + arrayTableDetailledView[i][0] +"']").val(val);
 		}
 		else{
-			$("input[name='" + arrayTableDetailledView[i][0] +"']").val(selectedDocument[curProp])
+			$("input[name='" + arrayTableDetailledView[i][0] +"'][type!='checkbox']").val(selectedDocument[curProp])
 		}
 	}
 }
@@ -688,7 +730,7 @@ function uploadFiles(id)
 
 
 // speichert die Arbeit
-function saveArbeit()
+function saveDocument(hiddenDocument)
 {
 	getGetParas();
 	var addSW = [];
@@ -719,10 +761,14 @@ function saveArbeit()
 	$.post(settings.phpBackend, data);
 	$.ajaxSetup({async: true});
 	returnValue = uploadFiles($_GET().id);
-	resetDocument();
-	getAllDocuments();
-	user.getCurrent();
-	showDocument($_GET().id);
+	if (hiddenDocument){
+		showHiddenDocument($_GET().id)
+	}
+	else{
+		getAllDocuments();
+		user.getCurrent();
+		showDocument($_GET().id);
+	}
 	arraySearchwordOperations = [];
 	return false;
 }
