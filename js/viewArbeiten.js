@@ -570,41 +570,48 @@ function buildEditForm(selectedDocument,hiddenDocument){
 		"typeOptions": getOptionsForSelectIndex("type"),
 		"files":edit.renderFiles(selectedDocument)
 	}
-	$.Mustache.load('partials/_edit_form.html', function() {
-		$('#updateDocument').empty();
-		$('#updateDocument').mustache('tpl-edit', templateData);
-		initEditValues(selectedDocument);
-		$('#editButtons').hide();
-		$('.editOnly').show();
-		$("#editFileInput").fileinput({
-				showUpload: false,
-				allowedFileTypes: ['pdf'],
-						overwriteInitial: true,
-				maxFileCount: 20,
-				maxFileSize:2000,
-				browseClass: "btn btn-primary",
-						browseLabel: "&nbsp;Datei(en) hinzufügen [*.pdf]",
-				browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
-				removeClass: "btn btn-danger",
-						removeLabel: "&nbsp;Löschen" });
-		edit.displaySearchWords(selectedDocument.searchWords)
-		$('#resetButton').unbind("click");
-		if (selectedDocument.hidden){
-			$('#resetButton').click(function(){
-				showHiddenDocument(selectedDocument.id)
-			});
-		}
-		else{
-			$('#resetButton').click(function(){
-				showDocument(selectedDocument.id)
-			});
-		}
-		$('#saveButton').unbind("click");
-		$("#saveButton").click(function(){
-			saveDocument(selectedDocument.hidden)
-		}
-		);
-	})
+
+	var onTemplateLoad = function(){
+			$('#updateDocument').empty();
+			$('#updateDocument').append(Mustache.render(templates.edit, templateData));
+			initEditValues(selectedDocument);
+			$('.editOnly').show();
+
+			$("#editFileInput").fileinput({
+					showUpload: false,
+					allowedFileTypes: ['pdf'],
+							overwriteInitial: true,
+					maxFileCount: 20,
+					maxFileSize:2000,
+					browseClass: "btn btn-primary",
+							browseLabel: "&nbsp;Datei(en) hinzufügen [*.pdf]",
+					browseIcon: "<i class=\"glyphicon glyphicon-folder-open\"></i>",
+					removeClass: "btn btn-danger",
+							removeLabel: "&nbsp;Löschen" });
+			edit.displaySearchWords(selectedDocument.searchWords)
+			$('#resetButton').unbind("click");
+			if (selectedDocument.hidden){
+				$('#resetButton').click(function(){
+					showHiddenDocument(selectedDocument.id)
+				});
+			}
+			else{
+				$('#resetButton').click(function(){
+					showDocument(selectedDocument.id)
+				});
+			}
+			$('#saveButton').unbind("click");
+			$("#saveButton").click(function(){
+				saveDocument(selectedDocument.hidden)
+			}
+			);
+	}
+	if (templates.edit){
+		onTemplateLoad()
+	}
+	else {
+		loadMustacheTemplate("edit", "tpl-edit","partials/_edit_form.html", onTemplateLoad);
+	}
 }
 
 function initEditValues(selectedDocument){

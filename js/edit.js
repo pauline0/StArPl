@@ -1,4 +1,5 @@
-$.Mustache.add('tag-template', '<span data-sw="" class="label label-{{labelClass}}" {{{additionalAttr}}}> {{value}} {{{icon}}}</span>');
+var tagTemplate =  '<span data-sw="" class="label label-{{labelClass}}" {{{additionalAttr}}}> {{value}} {{{icon}}}</span>';
+
 var searchword = {
    inputId: "#schlagwort",
    readdIcon: ' <span class="glyphicon glyphicon-repeat glyph-button" onclick="searchword.removeDeleteRequest($(this))"></span>',
@@ -12,7 +13,7 @@ var searchword = {
        "labelClass":labelClass,
        "additionalAttr":additionalAttr
      }
-     return $.Mustache.render('tag-template', data)
+     return Mustache.to_html(tagTemplate, data)
   },
 
   delete: function(delButton){
