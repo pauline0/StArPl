@@ -158,4 +158,29 @@ function get_fb_id($human_readable_name){
     return $kurse[substr($long_kurs, 0, 3)];
   }
 }
+
+function get_file_names_array($Id)
+{
+	$files = array();
+	$directory = "../upload/$Id/";
+	if (is_dir ($directory))
+	{
+		// öffnen des Verzeichnisses
+		if ($handle = opendir($directory))
+		{
+			// einlesen der Verzeichnisses
+			while (($file = readdir($handle)) !== false)
+			{
+				if (filetype($directory.$file) != 'dir')
+				{
+					$files[] = $file;
+				}
+			}
+			closedir($handle);
+		}
+	}
+	return $files;
+}
+
+
 ?>

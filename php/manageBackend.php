@@ -576,30 +576,6 @@ function get_file_by_id($conn, $file_id){
 }
 
 // liest die Dateinamen aus dem entsprechenden Verzeichnis aus
-function get_file_names_array($Id)
-{
-	$files = array();
-	$directory = "../upload/$Id/";
-	if (is_dir ($directory))
-	{
-		// öffnen des Verzeichnisses
-		if ($handle = opendir($directory))
-		{
-			// einlesen der Verzeichnisses
-			while (($file = readdir($handle)) !== false)
-			{
-				if (filetype($directory.$file) != 'dir')
-				{
-					$files[] = $file;
-				}
-			}
-			closedir($handle);
-		}
-	}
-	return $files;
-}
-
-
 function  get_all_search_words_for_document($conn,$documentId){
 	$result = $conn->query("SELECT `word` FROM `search_words` where `file_id` = '$documentId';");
 	$search_words_array = array();

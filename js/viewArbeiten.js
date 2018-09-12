@@ -39,11 +39,33 @@ $(document).ready(function() {
 			"language":
 			{
 				"url": "js/dataTableGerman.json"
-			},
+			},,
+			"ajax": "/php/table.php?action=documents",
+			"columns": [
+					{ "data": "id" },
+          { "data": "title" },
+          { "data": "student" },
+          { "data": "fb" },
+          { "data": "language" },
+          { "data": "type" },
+          { "data": "year" },
+					{ "data": "docent" },
+					{ "data": "company" },
+      ],
 			"columnDefs": [
 				{
-						"targets": [0, -2],
-						"render": null
+						"targets": 0,
+						"visible": false
+				},
+				{
+						"targets": [1],
+						"render": function(data, type, row) {
+							return '<a onclick="showDocument(' + row[0]+ ');">' + htmlEncode(data) + '</a>'
+						}
+				},
+				{
+					"targets": [-2],
+					"render": null
 				},
 				{
 						"targets": [-1],

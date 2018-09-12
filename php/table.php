@@ -49,5 +49,48 @@ if (!$conn->connect_error)
       exit;
       break;
     }
-  }
+		case "documents":{
+			if (isset($_SESSION["starpl"]["user_id"])){
+				$user_id = $_SESSION["starpl"]["user_id"];
+			}
+			else{
+				$queryStr = "SELECT * FROM `files` WHERE NOT `private`  ORDER BY `title` ASC;";
+			}
+			$result = $conn->query("SELECT `files`.*, `search_words`.`word` FROM `files` join search_words on `file_id` = `files`.`id` WHERE NOT `private`   ORDER BY `title` ASC;");
+			$all_documents = array();
+			$i = 0;
+			$last_id = null;
+			if ($result){
+				$document = null;
+				while ($row = $result->fetch_assoc())
+					{
+						if ($last_id != $row["id"]){
+							if ($document){
+								array_push($all_documents, $document);
+							}
+							$document = array('id' => $row["id"],
+																'fb' => $FB_NAMES[$row["fb"]],
+																'language' => $LANG_NAMES[$row["language"]],
+																'type' => $TYPE_NAMES[$row["type"]],
+																'search_words' => array(0 => $row["word"]),
+																'student' => $row['student'],
+																'company' => $row['company'],
+																'title' => $row['title']
+																);
+							$last_id = $row["id"];
+						}
+						else {
+							array_push($document['search_words'], $row["word"]);
+						}
+					}
+				}
+			else
+			{
+				error_log(mysqli_error($conn));
+			}
+
+			echo json_encode($all_documents);
+			break;
+  	}
+	}
 }
