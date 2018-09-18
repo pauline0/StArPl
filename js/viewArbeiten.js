@@ -21,8 +21,7 @@ function loadMustacheTemplate(name, tpl_name,path, onload){
 }
 
 $(document).ready(function() {
-	// Navigation zwischen den Fachbereichen
-	getAllDocuments();
+	// Navigation zwischen den Fachbereichen	// getAllDocuments();
 	getGetParas();
 	prepareTableHeader();
 	user.getCurrent();
@@ -39,7 +38,7 @@ $(document).ready(function() {
 			"language":
 			{
 				"url": "js/dataTableGerman.json"
-			},,
+			},
 			"ajax": "/php/table.php?action=documents",
 			"columns": [
 					{ "data": "id" },
@@ -51,6 +50,8 @@ $(document).ready(function() {
           { "data": "year" },
 					{ "data": "docent" },
 					{ "data": "company" },
+					{ "data": "search_words"},
+					{ "data": "owner" }
       ],
 			"columnDefs": [
 				{
@@ -65,7 +66,8 @@ $(document).ready(function() {
 				},
 				{
 					"targets": [-2],
-					"render": null
+					"visible": false,
+					"sortable": true
 				},
 				{
 						"targets": [-1],
@@ -91,14 +93,14 @@ $(document).ready(function() {
 	}
 	else
 	{
-		changeFachbereich($_GET().studiengang, "replaceState");
+		changeFb($_GET().studiengang, "replaceState");
 	}
 	$('.nav.fb_side li')
 	.click
 	(
 		function()
 		{
-			changeFachbereich($(this)[0].innerText);//value);
+			changeFb(this.id.substr(3));//$(this)[0].innerText);//value);
 		}
 	);
 });
@@ -116,7 +118,7 @@ window.onpopstate = function(event) {
 	}
 	else
 	{
-		changeFachbereich($_GET().studiengang, "replaceState");
+		changeFb($_GET().studiengang, "replaceState");
 	}
 };
 
@@ -143,38 +145,7 @@ function prepareTableHeader()
 // update der DataTable
 function reloadDataTable()
 {
-	arrayTableSelectedArbeiten = new Array();
-	for (var key in arraySelectedArbeiten)
-	{
-		var arrayOneRow = new Array();
-		for (var i = 0; i < settings.viewAllTableColumns.length; i++){
-			[propertyName, renderFunc] = [ settings.viewAllTableColumns[i][0], settings.viewAllTableColumns[i][2]]
-			if (renderFunc){
-				arrayOneRow.push(renderFunc(arraySelectedArbeiten[key]));
-			}
-			else{
-				arrayOneRow.push(arraySelectedArbeiten[key][propertyName]);
-			}
-		}
-
-		// if ($_GET().edit)
-		// {
-			if (user.current.id == arraySelectedArbeiten[key].user_id || user.current.user_role == '2') // verfügt der User über Bearbeitungsrecht?
-			{
-				arrayOneRow.push('<a onclick="showDocument(' + arraySelectedArbeiten[key].id + ');"><span class="glyphicon glyphicon-pencil"></span></a><span hidden> own </span>');
-			}
-			else
-			{
-				arrayOneRow.push('');
-			}
-		// }
-
-		arrayTableSelectedArbeiten.push(arrayOneRow);
-
-	}
-	$('#tableOverview').DataTable().clear();
-	$('#tableOverview').DataTable().rows.add(arrayTableSelectedArbeiten);
-	$('#tableOverview').DataTable().draw();
+	documentTable.ajax.reload();
 }
 
 // lädt alle Arbeiten aus der Datenbank
@@ -266,45 +237,49 @@ function changeToEdit(event){
 
 function resetStudiengangSelection(event){
 	event.preventDefault();
-	changeFachbereich();
+	changeFb();
 }
 
 // wird beim Wechsel des Fachbereichs Aufgerufen
-function changeFachbereich(selectedStudiengang, historyFunc="pushState")
+function changeFb(selectedFb, historyFunc="pushState")
 {
 	arraySelectedArbeiten = new Array();
-	selectedStudiengang = selectedStudiengang || '';
-	selectedStudiengang = selectedStudiengang.trim();
-	for (var key in arrayAllArbeiten)
-	{
-		if (arrayAllArbeiten[key].fb == selectedStudiengang || '' == selectedStudiengang || undefined == selectedStudiengang)
-		{
-			arraySelectedArbeiten.push(arrayAllArbeiten[key]);
-		}
+	selectedFb = parseInt(selectedFb)
+	if (selectedFb != undefined && selectedFb < settings.select.fb.length){
+		selectedFbStr = settings.select.fb[selectedFb];
 	}
-	$('#headLineStudiengang')[0].innerHTML = selectedStudiengang;
+	else {
+		selectedFb = ""
+		selectedFbStr = ""
+	}
+	$('#headLineStudiengang')[0].innerHTML = selectedFbStr;
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
 	$('#arbeitSearchwords').hide();
-	reloadDataTable();
+	documentTable
+		.column(3)
+		.search( selectedFbStr )
+		.draw();
+
 	getGetParas();
 	if ($_GET().edit)
 	{
-	 window.history[historyFunc]('', '', '?edit&studiengang=' + selectedStudiengang);
+	 window.history[historyFunc]('', '', '?edit&studiengang=' + selectedFb);
 	}
 	else
 	{
-		window.history[historyFunc]('', '', '?studiengang=' + selectedStudiengang);
+		window.history[historyFunc]('', '', '?studiengang=' + selectedFb);
 	}
 	resetDocument();
 	$('.active_fb').removeClass('active_fb');
 
-	if ( selectedStudiengang && selectedStudiengang.length > 0){
-		$('li:contains("'+selectedStudiengang +'")').addClass('active_fb');
-		documentTable.column(2).visible(false);
+	if ( selectedFb && selectedFbStr.length > 0){
+		// $('li:contains("'+selectedFb +'")').addClass('active_fb');
+		$("#fb_"+selectedFb).addClass("active_fb");
+		documentTable.column(3).visible(false);
 	}
 	else {
-		documentTable.column(2).visible(true);
+		documentTable.column(3).visible(true);
 	}
 	$('#editButtons').hide();
 	$('.editOnly').hide();
@@ -386,12 +361,12 @@ function showDocument(id)
 		else {
 			loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
 		}
-		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + selectedDocument.fb + '\');">' + selectedDocument.fb + '</a> > ' + htmlEncode(selectedDocument.title);
+		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + selectedDocument.fb + '\');">' + selectedDocument.fb + '</a> > ' + htmlEncode(selectedDocument.title);
 		$('#divTableOverview').hide();
 	}
 	else
 	{
-		changeFachbereich();
+		changeFb();
 	}
 }
 
@@ -428,7 +403,7 @@ function getHiddenDocument(id){
 			hiddenDocument = data[1];
 		}
 		else{
-			changeFachbereich();
+			changeFb();
 		}
 	});
 	$.ajaxSetup({async: true});
@@ -485,12 +460,12 @@ function showHiddenDocument(id){
 		else {
 			loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
 		}
-		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFachbereich(\'' + hiddenDocument.fb + '\');">' + hiddenDocument.fb + '</a> > ' + htmlEncode(hiddenDocument.title);
+		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + hiddenDocument.fb + '\');">' + hiddenDocument.fb + '</a> > ' + htmlEncode(hiddenDocument.title);
 		$('#divTableOverview').hide();
 	}
 	else
 	{
-		changeFachbereich();
+		changeFb();
 	}
 }
 
@@ -832,7 +807,7 @@ function deleteDocument()
 			}*/
 			getAllDocuments();
 			user.getCurrent();
-			changeFachbereich();
+			changeFb();
 		});
 		$.ajaxSetup({async: true});
 	}

@@ -89,6 +89,7 @@ var settings = {
 	],
 	viewAllTableColumns : [
 		//Name des Attributs, Tabellen Header Name, Funktion zum Rendern
+		['id', 'ID'],
 		['title', 'Titel', (arbeit) => { return '<a onclick="showDocument(' + arbeit.id + ');">' + htmlEncode(arbeit.title) + '</a>' }],
 		['student', 'Student', null],
 		['fb', 'Studiengang', null],
@@ -96,7 +97,8 @@ var settings = {
 		['type', 'Art der Arbeit', null],
 		['year', 'Jahrgang', null],
 		['docent', 'Betreuer', null],
-		['company', "Firma", 	(arbeit) => {return htmlEncode(arbeit.company) + '<span class="hidden">' + ((arbeit.searchWords) ? htmlEncode(arbeit.searchWords.join(" ")) : "") + "</span>"}]
+		['company', "Firma", 	(arbeit) => {return htmlEncode(arbeit.company) + '<span class="hidden">' + ((arbeit.searchWords) ? htmlEncode(arbeit.searchWords.join(" ")) : "") + "</span>"}],
+		['searchwords', "SW"]
 	],
 
 	select : {

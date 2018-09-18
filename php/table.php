@@ -50,11 +50,12 @@ if (!$conn->connect_error)
       break;
     }
 		case "documents":{
+			global $ROLLE_ADMIN;
 			if (isset($_SESSION["starpl"]["user_id"])){
 				$user_id = $_SESSION["starpl"]["user_id"];
 			}
 			else{
-				$queryStr = "SELECT * FROM `files` WHERE NOT `private`  ORDER BY `title` ASC;";
+				$user_id = null;#$queryStr = "SELECT * FROM `files` WHERE NOT `private`  ORDER BY `title` ASC;";
 			}
 			$result = $conn->query("SELECT `files`.*, `search_words`.`word` FROM `files` join search_words on `file_id` = `files`.`id` WHERE NOT `private`   ORDER BY `title` ASC;");
 			$all_documents = array();
@@ -75,7 +76,10 @@ if (!$conn->connect_error)
 																'search_words' => array(0 => $row["word"]),
 																'student' => $row['student'],
 																'company' => $row['company'],
-																'title' => $row['title']
+																'title' => $row['title'],
+																'docent' => $row['docent'],
+																'year' => $row['year'],
+																'owner' => ($user_id && ($user_id == $row['user_id'] || $user_role == $ROLLE_ADMIN) )
 																);
 							$last_id = $row["id"];
 						}
@@ -88,8 +92,9 @@ if (!$conn->connect_error)
 			{
 				error_log(mysqli_error($conn));
 			}
+			$answer = array('data' => $all_documents);
 
-			echo json_encode($all_documents);
+			echo json_encode($answer);
 			break;
   	}
 	}
