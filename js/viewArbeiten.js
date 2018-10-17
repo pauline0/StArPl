@@ -1,8 +1,4 @@
 // globale Variablen
-var arrayAllArbeiten = null;
-var arrayIdsArbeiten = null;
-var arraySelectedArbeiten = null;
-var arrayTableSelectedArbeiten = null;
 var arrayAllSearchWordsWithId = null;
 
 var arrayTableDetailledView = settings.detailTableColumns;
@@ -27,7 +23,7 @@ $(document).ready(function() {
 	user.getCurrent();
 
 	$('#editLink').click(changeToEdit);
-	$('#starplLink').click(resetStudiengangSelection);
+	$('#starplLink').click(resetFbSelection);
 	$('#toggleDocumentSelection').click(showMyFiles);
 
 	edit_col_hidden = ($_GET().edit) ? true : false
@@ -39,6 +35,8 @@ $(document).ready(function() {
 			{
 				"url": "js/dataTableGerman.json"
 			},
+			// "responsive":true,
+			"scrollX": true,
 			"ajax": "/php/table.php?action=documents",
 			"columns": [
 					{ "data": "id" },
@@ -61,7 +59,7 @@ $(document).ready(function() {
 				{
 						"targets": [1],
 						"render": function(data, type, row) {
-							return '<a onclick="showDocument(' + row[0]+ ');">' + htmlEncode(data) + '</a>'
+							return '<a onclick="getDocumentById(' + row["id"]+ ');">' + htmlEncode(data) + '</a>'
 						}
 				},
 				{
@@ -70,10 +68,10 @@ $(document).ready(function() {
 					"sortable": true
 				},
 				{
-						"targets": [-1],
-						"render": null,
-						"visible":edit_col_hidden,
-						"sortable": false
+					"targets": [-1],
+					"render": null,
+					"visible":edit_col_hidden,
+					"sortable": false
 				},
 				{
 					"targets": '_all',
@@ -100,7 +98,7 @@ $(document).ready(function() {
 	(
 		function()
 		{
-			changeFb(this.id.substr(3));//$(this)[0].innerText);//value);
+			changeFb(this.id.substr(3));
 		}
 	);
 });
@@ -148,32 +146,9 @@ function reloadDataTable()
 	documentTable.ajax.reload();
 }
 
-// lädt alle Arbeiten aus der Datenbank
-function getAllDocuments()
-{
-	arrayIdsArbeiten = new Array();
-	var data =
-	{
-		action: "getAllDocuments"
-	}
-	$.ajaxSetup({async: false});
-	$.post(settings.phpBackend, data)
-	.always(function(data)
-	{
-		arrayAllArbeiten = data;
-		for (var key in arrayAllArbeiten)
-		{
-			arrayIdsArbeiten.push(arrayAllArbeiten[key].id);
-		}
-		getAllSearchWordsWithId();
-	});
-	$.ajaxSetup({async: true});
-}
-
 function showMyFiles(event){
 	event.preventDefault()
 	documentTable.column(-1).search("own").draw();
-	console.log("test");
 	$('#toggleDocumentSelection').text("Alle Dateien anzeigen");
 	$('#toggleDocumentSelection').unbind("click");
 	$('#toggleDocumentSelection').click(showAllFiles);
@@ -235,18 +210,17 @@ function changeToEdit(event){
 	documentTable.column(-1).visible(true);
 }
 
-function resetStudiengangSelection(event){
+function resetFbSelection(event){
 	event.preventDefault();
 	changeFb();
 }
 
-// wird beim Wechsel des Fachbereichs Aufgerufen
+// wird beim Wechsel des Fachbereichs aufgerufen
 function changeFb(selectedFb, historyFunc="pushState")
 {
-	arraySelectedArbeiten = new Array();
 	selectedFb = parseInt(selectedFb)
 	if (selectedFb != undefined && selectedFb < settings.select.fb.length){
-		selectedFbStr = settings.select.fb[selectedFb];
+		selectedFbStr = settings.select.fb[selectedFb].toString();
 	}
 	else {
 		selectedFb = ""
@@ -256,10 +230,14 @@ function changeFb(selectedFb, historyFunc="pushState")
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
 	$('#arbeitSearchwords').hide();
-	documentTable
-		.column(3)
-		.search( selectedFbStr )
-		.draw();
+	documentTable.ajax.url("/php/table.php?action=documents&fb="+selectedFb).load(function(){
+		if ( selectedFb !== null && selectedFbStr.length > 0){
+			documentTable.column(3).visible(false);
+		}
+		else {
+			documentTable.column(3).visible(true);
+		}
+	})
 
 	getGetParas();
 	if ($_GET().edit)
@@ -270,17 +248,14 @@ function changeFb(selectedFb, historyFunc="pushState")
 	{
 		window.history[historyFunc]('', '', '?studiengang=' + selectedFb);
 	}
+
 	resetDocument();
 	$('.active_fb').removeClass('active_fb');
 
-	if ( selectedFb && selectedFbStr.length > 0){
-		// $('li:contains("'+selectedFb +'")').addClass('active_fb');
+	if ( selectedFb !== null && selectedFbStr.length > 0){
 		$("#fb_"+selectedFb).addClass("active_fb");
-		documentTable.column(3).visible(false);
 	}
-	else {
-		documentTable.column(3).visible(true);
-	}
+
 	$('#editButtons').hide();
 	$('.editOnly').hide();
 	$("#buttonPublishDoc").hide();
@@ -290,24 +265,63 @@ function getSearchwordLabel(content, value, labelClass="default", additionalAttr
 	return '<span class="label label-'+labelClass+'"'+ additionalAttr +'>' + htmlEncode(content) + '</span> '
 }
 
-function renderArbeitKeywords(searchWords){
-	swString = ""
-	if (searchWords){
-		for (var i = 0; i < searchWords.length; i++){
-			swString += getSearchwordLabel(searchWords[i], searchWords[i]) + " ";//'<span class="label label-default">' + searchWords[i] + '</span> '
-		}
-	}
-	return swString;
-}
-
-function renderSearchwords(selectedArbeit){
-	var html = "Schlagworte: " + renderArbeitKeywords(selectedArbeit["searchWords"])
-	return html;
-}
-
 function getSelectedDocument(id){
-	var idArray = $.inArray(id.toString(), arrayIdsArbeiten);
-	return arrayAllArbeiten[idArray];
+	//var idArray = $.inArray(id.toString(), arrayIdsArbeiten);
+	//return arrayAllArbeiten[idArray];
+}
+
+function getDocumentById(id){
+	$.getJSON("/php/table.php", {"action": "document","id":id} , function(document)
+		{
+			displayDocument(document)
+	});
+}
+
+function displayDocument(document){
+	var initShowView = function(){
+		$('#updateDocument').empty();
+		$('#updateDocument').append(Mustache.render(templates.show, templateData));
+		getGetParas()
+		if ($_GET().edit)
+		{
+			window.history.replaceState('', '', '?edit&studiengang=' + document.fb + '&id=' + document.id);
+			setButtonsInDetailView(document);
+		}
+		else
+		{
+			$('#editButtons').hide();
+			window.history.replaceState('', '', '?studiengang=' + document.fb + '&id=' + document.id);
+		}
+		$("#editButton").unbind("click");
+		$("#editButton").click(editArbeit);
+	}
+	var templateData = {
+		"strTitle": settings.detailTableColumns[0][1],
+		"strStudent": settings.detailTableColumns[1][1],
+		"strFb": settings.detailTableColumns[2][1],
+		"strLang": settings.detailTableColumns[3][1],
+		"strType": settings.detailTableColumns[4][1],
+		"strYear": settings.detailTableColumns[5][1],
+		"strDocent": settings.detailTableColumns[6][1],
+		"strCompany": settings.detailTableColumns[7][1],
+		"strAbstract": settings.detailTableColumns[8][1],
+		"strRestricted": settings.detailTableColumns[9][1],
+		"restricted": (document.restricted === "1"),
+		"restrictedVal": settings.yesno[document.restricted],
+		"strFiles": "Datei(en)",
+		"strSearchwords": "Schlagwörter",
+		"document": document,
+		"files": document.dateien,
+		"editable": true
+	}
+	if (templates.show){
+		initShowView()
+	}
+	else {
+		loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
+	}
+	$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + document.fb + '\');">' + document.fb + '</a> > ' + htmlEncode(document.title);
+	$('#divTableOverview').hide();
 }
 
 // detaillierte Übersicht über eine Arbeit
@@ -316,53 +330,9 @@ function showDocument(id)
 {
 	var selectedDocument = getSelectedDocument(id);
 
-	var initShowView = function(){
-		$('#updateDocument').empty();
-		$('#updateDocument').append(Mustache.render(templates.show, templateData));
-		getGetParas()
-		if ($_GET().edit)
-		{
-			window.history.replaceState('', '', '?edit&studiengang=' + selectedDocument.fb + '&id=' + selectedDocument.id);
-			setButtonsInDetailView(selectedDocument);
-		}
-		else
-		{
-			$('#editButtons').hide();
-			window.history.replaceState('', '', '?studiengang=' + selectedDocument.fb + '&id=' + selectedDocument.id);
-		}
-		$("#editButton").unbind("click");
-		$("#editButton").click(editArbeit);
-	}
-
 	if (selectedDocument != undefined)
 	{
-		var templateData = {
-			"strTitle": settings.detailTableColumns[0][1],
-			"strStudent": settings.detailTableColumns[1][1],
-			"strFb": settings.detailTableColumns[2][1],
-			"strLang": settings.detailTableColumns[3][1],
-			"strType": settings.detailTableColumns[4][1],
-			"strJahrgang": settings.detailTableColumns[5][1],
-			"strDocent": settings.detailTableColumns[6][1],
-			"strCompany": settings.detailTableColumns[7][1],
-			"strAbstract": settings.detailTableColumns[8][1],
-			"strRestricted": settings.detailTableColumns[9][1],
-			"restricted": (selectedDocument.restricted === "1"),
-			"restrictedVal": settings.yesno[selectedDocument.restricted],
-			"strFiles": "Datei(en)",
-			"strSearchwords": "Schlagwörter",
-			"document": selectedDocument,
-			"files": selectedDocument.dateien,
-			"editable": true
-		}
-		if (templates.show){
-			initShowView()
-		}
-		else {
-			loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
-		}
-		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + selectedDocument.fb + '\');">' + selectedDocument.fb + '</a> > ' + htmlEncode(selectedDocument.title);
-		$('#divTableOverview').hide();
+		displayDocument(selectedDocument);
 	}
 	else
 	{
@@ -441,7 +411,7 @@ function showHiddenDocument(id){
 			"strFb": settings.detailTableColumns[2][1],
 			"strLang": settings.detailTableColumns[3][1],
 			"strType": settings.detailTableColumns[4][1],
-			"strJahrgang": settings.detailTableColumns[5][1],
+			"strYear": settings.detailTableColumns[5][1],
 			"strDocent": settings.detailTableColumns[6][1],
 			"strCompany": settings.detailTableColumns[7][1],
 			"strAbstract": settings.detailTableColumns[8][1],
@@ -469,7 +439,7 @@ function showHiddenDocument(id){
 	}
 }
 
-function releaseDocument(id, studiengang){
+function releaseDocument(id, fb){
 	var data =
 	{
 		action: "releasePrivateDocument",
@@ -482,7 +452,7 @@ function releaseDocument(id, studiengang){
 	{
 		console.log(data);
 	});
-	window.history.replaceState('', '', '?studiengang=' + studiengang + '&id=' + id);
+	window.history.replaceState('', '', '?studiengang=' + fb + '&id=' + id);
 	location.reload();
 }
 
@@ -554,7 +524,7 @@ function buildEditForm(selectedDocument,hiddenDocument){
 		"strFb" : settings.detailTableColumns[2][1],
 		"strLang" : settings.detailTableColumns[3][1],
 		"strType" : settings.detailTableColumns[4][1],
-		"strJahrgang" : settings.detailTableColumns[5][1],
+		"strYear" : settings.detailTableColumns[5][1],
 		"strDocent" : settings.detailTableColumns[6][1],
 		"strCompany" : settings.detailTableColumns[7][1],
 		"abstract": selectedDocument.abstract,
@@ -662,7 +632,6 @@ function resetDocument()
 	$('#tableBodyDetailledArbeitEdit').hide();
 	$('#editButtons').show();
 	$('.editOnly').hide();
-	// renderSearchwords();
 	return false;
 }
 
@@ -733,7 +702,6 @@ function uploadFiles(id)
 }
 
 
-// speichert die Arbeit
 function saveDocument(hiddenDocument)
 {
 	getGetParas();
@@ -769,7 +737,7 @@ function saveDocument(hiddenDocument)
 		showHiddenDocument($_GET().id)
 	}
 	else{
-		getAllDocuments();
+		//getAllDocuments();
 		user.getCurrent();
 		showDocument($_GET().id);
 	}
@@ -777,7 +745,6 @@ function saveDocument(hiddenDocument)
 	return false;
 }
 
-// löscht eine Arbeit vollständig
 function deleteDocument()
 {
 	if (confirm('Möchten Sie diese Arbeit wirklich löschen?'))
@@ -805,7 +772,7 @@ function deleteDocument()
 			{
 				alert('Der Bericht konnte nicht gelöscht werden.');
 			}*/
-			getAllDocuments();
+			// getAllDocuments();
 			user.getCurrent();
 			changeFb();
 		});

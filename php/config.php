@@ -12,6 +12,11 @@ if (mysqli_connect_errno())
 {
   echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
+// 
+// if (!$conn->set_charset('utf8')) {
+//     error_log("Error loading character set utf8: %s\n", $conn->error);
+//     exit;
+// }
 
 $ROLLE_STUDENT = 0;
 $ROLLE_DOZENT = 1;

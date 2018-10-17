@@ -1,6 +1,6 @@
-<nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="105">
+<nav class="navbar starpl-top-nav affix-top" data-spy="affix" data-offset-top="106">
   <div class="container">
-    <ul class="nav navbar-nav inner-starpl-top-nav" >
+    <ul class="nav navbar-nav inner-starpl-top-nav left-menu" >
       <li id="starplLink"><a href="/">
        <span class="glyphicon glyphicon-home"></span> StArPl
       </a></li>
@@ -12,7 +12,7 @@
         $user_role = -1;
       }
       ?>
-      <?= ($user_role >= $ROLLE_DOZENT)? '<li class="collapse'.((isset($create_active) && $create_active)? ' active' : '').'"><a href="./?create"><span class="glyphicon glyphicon-education"></span> Studenten-Accounts</a></li>' :""; ?>
+      <?= ($user_role >= $ROLLE_DOZENT)? '<li class="collapse'.((isset($create_active) && $create_active)? ' active' : '').'"><a href="./?create"><span class="glyphicon glyphicon-education"></span><span class="hidden-xs"> Studenten-Accounts</span></a></li>' :""; ?>
       <?= ($user_role >= $ROLLE_STUDENT)? '<li class="collapse'.((isset($edit_active) && $edit_active)? ' active' : '').'" id="editLink"><a href="./?edit"><span class="glyphicon glyphicon-pencil"></span><span class="hidden-xs"> Bearbeiten </span></a></li>' :""; ?>
       <?= ($user_role >= $ROLLE_STUDENT)? '<li class="collapse'.((isset($upload_active) && $upload_active)? ' active' : '').'"><a href="./?upload"><span class="glyphicon glyphicon-upload"></span><span class="hidden-xs"> Hochladen </span></a></li>' :""; ?>
       <?= '<li class="collapse'.((isset($side_notice_active) && $side_notice_active)? ' active' : '').'"><a href="./?site_notice"><span>§</span><span class="hidden-xs"> Impressum </span></a></li>'?>

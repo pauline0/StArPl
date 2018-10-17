@@ -115,7 +115,7 @@
 						<textarea class="form-control" id="abstract" name="abstract" placeholder="Kurzfassung" rows="5" required></textarea>
 					</div>
 				</div>
-				<input hidden name="csrf_token" id="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+				<input hidden name="csrf_token" id="csrf_token" value="<?= (isset($_SESSION["csrf_token"])) ? $_SESSION['csrf_token'] : '' ?>">
 				<?php
 					if (get_user_role($_SESSION["starpl"]["user_id"]) === $ROLLE_STUDENT){
 							echo '<div class="form-group">

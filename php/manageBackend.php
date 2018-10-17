@@ -33,13 +33,13 @@ if (!$conn->connect_error)
 		{
 			if (isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false)
 				{
-				$is_min_docent = check_if_min_dozent($_SESSION["starpl"]["user_id"]);
+				$is_min_docent = check_if_min_docent($_SESSION["starpl"]["user_id"]);
 				$file_id = create_document($conn,$_SESSION["starpl"]["user_id"], $is_min_docent , $_post);
 				$user_answer = array();
 				if ($file_id)
 				{
-					$schlagwoerter = $_post['schlagwort'];
-					foreach ($schlagwoerter as $key => $value)
+					$search_words = $_post['schlagwort'];
+					foreach ($search_words as $key => $value)
 					{
 						if ($value)
 						{
@@ -74,9 +74,8 @@ if (!$conn->connect_error)
 			{
 				$id = $_post['id'];
 				if(check_if_min_admin($_SESSION["starpl"]["user_id"]) || is_owner_of_file($conn, $id, $_SESSION["starpl"]["user_id"]) ){
-					$allowedFileTypes = array('pdf'); // diese Dateiendungen werden akzeptiert
-					$dirUpload = '../upload';
-					$path_to_files = "$dirUpload/$id/";
+					$dir_upload = '../upload';
+					$path_to_files = "$dir_upload/$id/";
 					mkdir("$path_to_files", 0755, true);
 					foreach($_FILES as $key => $value)
 					{
@@ -276,10 +275,8 @@ if (!$conn->connect_error)
 					$directory = "../upload/$id/";
 					if (is_dir($directory))
 					{
-						// öffnen des Verzeichnisses
 						if ($handle = opendir($directory))
 						{
-							// einlesen der Verzeichnisses
 							while (($file = readdir($handle)) !== false)
 							{
 								if (filetype($file) != 'dir')
@@ -367,7 +364,7 @@ EOT;
 							$account_id = get_student_account_for_user($conn, $user_id, $activator_id);
 							$user_answer[0] = $account_id;
 							if ($account_id == 0){
-								$user_answer[0] = createTemporaryAccountInDB($conn, $activator_id,  $user_id, $expiry);
+								$user_answer[0] = create_temporary_account_in_db($conn, $activator_id,  $user_id, $expiry);
 								$user_answer[1] = $ACCOUNT_CREATE_SUCCESS;
 							}
 							else {
@@ -395,7 +392,7 @@ EOT;
 				if(isset($_SESSION["starpl"]["user_id"]) && $_SESSION["csrf_detected"] === false){
 					$activator_id = $_SESSION["starpl"]["user_id"];
 					$user_answer = array();
-					if(check_if_min_dozent($_SESSION["starpl"]["user_id"])){
+					if(check_if_min_docent($_SESSION["starpl"]["user_id"])){
 						$expiry = get_expiry_date($_post["datum_gueltig"],$_post["time_gueltig"], $max_account_lifetime);
 						$account_id = $conn->real_escape_string($_post["id"]);
 						if(!$expiry){
@@ -438,8 +435,8 @@ EOT;
 				$account_id = $conn->real_escape_string($_post['id']);
 				$docent_id = $_SESSION["starpl"]["user_id"];
 				$answer = array();
-				$filesOfStudent = $conn->query("SELECT file_id FROM student_accounts JOIN release_requests ON `student_accounts`.`id` = student_account_id where `docent_id` = '$docent_id' AND `student_accounts`.`id`= '$account_id';");
-				while ($row = $filesOfStudent->fetch_assoc()){
+				$files_of_student = $conn->query("SELECT file_id FROM student_accounts JOIN release_requests ON `student_accounts`.`id` = student_account_id where `docent_id` = '$docent_id' AND `student_accounts`.`id`= '$account_id';");
+				while ($row = $files_of_student->fetch_assoc()){
 					$file_id = $row["file_id"];
 					$conn->query("DELETE from `files` WHERE `id` = '$file_id'");
 					delete_files_for_document($file_id);
@@ -457,11 +454,14 @@ EOT;
 		}
 		case 'incrementDownloads':
 		{
-			$id = $_post['id'];
+			$id = $conn->real_escape_string($_post['id']);
 			$query = "UPDATE `files` SET `downloads`=`downloads`+1 WHERE `id`= ?;";
 			$stmt = $conn->prepare($query);
 			$stmt->bind_param("i", $id);
 			$stmt->execute();
+			$stmt->free_result();
+			$new_downloads = $conn->query("SELECT `downloads` from `files` where `id` = $id");
+
 			break;
 		}
 		default:
@@ -521,7 +521,7 @@ function get_valid_student_account_for_user($conn, $user_id, $docent_id = null){
 }
 
 // legt einen neuen User in der Datenbank an
-function createTemporaryAccountInDB($conn, $activator_id, $user_id, $expiry){
+function create_temporary_account_in_db($conn, $activator_id, $user_id, $expiry){
 	$expiry_str = $expiry->format('Y-m-d H:i:s');
 	$conn->query("INSERT INTO `student_accounts` (`user_id`,`docent_id`,`expiry_date`) VALUES ('$user_id', '$activator_id',  '$expiry_str');");
 	return mysqli_insert_id($conn);
@@ -546,7 +546,7 @@ function create_temporary_user_in_db($conn, $activator_id,  $user_name, $expiry 
 	global $ROLLE_STUDENT;
 	$conn->query("INSERT INTO `user_login` (`user_name`, `user_role`) VALUES ('$user_name', '$ROLLE_STUDENT');");
 	$user_id = mysqli_insert_id($conn);
-	$account_id = createTemporaryAccountInDB($conn, $activator_id, $user_id, $expiry);
+	$account_id = create_temporary_account_in_db($conn, $activator_id, $user_id, $expiry);
 	return $account_id;
 }
 
@@ -557,32 +557,6 @@ function check_allowed_to_view_document($conn, $file_id, $user_id){
 		$access_level = ($row["is_docent"]) ? 1 : 0;
 	}
 	return $access_level;
-}
-
-
-function get_file_by_id($conn, $file_id){
-	global $FB_NAMES;
-	global $LANG_NAMES;
-	global $TYPE_NAMES;
-	$result = $conn->query("SELECT * FROM `files` WHERE `id` = '$file_id'; ");
-	while ($document = $result->fetch_assoc())
-	{
-		$document["fb"] = $FB_NAMES[$document["fb"]];
-		$document["language"] = $LANG_NAMES[$document["language"]];
-		$document["type"] = $TYPE_NAMES[$document["type"]];
-		$document['dateien'] = get_file_names_array($document['id']);
-		return $document;
-	}
-}
-
-// liest die Dateinamen aus dem entsprechenden Verzeichnis aus
-function  get_all_search_words_for_document($conn,$documentId){
-	$result = $conn->query("SELECT `word` FROM `search_words` where `file_id` = '$documentId';");
-	$search_words_array = array();
-	while ($zeile = $result->fetch_assoc()){
-		array_push($search_words_array, $zeile["word"]);
-	}
-	return $search_words_array;
 }
 
 function delete_files_for_document($id, $file_arr=null){
@@ -645,8 +619,13 @@ function save_document_in_database($conn, $file_params, $uploader_id, $privat){
 																	$file_params["abstract"]
 																	);
 	$stmt->execute();
+	// if (!$conn->set_charset('utf8')) {
+	//     error_log("Error loading character set utf8: %s\n", $conn->error);
+	//     exit;
+	// }
 	$rv = ($conn->affected_rows > 0 ) ? $conn->insert_id : false;
 	if (!$rv){
+		error_log("No new record...");
 		error_log(mysqli_error($conn));
 	}
 	$stmt->close();
@@ -686,7 +665,7 @@ function validate_file_params($file_params){
 	if (!(isset($file_params["company"]) && strlen($file_params["company"]) > 0)) return false;
 	if (!(isset($file_params["year"]) && intval($file_params["year"]) > 1)) return false;
 	if (!(isset($file_params["fb"]) && intval($file_params["fb"]) >= 0 && intval($file_params["fb"]) <= 16)) return false;
-	if (!(isset($file_params["type"]) && intval($file_params["type"]) >= 0 && intval($file_params["type"]) <= 1)) return false;
+	if (!(isset($file_params["type"]) && intval($file_params["type"]) >= 0 && intval($file_params["type"]) <= 2)) return false;
 	if (!(isset($file_params["language"]) && intval($file_params["language"]) >= 0 && intval($file_params["language"]) <= 1)) return false;
 	return true;
 }

@@ -95,7 +95,7 @@ function get_user_role($user_id){
   }
 }
 
-function check_if_min_dozent($user_id){
+function check_if_min_docent($user_id){
   global $ROLLE_DOZENT;
   return (isset($user_id) && check_user_level($user_id, $ROLLE_DOZENT));
 }
@@ -158,6 +158,32 @@ function get_fb_id($human_readable_name){
     return $kurse[substr($long_kurs, 0, 3)];
   }
 }
+
+function get_file_by_id($conn, $file_id){
+	global $FB_NAMES;
+	global $LANG_NAMES;
+	global $TYPE_NAMES;
+	$result = $conn->query("SELECT * FROM `files` WHERE `id` = '$file_id'; ");
+	while ($document = $result->fetch_assoc())
+	{
+		$document["fb"] = $FB_NAMES[$document["fb"]];
+		$document["language"] = $LANG_NAMES[$document["language"]];
+		$document["type"] = $TYPE_NAMES[$document["type"]];
+		$document['dateien'] = get_file_names_array($document['id']);
+		return $document;
+	}
+}
+
+function  get_all_search_words_for_document($conn,$document_id){
+	$result = $conn->query("SELECT `word` FROM `search_words` where `file_id` = '$document_id';");
+	$search_words_array = array();
+	while ($zeile = $result->fetch_assoc()){
+		array_push($search_words_array, $zeile["word"]);
+	}
+	return $search_words_array;
+}
+
+
 
 function get_file_names_array($Id)
 {

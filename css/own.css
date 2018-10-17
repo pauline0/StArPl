@@ -18,6 +18,7 @@ div.box-content
 	/* background-color:#F8F8FF */
 	margin-top: 0px;
 	padding-top:40px;
+	width: 100%;
 /* min-height: 680px; */
 }
 
@@ -104,14 +105,6 @@ li.active_fb > a,.nav.fb_side > li:not(.active_fb):hover > a{
 div.center-block.box-content{
 	margin-top: 20px;
 }
-/*
-.pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus {
-    background-color: #d92425;
-    border-color: #d92425;
-		color: #fff;
-}
-
-*/
 
 #starpl-header {
 	cursor: pointer;
@@ -120,25 +113,38 @@ div.center-block.box-content{
 #arbeitSearchwords{
 	line-height: 1.75em;
 }
-/*
-#inner-starpl-top-nav > .nav_ur, #loginLink {
-	display: none;
-} */
 
 .glyph-button {
 	top: 2px;
 }
+.inner-starpl-top-nav.left-menu, .inner-starpl-top-nav.left-menu > li {
+	float: left;
+}
+
+.inner-starpl-top-nav.right-menu, .inner-starpl-top-nav.right-menu > li {
+	float: right;
+}
 
 .inner-starpl-top-nav > .active, .loginLink.active {
-	/* border-radius: 10px; */
 	background-color: #af1d1d;
 }
 
 #starplLink{
 }
-
+/*
 .right-menu {
 	float: right;
+} */
+
+html {
+    overflow-x: hidden;
+		margin: 0px;
+		width:100%;
+}
+
+body{
+	padding-bottom: 50px;
+	margin: 0;
 }
 
 /*Bootstrap files generated with https://getbootstrap.com/docs/3.3/customize/ */

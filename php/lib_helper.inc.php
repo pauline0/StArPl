@@ -1,8 +1,8 @@
 <?php
 
 
-function generate_options($human_readable_names, $empty, $values=null){
-  $opt_string = "<option value=''>".$empty."</option>\n";
+function generate_options($human_readable_names, $empty=null, $values=null){
+  $opt_string = ($empty == null)? "":"<option value=''>".$empty."</option>\n";
   foreach($human_readable_names as $value => $option_name){
     if($values){
       $value = $values[$value];
