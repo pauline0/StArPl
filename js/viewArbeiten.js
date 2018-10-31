@@ -8,7 +8,7 @@ var currentDocument = {}
 var templates = {
 	show: null,
 	edit: null,
-	editButton: "<a onclick=\"getDocumentById({{id}});\"><span class=\"glyphicon glyphicon-pencil\"></span></a><span hidden> own </span>"
+	editButton: "<a onclick=\"getDocumentById({{id}});\"><span class=\"glyphicon glyphicon-pencil\"></span></a><span hidden>1</span>"
 }
 
 Mustache.parse(templates["editButton"])
@@ -83,7 +83,7 @@ $(document).ready(function() {
 					},
 					"visible":edit_col_hidden,
 					"sortable": false,
-					"searchable":false
+					"searchable":true
 				},
 				{
 					"targets": '_all',
@@ -160,7 +160,8 @@ function reloadDataTable()
 
 function showMyFiles(event){
 	event.preventDefault()
-	documentTable.column(-1).search("own").draw();
+	//TODO this is a workaround
+	documentTable.column(-1).search("1").draw();
 	$('#toggleDocumentSelection').text("Alle Dateien anzeigen");
 	$('#toggleDocumentSelection').unbind("click");
 	$('#toggleDocumentSelection').click(showAllFiles);
