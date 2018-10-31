@@ -298,14 +298,17 @@ if (!$conn->connect_error)
 			$answer = array();
 			if ($file_id !== 0 && $_SESSION["starpl"]["user_id"] && $_SESSION["csrf_detected"] === false) {
 				$authorization_level = check_allowed_to_view_document($conn, $file_id, $_SESSION["starpl"]["user_id"]);
-				$answer[0] = $authorization_level;
+				error_log($authorization_level);
 				if ($authorization_level >= 0){
-					$answer[1] = get_file_by_id($conn, $file_id);
-					$answer[1]["searchWords"] = get_all_search_words_for_document($conn, $file_id);
+					$answer = get_file_by_id($conn, $file_id);
+					$answer["searchWords"] = get_all_search_words_for_document($conn, $file_id);
+					$answer["hidden"] = true;
+					$answer["releasable"] = $authorization_level === 1;
+					$answer["editable"] = $authorization_level === 0;
 				}
 			}
 			else{
-				$answer[0] = -1;
+				http_response_code(403);
 			}
 			echo json_encode($answer);
 			break;

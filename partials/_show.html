@@ -23,7 +23,7 @@
             {{strFb}}
           </th>
           <td>
-            {{document.fb}}
+            {{document.fb_str}}
           </td>
         </tr>
         <tr>
@@ -109,7 +109,7 @@
         <span class="label label-default"> {{.}} </span> &nbsp
       {{/document.searchWords}}
     </h4>
-    {{#editable}}
+    {{#document.editable}}
     <div class="form-group text-right" id="editButtons">
       <button onclick="deleteDocument();" class="btn btn-danger myhidden" >
         <span class="glyphicon glyphicon-remove"></span> Löschen
@@ -118,11 +118,13 @@
         <span class="glyphicon glyphicon-pencil"></span> Bearbeiten
       </button>
     </div>
-    {{/editable}}
-    <div class="form-group text-right hidden" id="buttonPublishDoc">
-      <button class="btn btn-success">
-        <span class="glyphicon glyphicon-ok" ></span> Freischalten
-      </button>
-    </div>
+    {{/document.editable}}
+    {{#document.releasable}}
+      <div class="form-group text-right" onclick="releaseDocument({{document.id}}, '{{document.fb}}')" id="buttonPublishDoc">
+        <button class="btn btn-success">
+          <span class="glyphicon glyphicon-ok" ></span> Freischalten
+        </button>
+      </div>
+    {{/document.releasable}}
   </div>
 </script>

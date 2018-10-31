@@ -3,11 +3,15 @@ var arrayAllSearchWordsWithId = null;
 
 var arrayTableDetailledView = settings.detailTableColumns;
 var documentTable = null;
+var currentDocument = {}
 
 var templates = {
 	show: null,
-	edit: null
+	edit: null,
+	editButton: "<a onclick=\"getDocumentById({{id}});\"><span class=\"glyphicon glyphicon-pencil\"></span></a><span hidden> own </span>"
 }
+
+Mustache.parse(templates["editButton"])
 
 function loadMustacheTemplate(name, tpl_name,path, onload){
 	$.get(path, function(data) {
@@ -17,7 +21,7 @@ function loadMustacheTemplate(name, tpl_name,path, onload){
 }
 
 $(document).ready(function() {
-	// Navigation zwischen den Fachbereichen	// getAllDocuments();
+	// Navigation zwischen den Fachbereichen
 	getGetParas();
 	prepareTableHeader();
 	user.getCurrent();
@@ -49,7 +53,7 @@ $(document).ready(function() {
 					{ "data": "docent" },
 					{ "data": "company" },
 					{ "data": "search_words"},
-					{ "data": "owner" }
+					{ "data": "editable" }
       ],
 			"columnDefs": [
 				{
@@ -69,9 +73,17 @@ $(document).ready(function() {
 				},
 				{
 					"targets": [-1],
-					"render": null,
+					"render": function(data, type, row) {
+						if (row["editable"]){
+							return Mustache.render(templates.editButton, {id:row["id"]})
+						}
+						else{
+							return ""
+						}
+					},
 					"visible":edit_col_hidden,
-					"sortable": false
+					"sortable": false,
+					"searchable":false
 				},
 				{
 					"targets": '_all',
@@ -83,7 +95,7 @@ $(document).ready(function() {
 	if ($_GET().id)
 	{
 		if($_GET().hidden){
-			showHiddenDocument($_GET().id)
+			getPrivateDocument($_GET().id, displayDocument)
 		}
 		else{
 			showDocument($_GET().id);
@@ -197,8 +209,8 @@ function changeToEdit(event){
 	var newstate = "?edit"
 	getGetParas();
 	if ($_GET().id){
-		var selectedArbeit = getSelectedDocument($_GET().id);
-		setButtonsInDetailView(selectedArbeit);
+		// var selectedArbeit = getSelectedDocument($_GET().id);
+		// setButtonsInDetailView(selectedArbeit);
 		newstate += "&" + "id=" + $_GET().id;
 	}
 	if (studiengang && studiengang.length > 0) {
@@ -218,20 +230,19 @@ function resetFbSelection(event){
 // wird beim Wechsel des Fachbereichs aufgerufen
 function changeFb(selectedFb, historyFunc="pushState")
 {
-	selectedFb = parseInt(selectedFb)
-	if (selectedFb != undefined && selectedFb < settings.select.fb.length){
-		selectedFbStr = settings.select.fb[selectedFb].toString();
+	selectedFbIdx = parseInt(selectedFb)
+	if (selectedFbIdx != NaN && selectedFb < settings.select.fb.length){
+		selectedFbStr = settings.select.fb[selectedFbIdx].toString();
 	}
 	else {
-		selectedFb = ""
-		selectedFbStr = ""
+		selectedFbStr = selectedFbIdx = ""
 	}
 	$('#headLineStudiengang')[0].innerHTML = selectedFbStr;
 	$('#divTableOverview').show();
 	$('#tableDetailledArbeit').hide();
 	$('#arbeitSearchwords').hide();
-	documentTable.ajax.url("/php/table.php?action=documents&fb="+selectedFb).load(function(){
-		if ( selectedFb !== null && selectedFbStr.length > 0){
+	documentTable.ajax.url("/php/table.php?action=documents&fb="+selectedFbIdx).load(function(){
+		if ( selectedFbIdx !== null && selectedFbStr.length > 0){
 			documentTable.column(3).visible(false);
 		}
 		else {
@@ -242,18 +253,18 @@ function changeFb(selectedFb, historyFunc="pushState")
 	getGetParas();
 	if ($_GET().edit)
 	{
-	 window.history[historyFunc]('', '', '?edit&studiengang=' + selectedFb);
+	 window.history[historyFunc]('', '', '?edit&studiengang=' + selectedFbIdx);
 	}
 	else
 	{
-		window.history[historyFunc]('', '', '?studiengang=' + selectedFb);
+		window.history[historyFunc]('', '', '?studiengang=' + selectedFbIdx);
 	}
 
 	resetDocument();
 	$('.active_fb').removeClass('active_fb');
 
 	if ( selectedFb !== null && selectedFbStr.length > 0){
-		$("#fb_"+selectedFb).addClass("active_fb");
+		$("#fb_"+selectedFbIdx).addClass("active_fb");
 	}
 
 	$('#editButtons').hide();
@@ -265,16 +276,30 @@ function getSearchwordLabel(content, value, labelClass="default", additionalAttr
 	return '<span class="label label-'+labelClass+'"'+ additionalAttr +'>' + htmlEncode(content) + '</span> '
 }
 
-function getSelectedDocument(id){
-	//var idArray = $.inArray(id.toString(), arrayIdsArbeiten);
-	//return arrayAllArbeiten[idArray];
+function getSelectedDocument(id, callback){
+	if (currentDocument["id"] === id){
+		callback(currentDocument)
+	}
+	else{
+		loadDocument(id, callback)
+	}
+}
+
+function loadDocument(id, callback){
+	$.getJSON("/php/table.php", {"action": "document","id":id} , function(document)
+		{
+			currentDocument = document
+			callback(document)
+	});
 }
 
 function getDocumentById(id){
-	$.getJSON("/php/table.php", {"action": "document","id":id} , function(document)
-		{
-			displayDocument(document)
-	});
+	getSelectedDocument(id, displayDocument);
+	// $.getJSON("/php/table.php", {"action": "document","id":id} , function(document)
+	// 	{
+	// 		currentDocument = document
+	// 		displayDocument(document)
+	// });
 }
 
 function displayDocument(document){
@@ -285,16 +310,17 @@ function displayDocument(document){
 		if ($_GET().edit)
 		{
 			window.history.replaceState('', '', '?edit&studiengang=' + document.fb + '&id=' + document.id);
-			setButtonsInDetailView(document);
+			// setButtonsInDetailView(document);
 		}
 		else
 		{
-			$('#editButtons').hide();
+			// $('#editButtons').hide();
 			window.history.replaceState('', '', '?studiengang=' + document.fb + '&id=' + document.id);
 		}
 		$("#editButton").unbind("click");
 		$("#editButton").click(editArbeit);
 	}
+	document.fb_str = settings.select.fb[document.fb]
 	var templateData = {
 		"strTitle": settings.detailTableColumns[0][1],
 		"strStudent": settings.detailTableColumns[1][1],
@@ -311,8 +337,7 @@ function displayDocument(document){
 		"strFiles": "Datei(en)",
 		"strSearchwords": "Schlagwörter",
 		"document": document,
-		"files": document.dateien,
-		"editable": true
+		"files": document.dateien
 	}
 	if (templates.show){
 		initShowView()
@@ -320,7 +345,7 @@ function displayDocument(document){
 	else {
 		loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
 	}
-	$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + document.fb + '\');">' + document.fb + '</a> > ' + htmlEncode(document.title);
+	$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + document.fb + '\');">' + document.fb_str + '</a> > ' + htmlEncode(document.title);
 	$('#divTableOverview').hide();
 }
 
@@ -328,32 +353,35 @@ function displayDocument(document){
 
 function showDocument(id)
 {
-	var selectedDocument = getSelectedDocument(id);
-
-	if (selectedDocument != undefined)
-	{
-		displayDocument(selectedDocument);
-	}
-	else
-	{
-		changeFb();
-	}
-}
-
-function setButtonsInDetailView(selectedArbeit){
-	if (user.current.id == selectedArbeit.user_id || user.current.user_role == '2')
-	{
-		$('#editButtons').show();
-	}
-	else
-	{
-		$('#editButtons').hide();
-	}
+	getSelectedDocument(id, function(selectedDocument){
+		if (selectedDocument)
+		{
+			displayDocument(selectedDocument);
+		}
+		else
+		{
+			changeFb();
+		}
+	});
 }
 
 function getCsrfToken(){
 	return $("#csrf_token").val();
 }
+
+function getPrivateDocument(id, callback,additionalOptions={}){
+	var hiddenDocument;
+	var role;
+	var stdOptions =
+	{
+		action: "getHiddenDocument",
+		id: id,
+		csrf_token: getCsrfToken()
+	}
+	var data = {...stdOptions,...additionalOptions }
+	$.post(settings.phpBackend, data).done(callback)
+}
+
 
 function getHiddenDocument(id){
 	var hiddenDocument;
@@ -446,14 +474,12 @@ function releaseDocument(id, fb){
 		id: id,
 		csrf_token: getCsrfToken()
 	}
-	$.ajaxSetup({async: false});
 	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
-		console.log(data);
+		window.history.replaceState('', '', '?studiengang=' + fb + '&id=' + id);
+		getDocumentById(id);
 	});
-	window.history.replaceState('', '', '?studiengang=' + fb + '&id=' + id);
-	location.reload();
 }
 
 // zählt den Counter für Downloads hoch
@@ -506,18 +532,20 @@ function editArbeit(hiddenDocument=false)
 		var selectedArbeit = getHiddenDocument($_GET().id);
 		var newstate = '?edit&hidden&id=' + $_GET().id
 		selectedArbeit.hidden = true
+		window.history.pushState('', '', newstate);
+		buildEditForm(selectedArbeit);
 	}
 	else {
-		var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
-		var selectedArbeit = arrayAllArbeiten[idArray];
+		// var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
+		// var selectedArbeit = arrayAllArbeiten[idArray];
 		var newstate = '?edit&id=' + $_GET().id
-		selectedArbeit.hidden = false
+		//selectedArbeit.hidden = false
+		window.history.pushState('', '', newstate);
+		getSelectedDocument($_GET().id, buildEditForm)
 	}
-	window.history.pushState('', '', newstate);
-	buildEditForm(selectedArbeit);
 }
 
-function buildEditForm(selectedDocument,hiddenDocument){
+function buildEditForm(selectedDocument){
 	var templateData = {
 		"strTitle" : settings.detailTableColumns[0][1],
 		"strStudent" : settings.detailTableColumns[1][1],
@@ -584,8 +612,13 @@ function buildEditForm(selectedDocument,hiddenDocument){
 function initEditValues(selectedDocument){
 	for (var i = 0; i < arrayTableDetailledView.length; i++){
 		var curProp = arrayTableDetailledView[i][0];
-		if(settings.select[curProp]){
-			var val = settings.select[curProp].indexOf(selectedDocument[curProp]);
+		if (settings.select[curProp]){
+			if (curProp === "fb"){
+				var val = selectedDocument[curProp]
+			}
+			else {
+				var val = settings.select[curProp].indexOf(selectedDocument[curProp]);
+			}
 			$("select[name='" + arrayTableDetailledView[i][0] +"']").val(val);
 		}
 		else{
@@ -606,7 +639,8 @@ function uploadFilesO(id){
 		form_data.append('file' + i, file_data);
 		form_data.append('id', id);
 		form_data.append('action', 'fileUpload');
-		form_data.append('csrf_token', csrf_token);		$.ajaxSetup({async: false});
+		form_data.append('csrf_token', csrf_token);
+		$.ajaxSetup({async: false});
 		$.ajax({
 			url: './php/manageBackend.php', // point to server-side PHP script
 			dataType: 'text',  // what to expect back from the PHP script, if anything
@@ -737,8 +771,7 @@ function saveDocument(hiddenDocument)
 		showHiddenDocument($_GET().id)
 	}
 	else{
-		//getAllDocuments();
-		user.getCurrent();
+		currentDocument = null
 		showDocument($_GET().id);
 	}
 	arraySearchwordOperations = [];
@@ -772,7 +805,6 @@ function deleteDocument()
 			{
 				alert('Der Bericht konnte nicht gelöscht werden.');
 			}*/
-			// getAllDocuments();
 			user.getCurrent();
 			changeFb();
 		});

@@ -15,11 +15,18 @@ if (!$conn->connect_error)
 	switch ($action){
 		case 'document':
 		{
+			if (isset($_SESSION["starpl"]["user_id"])){
+				$user_id = $_SESSION["starpl"]["user_id"];
+			}
+			else{
+				$user_id = null;#$queryStr = "SELECT * FROM `files` WHERE NOT `private`  ORDER BY `title` ASC;";
+			}
 			$file_id = $conn->real_escape_string($_get["id"]);
 			$answer = array();
 			if ($file_id != 0) {
 				$file = get_file_by_id($conn, $file_id);
 				if ($file){
+					$file["editable"] = ($user_id && ($user_id == $file['user_id'] || $user_role == $ROLLE_ADMIN));
 					$answer = $file;
 					$answer["searchWords"] = get_all_search_words_for_document($conn, $file_id);
 					http_response_code(200);
@@ -115,7 +122,7 @@ if (!$conn->connect_error)
 																'title' => $row['title'],
 																'docent' => $row['docent'],
 																'year' => $row['year'],
-																'owner' => ($user_id && ($user_id == $row['user_id'] || $user_role == $ROLLE_ADMIN) )
+																'editable' => ($user_id && ($user_id == $row['user_id'] || $user_role == $ROLLE_ADMIN) )
 																);
 							$last_id = $row["id"];
 						}

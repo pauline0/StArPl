@@ -166,7 +166,7 @@ function get_file_by_id($conn, $file_id){
 	$result = $conn->query("SELECT * FROM `files` WHERE `id` = '$file_id'; ");
 	while ($document = $result->fetch_assoc())
 	{
-		$document["fb"] = $FB_NAMES[$document["fb"]];
+		#$document["fb"] = $FB_NAMES[$document["fb"]];
 		$document["language"] = $LANG_NAMES[$document["language"]];
 		$document["type"] = $TYPE_NAMES[$document["type"]];
 		$document['dateien'] = get_file_names_array($document['id']);
