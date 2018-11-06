@@ -45,17 +45,14 @@ else {
     include("html/site_notice.html");
     exit;
   }
+  else if (isset($_REQUEST['conditions'])){
+    include("html/conditions.html");
+    exit;
+  }
   else
   {
-      // if (isset($_SESSION["starpl"]["user_id"]) && isset($_REQUEST['logout']))
-      // {
-      //     logout();
-      // }
-      // else
-      // {
-          include('html/viewArbeiten.html');
-          exit;
-      // }
+    include('html/viewArbeiten.html');
+    exit;
   }
 }
 

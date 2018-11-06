@@ -19,12 +19,6 @@ function getGetParas()
 	}
 }
 
-// window.$_GET = function(param){
-// 		if (last_query_str === undefined || last_query_str != window.location.search){
-//
-// 		}
-// }
-
 var menu = {
 	init : function(user_role){
 	}
@@ -145,4 +139,17 @@ var settings = {
 	}
 
 
+}
+
+
+function giveCookieConsent(){
+	var data =
+	{
+		action: "cookieConsent"
+	}
+	$.post(settings.phpBackend, data)
+	.always(function(data)
+	{
+		$("#cookie-consent").fadeOut()
+	});
 }

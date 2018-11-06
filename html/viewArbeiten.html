@@ -67,4 +67,9 @@
 		<script src="js/viewArbeiten.js"></script>
 		<script src="js/fileinput.min.js"></script> <!-- 4.4.3-10 -->
 	</body>
+
+	<?php if(!isset($_COOKIE["cookie_consent"])){
+		include("cookiebar.html");
+		}
+	?>
 </html>

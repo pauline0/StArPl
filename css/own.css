@@ -129,13 +129,6 @@ div.center-block.box-content{
 	background-color: #af1d1d;
 }
 
-#starplLink{
-}
-/*
-.right-menu {
-	float: right;
-} */
-
 html {
     overflow-x: hidden;
 		margin: 0px;
@@ -145,6 +138,11 @@ html {
 body{
 	padding-bottom: 60px;
 	margin: 0;
+}
+
+.anchor{
+	padding-top: 50px;
+	margin-top: -50px;
 }
 
 /*Bootstrap files generated with https://getbootstrap.com/docs/3.3/customize/ */

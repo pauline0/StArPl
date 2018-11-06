@@ -463,10 +463,34 @@ EOT;
 			$stmt->bind_param("i", $id);
 			$stmt->execute();
 			$stmt->free_result();
-			$new_downloads = $conn->query("SELECT `downloads` from `files` where `id` = $id");
-
+			$result = $conn->query("SELECT `downloads` from `files` where `id` = $id LIMIT 1");
+			$new_downloads = mysqli_fetch_assoc($result)["downloads"];
+			echo(json_encode(array("downloads" => $new_downloads)));
 			break;
 		}
+
+		case 'cookieConsent':
+		{
+			$cookie_params = array(
+				"path" => "/",
+				"hostname" => "",
+				"domain" => "",
+				"secure" => false,
+				"httponly" => false
+			);
+		  $rv = setcookie("cookie_consent",
+			  "true",
+				time() + 2592000,
+			 	$cookie_params["path"],
+				$cookie_params["domain"],
+				$cookie_params["secure"],
+				$cookie_params["httponly"]
+				);
+			($rv) ? http_response_code(200) : http_response_code(500);
+			var_dump($_COOKIE);
+			break;
+		}
+
 		default:
 		{
 			echo 'no Action';
