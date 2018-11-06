@@ -96,7 +96,8 @@
 						<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
 						<input class="form-control" id="schlagwort" name="schlagwort[]" placeholder="Schlagwort 1" list="schlagwoerter" required />
 						<span class="input-group-btn">
-							<button type="button" class="btn btn-success addButton"><i class="glyphicon glyphicon-plus"></i></button>
+							<input type="button" class="btn btn-success addButton" value="+" ></input>
+							<!-- <button type="button" class="btn btn-success addButton"><i class="glyphicon glyphicon-plus"></i></button> -->
 						</span>
 					</div>
 				</div>
@@ -110,6 +111,7 @@
 					</div>
 				</div>
 				<datalist id="schlagwoerter"></datalist>
+
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="glyphicon glyphicon-text-size"></i></span>
@@ -127,11 +129,9 @@
 							</div>';
 					}
 				?>
-				<!-- <div id='formUpload-divError' class="alert alert-danger hide">
-				</div> -->
-
+				<hr>
 				<div class="form-group">
-					<button type="submit" class="btn btn-success" >
+					<button type="submit" class="btn btn-success pull-right btn-lg" >
 						<span class="glyphicon glyphicon-upload"></span> Hochladen
 					</button>
 				</div>

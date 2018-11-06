@@ -19,6 +19,12 @@ $(document).ready(function() {
             },
           },
           {
+            "targets": 2,
+            "render": function(data){
+              return (new Date(data)).toLocaleString()
+            }
+          },
+          {
             "targets": 3,
             "render": function(data, type, row){
               return "<button onclick='openUserRefreshForm(\""+row[0] + "\", "+ data + ",\""+row[2] + "\")'>Verlängern</button>";

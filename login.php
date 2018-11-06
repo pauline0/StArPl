@@ -31,8 +31,8 @@
 		?>
 
 		<div class="center-block box-content" id="starpl-content" >
+			<h3>Login</h3>
 			<form method="post" name="formLogin" id="formLogin" action="/?action=login">
-				<h3>Login</h3>
         <input type="hidden" name="FORM_LOGIN_PAGE" value="<?= $loginpage_url ?: "login.php" ?>" />
         <input type="hidden" name="FORM_LOGIN_REDIRECTION" value="<?= ($success_url ?: $_REQUEST["next"]?:"")?>" />
 				<div class="form-group">
@@ -58,7 +58,7 @@
 				</ul>
 				</div>
 				<div class="form-group">
-					<button type="submit" class="btn btn-success">
+					<button type="submit" class="btn btn-lg btn-success pull-right">
 						<span class="glyphicon glyphicon-log-in"></span> Login
 					</button>
 				</div>

@@ -8,10 +8,13 @@ var currentDocument = {}
 var templates = {
 	show: null,
 	edit: null,
-	editButton: "<a onclick=\"getDocumentById({{id}});\"><span class=\"glyphicon glyphicon-pencil\"></span></a><span hidden>1</span>"
+	showLink:"<a onclick=\"getDocumentById('{{id}}');\">{{title}}</a>",
+	editButton: "<a onclick=\"getDocumentById({{id}});\"><span class=\"glyphicon glyphicon-pencil\"></span></a><span hidden>1</span>",
+	headLine: "<a onclick=\"changeFb(\'{{doc.fb}}\');\"> {{doc.fb_str}} </a> > {{doc.title}}"
 }
 
-Mustache.parse(templates["editButton"])
+Mustache.parse(templates.editButton)
+Mustache.parse(templates.showLink)
 
 function loadMustacheTemplate(name, tpl_name,path, onload){
 	$.get(path, function(data) {
@@ -63,7 +66,8 @@ $(document).ready(function() {
 				{
 						"targets": [1],
 						"render": function(data, type, row) {
-							return '<a onclick="getDocumentById(' + row["id"]+ ');">' + htmlEncode(data) + '</a>'
+							return Mustache.render(templates.showLink, {id:row["id"], title: data})
+//							return '<a onclick="getDocumentById(' + row["id"]+ ');">' + htmlEncode(data) + '</a>'
 						}
 				},
 				{
@@ -175,43 +179,12 @@ function showAllFiles(event){
 	$('#toggleDocumentSelection').click(showMyFiles);
 }
 
-// gibt alle Schlagwörter aus
-function getAllSearchWordsWithId()
-{
-	arrayAllSearchWordsWithId = new Array();
-	var data =
-	{
-		action: "getAllSearchWordsWithId"
-	}
-	$.post(settings.phpBackend, data)
-	.always(function(data)
-	{
-		arrayAllSearchWordsWithId = data;
-		for (var keyArbeiten in arrayAllArbeiten)
-		{
-			var idArray = $.inArray(keyArbeiten.toString(), arrayIdsArbeiten);
-			var arraySearchWords = new Array();
-			for (var keySearch in arrayAllSearchWordsWithId)
-			{
-
-				if (arrayAllSearchWordsWithId[keySearch].file_id == arrayAllArbeiten[keyArbeiten].id.toString())
-				{
-					arraySearchWords.push(arrayAllSearchWordsWithId[keySearch].word);
-				}
-			}
-			arrayAllArbeiten[keyArbeiten]['searchWords'] = arraySearchWords;
-		}
-	});
-}
-
 function changeToEdit(event){
 	event.preventDefault();
 	var studiengang = window.location.search.match(/studiengang=\w*/);
 	var newstate = "?edit"
 	getGetParas();
 	if ($_GET().id){
-		// var selectedArbeit = getSelectedDocument($_GET().id);
-		// setButtonsInDetailView(selectedArbeit);
 		newstate += "&" + "id=" + $_GET().id;
 	}
 	if (studiengang && studiengang.length > 0) {
@@ -232,7 +205,7 @@ function resetFbSelection(event){
 function changeFb(selectedFb, historyFunc="pushState")
 {
 	selectedFbIdx = parseInt(selectedFb)
-	if (selectedFbIdx != NaN && selectedFb < settings.select.fb.length){
+	if (!isNaN(selectedFbIdx) && selectedFb < settings.select.fb.length && selectedFb >= 0){
 		selectedFbStr = settings.select.fb[selectedFbIdx].toString();
 	}
 	else {
@@ -262,15 +235,18 @@ function changeFb(selectedFb, historyFunc="pushState")
 	}
 
 	resetDocument();
+
+	updateFbSidebar(selectedFbIdx);
+
+	$("#updateDocument").empty();
+}
+
+function updateFbSidebar(selectedFbIdx){
 	$('.active_fb').removeClass('active_fb');
 
-	if ( selectedFb !== null && selectedFbStr.length > 0){
+	if (selectedFbIdx !== "" && selectedFbIdx !== undefined ){
 		$("#fb_"+selectedFbIdx).addClass("active_fb");
 	}
-
-	$('#editButtons').hide();
-	$('.editOnly').hide();
-	$("#buttonPublishDoc").hide();
 }
 
 function getSearchwordLabel(content, value, labelClass="default", additionalAttr=""){
@@ -287,41 +263,34 @@ function getSelectedDocument(id, callback){
 }
 
 function loadDocument(id, callback){
-	$.getJSON("/php/table.php", {"action": "document","id":id} , function(document)
+	$.getJSON("/php/table.php", {"action": "document","id":id} , function(doc)
 		{
-			currentDocument = document
-			callback(document)
+			currentDocument = doc
+			callback(doc)
 	});
 }
 
 function getDocumentById(id){
 	getSelectedDocument(id, displayDocument);
-	// $.getJSON("/php/table.php", {"action": "document","id":id} , function(document)
-	// 	{
-	// 		currentDocument = document
-	// 		displayDocument(document)
-	// });
 }
 
-function displayDocument(document){
+function displayDocument(doc){
 	var initShowView = function(){
 		$('#updateDocument').empty();
 		$('#updateDocument').append(Mustache.render(templates.show, templateData));
 		getGetParas()
 		if ($_GET().edit)
 		{
-			window.history.replaceState('', '', '?edit&studiengang=' + document.fb + '&id=' + document.id);
-			// setButtonsInDetailView(document);
+			window.history.replaceState('', '', '?edit&studiengang=' + doc.fb + '&id=' + doc.id);
 		}
 		else
 		{
-			// $('#editButtons').hide();
-			window.history.replaceState('', '', '?studiengang=' + document.fb + '&id=' + document.id);
+			window.history.replaceState('', '', '?studiengang=' + doc.fb + '&id=' + doc.id);
 		}
 		$("#editButton").unbind("click");
 		$("#editButton").click(editArbeit);
 	}
-	document.fb_str = settings.select.fb[document.fb]
+	doc.fb_str = settings.select.fb[doc.fb]
 	var templateData = {
 		"strTitle": settings.detailTableColumns[0][1],
 		"strStudent": settings.detailTableColumns[1][1],
@@ -333,12 +302,12 @@ function displayDocument(document){
 		"strCompany": settings.detailTableColumns[7][1],
 		"strAbstract": settings.detailTableColumns[8][1],
 		"strRestricted": settings.detailTableColumns[9][1],
-		"restricted": (document.restricted === "1"),
-		"restrictedVal": settings.yesno[document.restricted],
+		"restricted": (doc.restricted === "1"),
+		"restrictedVal": settings.yesno[doc.restricted],
 		"strFiles": "Datei(en)",
 		"strSearchwords": "Schlagwörter",
-		"document": document,
-		"files": document.dateien
+		"document": doc,
+		"files": doc.dateien
 	}
 	if (templates.show){
 		initShowView()
@@ -346,7 +315,7 @@ function displayDocument(document){
 	else {
 		loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
 	}
-	$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + document.fb + '\');">' + document.fb_str + '</a> > ' + htmlEncode(document.title);
+	$('#headLineStudiengang')[0].innerHTML = Mustache.render(templates["headLine"],{doc: doc})//'<a onclick="changeFb(\'' + doc.fb + '\');">' + doc.fb_str + '</a> > ' + htmlEncode(doc.title);
 	$('#divTableOverview').hide();
 }
 
@@ -434,6 +403,7 @@ function showHiddenDocument(id){
 
 	if (hiddenDocument != undefined)
 	{
+		hiddenDocument.fb_str = settings.select.fb[hiddenDocument.fb]
 		var templateData = {
 			"strTitle": settings.detailTableColumns[0][1],
 			"strStudent": settings.detailTableColumns[1][1],
@@ -459,7 +429,7 @@ function showHiddenDocument(id){
 		else {
 			loadMustacheTemplate("show", "tpl-show","partials/_show.html", initShowView);
 		}
-		$('#headLineStudiengang')[0].innerHTML = '<a onclick="changeFb(\'' + hiddenDocument.fb + '\');">' + hiddenDocument.fb + '</a> > ' + htmlEncode(hiddenDocument.title);
+		$('#headLineStudiengang')[0].innerHTML = Mustache.render(templates["headLine"], {doc: hiddenDocument})//'<a onclick="changeFb(\'' + hiddenDocument.fb + '\');">' + hiddenDocument.fb + '</a> > ' + htmlEncode(hiddenDocument.title);
 		$('#divTableOverview').hide();
 	}
 	else
@@ -494,10 +464,11 @@ function downloadFile(id)
 	$.post(settings.phpBackend, data)
 	.always(function(data)
 	{
-		var idArray = $.inArray(id.toString(), arrayIdsArbeiten);
-		arrayAllArbeiten[idArray].downloads = parseInt(arrayAllArbeiten[idArray].downloads)
-		arrayAllArbeiten[idArray].downloads += 1;
-		$('#downloadsValue')[0].innerHTML = arrayAllArbeiten[idArray].downloads;
+		downloads = data["downloads"];
+		if (currentDocument){
+			currentDocument.downloads = downloads
+		}
+		$('#downloadsValue')[0].innerHTML = downloads;
 	});
 }
 
@@ -537,10 +508,7 @@ function editArbeit(hiddenDocument=false)
 		buildEditForm(selectedArbeit);
 	}
 	else {
-		// var idArray = $.inArray($_GET().id.toString(), arrayIdsArbeiten);
-		// var selectedArbeit = arrayAllArbeiten[idArray];
 		var newstate = '?edit&id=' + $_GET().id
-		//selectedArbeit.hidden = false
 		window.history.pushState('', '', newstate);
 		getSelectedDocument($_GET().id, buildEditForm)
 	}
@@ -693,7 +661,7 @@ function getFileDeleteText(text,id){
 }
 
 function getFileText(text,id){
-	innerHTML =text + '</a> <span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+id+')"></span>';
+	innerHTML = text + '</a> <span class="glyphicon glyphicon-trash" onclick="deleteFile($(this),'+id+')"></span>';
 	if(text.trim().substr(-4,4) == ".pdf"){
 		innerHTML = '<img src="img/pdf.png">' + innerHTML;
 	}
